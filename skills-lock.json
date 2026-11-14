@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "skills": {
+    "flutter-drift": {
+      "source": "MADTeacher/mad-agents-skills",
+      "sourceType": "github",
+      "skillPath": "flutter-drift/SKILL.md",
+      "computedHash": "9265c1026182ed4e12ae29bda808d3f5af077af61b9b436945959759363496ee"
+    },
+    "material-theming": {
+      "source": "VeryGoodOpenSource/vgv-ai-flutter-plugin",
+      "sourceType": "github",
+      "skillPath": "skills/material-theming/SKILL.md",
+      "computedHash": "8d8ff4b7dc1c8d6ccb33276ad0e7e8dab8d2e2824a2a4c7d23357eaf852781ea"
+    }
+  }
+}

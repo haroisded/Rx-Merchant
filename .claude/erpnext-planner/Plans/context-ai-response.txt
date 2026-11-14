@@ -1,0 +1,42 @@
+The six plan files are written to C:\Users\uel36\OneDrive\Desktop\erpnext-planner\Plans\. No app code was written.
+
+┌───────────────────────────────┬───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│             File              │                                                            Covers                                                             │
+├───────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 00-overview-and-foundation.md │ Scope, exclusion rules, stack, shared standards, responsive rules, table index, build order                                   │
+├───────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 01-setup.md                   │ First-run wizard, store profile, formats, naming series, payment modes, taxes, price lists, POS Profile, import, backup       │
+├───────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 02-stock.md                   │ Items, variants, batches, serial numbers, warehouses, Stock Entry, Stock Reconciliation, ledger and valuation engine, reports │
+├───────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 03-cash-register.md           │ POS session, POS screen, totals and tax calculation, payment, submit, closing                                                 │
+├───────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 04-sales-dashboard.md         │ Cards, sales goal, charts, Sales Analytics, Item-wise Sales, Gross Profit                                                     │
+├───────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 05-invoices-and-receipts.md   │ Invoice list, returns, cancel, print formats, PDF and thermal printing                                                        │
+└───────────────────────────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+Each feature file has the same eight sections: ERPNext sources, scope table (kept, adapted, dropped), SQLite tables, numbered business rules, phone and tablet screens, build steps, acceptance checks, and what was left out.
+
+I read links.txt in full and about 6,000 lines of erpnext-docs-merged.md covering only the five areas.
+
+The cross-checks passed:
+- All 48 tables are defined once and match the index.
+- No foreign key points at a missing table.
+- All 78 cited doc links exist in links.txt.
+- Every rule and build-step reference resolves.
+
+Where the plans go beyond the merged docs (each is marked in the files):
+- POS Opening and Closing Entry fields: the docs describe these forms only in outline, so the fields come from ERPNext's standard forms.
+- Order of the totals calculation: also from ERPNext's standard behaviour, including how a discount on Grand Total is spread across items.
+- Default naming patterns: ACC-SINV-.YYYY.- and the others are ERPNext's defaults, not taken from the docs.
+
+Two things to confirm when building:
+- Thermal printer package: I did not pick one. Step INV-B7 says to check which Bluetooth ESC/POS package is maintained at that point.
+- Offline barcode scanning: the plan assumes mobile_scanner ships its scanning model inside the app. Confirm on a device that has never been online.
+
+Decisions I made that you may want to change:
+- Invoice numbers are assigned on Submit, not on first save as ERPNext does, so discarded held orders leave no gaps in receipt numbers.
+- A sale can be cancelled only while its POS session is open. After closing, the correction is a return.
+- Batch and serial items are not handled by Stock Reconciliation. They are counted in and out through Stock Entry, following the older rule in the docs.
+- A price-only credit note uses up the returnable quantity of that line, as ERPNext does.

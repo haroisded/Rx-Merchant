@@ -1,0 +1,10 @@
+- read these referenced files, word for word...
+* "B:\Development-Projects\erpnext-planner\past-user-prompt.txt"
+* "B:\Development-Projects\erpnext-planner\Plans\context-ai-response.txt"
+  ( note: don't do these referenced files, only read them, context only )
+
+- once done, I request do only...
+  "B:\Development-Projects\erpnext-planner\Plans\00-overview-and-foundation.md"
+
+  and for context... 
+

@@ -1,0 +1,73 @@
+# user-note
+
+- Read the entire "links.txt"
+- Do not read the entire "erpnext-docs-merged.md", as it contains 600,000 to 680,000 worth of tokens
+- What I recommend is use the "links.txt", in order for you to...
+* navigate
+* gain context
+* find
+* learn  
+topics that you only need in "erpnext-docs-merged.md"
+
+
+# context
+
+- The Plan is to "Create Plans" in [creating a Offline POS Mobile App],
+  Strictly nearly Matching 1:1 the "erpnext-docs-merged.md" Format and Standards 
+
+the reason why "nearly", is because of "User Preferences", which are...
+
+( The System "DOES NOT include" ):
+1. Multi Company Handling
+2. Cost Centers
+3. Fixed Assets
+4. Customers
+5. Sales Person
+6. Chart of Accounts or Accounts Handling
+7. Staffs or Employees ( meaning this is only a single store owner ) 
+
+
+( The System "ONLY includes" ):
+1. Setup ( WITHOUT, including anything related to the "not included" earlier ) 
+2. Stocks
+3. Cash Register ( Sale Transactions )
+4. Sales Dashboard 
+5. Invoices / Receipts 
+
+
+- As for the Mobile-App...
+* it is ONLY for android
+* it is ONLY offline 
+* it is for both Mobile and Tablet 
+  ( Frontend must already be responsive, 
+    right at-the-bat )
+* Flutter is both the [Frontend and Backend]
+* The database is only SQLite
+* the Frontend ONLY and STRICTLY adheres to 
+  "Google's Material UI"
+
+
+# user-prompt 
+- Read everything in "erpnext-docs-merged.md" using the
+  "links.txt" that is ONLY related to...
+1. Setup ( WITHOUT, including anything related to the "not included" earlier ) 
+2. Stocks
+3. Cash Register ( Sale Transactions )
+4. Sales Dashboard 
+5. Invoices / Receipts 
+
+
+- Once done, "Create Detailed Plans" in how to implement and create each of these features...
+1. Setup ( WITHOUT, including anything related to the "not included" earlier ) 
+2. Stocks
+3. Cash Register ( Sale Transactions )
+4. Sales Dashboard 
+5. Invoices / Receipts 
+
+in order to create the [Offline POS Mobile App]
+
+
+- For the meantime, user has no plan in making it public ( albeit APK or .AAB )
+
+- You can save each plans, in a .MD File with a appropriate File Name, stored in...
+  C:\Users\uel36\OneDrive\Desktop\erpnext-planner\Plans
