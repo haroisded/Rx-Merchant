@@ -1,10 +1,20 @@
+# instructions
 - read these referenced files, word for word...
+* "B:\Development-Projects\rx_merchant\CLAUDE.md"
 * "B:\Development-Projects\erpnext-planner\past-user-prompt.txt"
 * "B:\Development-Projects\erpnext-planner\Plans\context-ai-response.txt"
   ( note: don't do these referenced files, only read them, context only )
 
-- once done, I request do only...
+
+# context
+- project has already been setup, using the...
+  flutter create --platforms=android --org com.rx-merchant rx-merchant
+
+  project folder location is: B:\Development-Projects\rx_merchant
+
+- git has already been setted up 
+
+
+# user-prompt
+- once done, I request read word for word and do only...
   "B:\Development-Projects\erpnext-planner\Plans\00-overview-and-foundation.md"
-
-  and for context... 
-

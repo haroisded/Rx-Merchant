@@ -1,0 +1,146 @@
+-- Schema source: 03-cash-register.md section 3. Copied verbatim; created_at/modified_at added per 00 section 6.6.
+import '../../setup/data/setup.drift';
+import '../../stock/data/stock.drift';
+import '../../invoices/data/invoices.drift';
+
+CREATE TABLE pos_opening_entry (
+  id INTEGER PRIMARY KEY,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  modified_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  name TEXT UNIQUE,                         -- assigned on Submit
+  docstatus INTEGER NOT NULL DEFAULT 0 CHECK (docstatus IN (0,1,2)),
+  status TEXT NOT NULL DEFAULT 'Draft' CHECK (status IN ('Draft','Open','Closed','Cancelled')),
+  pos_profile_id INTEGER NOT NULL REFERENCES pos_profile(id),
+  period_start_datetime TEXT NOT NULL,
+  period_end_datetime TEXT
+);
+-- One open session at a time: one device, one drawer.
+CREATE UNIQUE INDEX one_open_session_idx ON pos_opening_entry (status) WHERE status = 'Open';
+
+CREATE TABLE pos_opening_entry_detail (
+  id INTEGER PRIMARY KEY,
+  pos_opening_entry_id INTEGER NOT NULL REFERENCES pos_opening_entry(id) ON DELETE CASCADE,
+  mode_of_payment_id INTEGER NOT NULL REFERENCES mode_of_payment(id),
+  opening_amount REAL NOT NULL DEFAULT 0,
+  UNIQUE (pos_opening_entry_id, mode_of_payment_id)
+);
+
+CREATE TABLE pos_closing_entry (
+  id INTEGER PRIMARY KEY,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  modified_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  name TEXT UNIQUE,
+  docstatus INTEGER NOT NULL DEFAULT 0 CHECK (docstatus IN (0,1,2)),
+  pos_opening_entry_id INTEGER NOT NULL REFERENCES pos_opening_entry(id),
+  pos_profile_id INTEGER NOT NULL REFERENCES pos_profile(id),
+  period_start_datetime TEXT NOT NULL,
+  period_end_datetime TEXT NOT NULL,
+  posting_datetime TEXT NOT NULL,
+  total_quantity REAL NOT NULL DEFAULT 0,
+  net_total REAL NOT NULL DEFAULT 0,
+  total_taxes_and_charges REAL NOT NULL DEFAULT 0,
+  grand_total REAL NOT NULL DEFAULT 0,
+  remarks TEXT
+);
+
+-- Payment Reconciliation table of the closing entry.
+CREATE TABLE pos_closing_entry_detail (
+  id INTEGER PRIMARY KEY,
+  pos_closing_entry_id INTEGER NOT NULL REFERENCES pos_closing_entry(id) ON DELETE CASCADE,
+  mode_of_payment_id INTEGER NOT NULL REFERENCES mode_of_payment(id),
+  opening_amount REAL NOT NULL DEFAULT 0,
+  expected_amount REAL NOT NULL DEFAULT 0,
+  closing_amount REAL NOT NULL DEFAULT 0,   -- counted by the owner
+  difference REAL NOT NULL DEFAULT 0,
+  UNIQUE (pos_closing_entry_id, mode_of_payment_id)
+);
+
+CREATE TABLE sales_invoice (
+  id INTEGER PRIMARY KEY,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  modified_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  name TEXT UNIQUE,                         -- assigned on Submit
+  docstatus INTEGER NOT NULL DEFAULT 0 CHECK (docstatus IN (0,1,2)),
+  status TEXT NOT NULL DEFAULT 'Draft'
+    CHECK (status IN ('Draft','Paid','Return','Credit Note Issued','Cancelled')),
+  posting_datetime TEXT NOT NULL,
+  pos_profile_id INTEGER NOT NULL REFERENCES pos_profile(id),
+  pos_opening_entry_id INTEGER NOT NULL REFERENCES pos_opening_entry(id),
+  is_return INTEGER NOT NULL DEFAULT 0,
+  return_against_id INTEGER REFERENCES sales_invoice(id),
+  update_stock INTEGER NOT NULL DEFAULT 1,
+  set_warehouse_id INTEGER NOT NULL REFERENCES warehouse(id),
+  price_list_id INTEGER NOT NULL REFERENCES price_list(id),
+  taxes_template_id INTEGER REFERENCES sales_taxes_template(id),
+  total_qty REAL NOT NULL DEFAULT 0,
+  total REAL NOT NULL DEFAULT 0,            -- sum of item amounts
+  net_total REAL NOT NULL DEFAULT 0,        -- sum of item net amounts
+  apply_discount_on TEXT NOT NULL DEFAULT 'Grand Total'
+    CHECK (apply_discount_on IN ('Grand Total','Net Total')),
+  additional_discount_percentage REAL NOT NULL DEFAULT 0,
+  discount_amount REAL NOT NULL DEFAULT 0,
+  total_taxes_and_charges REAL NOT NULL DEFAULT 0,
+  grand_total REAL NOT NULL DEFAULT 0,
+  rounding_adjustment REAL NOT NULL DEFAULT 0,
+  rounded_total REAL NOT NULL DEFAULT 0,
+  in_words TEXT,
+  paid_amount REAL NOT NULL DEFAULT 0,
+  change_amount REAL NOT NULL DEFAULT 0,
+  letter_head_id INTEGER REFERENCES letter_head(id),
+  print_heading_id INTEGER REFERENCES print_heading(id),
+  tc_id INTEGER REFERENCES terms_and_conditions(id),
+  terms TEXT,                               -- Terms and Conditions Details, copied text
+  remarks TEXT
+);
+CREATE INDEX si_posting_idx ON sales_invoice (docstatus, posting_datetime);
+CREATE INDEX si_session_idx ON sales_invoice (pos_opening_entry_id);
+CREATE INDEX si_return_idx ON sales_invoice (return_against_id);
+
+CREATE TABLE sales_invoice_item (
+  id INTEGER PRIMARY KEY,
+  sales_invoice_id INTEGER NOT NULL REFERENCES sales_invoice(id) ON DELETE CASCADE,
+  idx INTEGER NOT NULL,
+  item_id INTEGER NOT NULL REFERENCES item(id),
+  item_name TEXT NOT NULL,                  -- copied, so later renames do not change old receipts
+  description TEXT,
+  qty REAL NOT NULL,                        -- negative on a return
+  uom_id INTEGER NOT NULL REFERENCES uom(id),
+  conversion_factor REAL NOT NULL DEFAULT 1,
+  stock_qty REAL NOT NULL,
+  price_list_rate REAL NOT NULL DEFAULT 0,
+  discount_percentage REAL NOT NULL DEFAULT 0,
+  discount_amount REAL NOT NULL DEFAULT 0,
+  rate REAL NOT NULL DEFAULT 0,
+  amount REAL NOT NULL DEFAULT 0,
+  net_rate REAL NOT NULL DEFAULT 0,
+  net_amount REAL NOT NULL DEFAULT 0,
+  item_tax_template_id INTEGER REFERENCES item_tax_template(id),
+  item_tax_rate TEXT NOT NULL DEFAULT '{}', -- JSON: tax id -> rate, or "NA" for Not Applicable
+  warehouse_id INTEGER NOT NULL REFERENCES warehouse(id),
+  incoming_rate REAL NOT NULL DEFAULT 0,    -- cost per stock unit when posted; feeds Gross Profit
+  sales_invoice_item_id INTEGER REFERENCES sales_invoice_item(id)  -- on a return: the original row
+);
+CREATE INDEX sii_item_idx ON sales_invoice_item (item_id);
+
+CREATE TABLE sales_invoice_tax (
+  id INTEGER PRIMARY KEY,
+  sales_invoice_id INTEGER NOT NULL REFERENCES sales_invoice(id) ON DELETE CASCADE,
+  idx INTEGER NOT NULL,
+  charge_type TEXT NOT NULL,
+  tax_id INTEGER NOT NULL REFERENCES tax(id),
+  description TEXT,
+  rate REAL NOT NULL DEFAULT 0,
+  row_id INTEGER,
+  included_in_print_rate INTEGER NOT NULL DEFAULT 0,
+  tax_amount REAL NOT NULL DEFAULT 0,
+  tax_amount_after_discount_amount REAL NOT NULL DEFAULT 0,
+  total REAL NOT NULL DEFAULT 0,            -- running total after this row
+  item_wise_tax_detail TEXT NOT NULL DEFAULT '{}'   -- JSON: item row id -> [rate, amount]
+);
+
+CREATE TABLE sales_invoice_payment (
+  id INTEGER PRIMARY KEY,
+  sales_invoice_id INTEGER NOT NULL REFERENCES sales_invoice(id) ON DELETE CASCADE,
+  mode_of_payment_id INTEGER NOT NULL REFERENCES mode_of_payment(id),
+  amount REAL NOT NULL                      -- amount tendered; negative on a return
+);

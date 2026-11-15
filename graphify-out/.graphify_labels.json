@@ -1,0 +1,19 @@
+{
+  "0": "singles.dart",
+  "1": "report_table.dart",
+  "2": "router.dart",
+  "3": "package:material_ui/material_ui.dart",
+  "4": "schema_test.dart",
+  "5": "format.dart",
+  "6": "link_field.dart",
+  "7": "app_test.dart",
+  "8": "batch_table.dart",
+  "9": "flt.dart",
+  "10": "spacing.dart",
+  "11": "flt_test.dart",
+  "12": "MainActivity.kt",
+  "13": "rx_merchant",
+  "14": "app/build.gradle.kts",
+  "15": "android/build.gradle.kts",
+  "16": "settings.gradle.kts"
+}

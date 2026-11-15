@@ -1,0 +1,29 @@
+-- Schema source: 05-invoices-and-receipts.md section 3. Copied verbatim; created_at/modified_at added per 00 section 6.6.
+
+CREATE TABLE letter_head (
+  id INTEGER PRIMARY KEY,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  modified_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  name TEXT NOT NULL UNIQUE,
+  is_default INTEGER NOT NULL DEFAULT 0,
+  disabled INTEGER NOT NULL DEFAULT 0,
+  image BLOB,                    -- logo
+  header TEXT,                   -- lines under the logo: address, phone, tax ID
+  footer TEXT
+);
+
+CREATE TABLE print_heading (
+  id INTEGER PRIMARY KEY,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  modified_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  name TEXT NOT NULL UNIQUE      -- 'Invoice', 'Bill', 'Official Receipt'
+);
+
+CREATE TABLE terms_and_conditions (
+  id INTEGER PRIMARY KEY,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  modified_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  title TEXT NOT NULL UNIQUE,
+  terms TEXT NOT NULL,
+  disabled INTEGER NOT NULL DEFAULT 0
+);

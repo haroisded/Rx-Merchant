@@ -1,0 +1,5 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- Offline is enforced: release builds never get INTERNET, even if a plugin declares it. -->
+    <uses-permission android:name="android.permission.INTERNET" tools:node="remove"/>
+</manifest>

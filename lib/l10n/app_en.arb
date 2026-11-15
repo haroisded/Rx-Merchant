@@ -1,0 +1,51 @@
+{
+  "@@locale": "en",
+  "appTitle": "Rx Merchant",
+  "@appTitle": { "description": "Name of the app in the task switcher" },
+
+  "navCashRegister": "Register",
+  "@navCashRegister": { "description": "Navigation destination 1: the POS screen. Kept short: a longer label wraps on a 360dp-wide bar" },
+  "titleCashRegister": "Cash Register",
+  "@titleCashRegister": { "description": "Title of the POS screen" },
+  "navInvoices": "Invoices",
+  "@navInvoices": { "description": "Navigation destination 2: the Sales Invoice list" },
+  "navStock": "Stock",
+  "@navStock": { "description": "Navigation destination 3: items, stock transactions, stock reports" },
+  "navDashboard": "Dashboard",
+  "@navDashboard": { "description": "Navigation destination 4: Sales Dashboard and sales reports" },
+  "navSetup": "Setup",
+  "@navSetup": { "description": "Navigation destination 5: every settings page" },
+
+  "comingSoon": "This screen arrives in a later milestone.",
+  "@comingSoon": { "description": "Body of a destination that has not been built yet" },
+
+  "wizardTitle": "Welcome",
+  "@wizardTitle": { "description": "Title of the first-run wizard" },
+  "wizardPlaceholder": "The first-run wizard arrives in milestone M1. Until then, finish setup here to reach the app.",
+  "@wizardPlaceholder": { "description": "Body of the wizard placeholder; removed with milestone M1" },
+  "wizardFinish": "Finish setup",
+  "@wizardFinish": { "description": "Button that marks setup as complete" },
+
+  "startupError": "The database could not be opened.",
+  "@startupError": { "description": "Shown when settings cannot be read at startup" },
+
+  "createNew": "Create new",
+  "@createNew": { "description": "Last entry of a link field's list: create a new master record" },
+  "addRow": "Add Row",
+  "@addRow": { "description": "Button under a child table" },
+  "exportCsv": "Export CSV",
+  "@exportCsv": { "description": "Tooltip of a report's export action" },
+
+  "statusDraft": "Draft",
+  "@statusDraft": { "description": "Document status: docstatus 0" },
+  "statusSubmitted": "Submitted",
+  "@statusSubmitted": { "description": "Document status: docstatus 1" },
+  "statusPaid": "Paid",
+  "@statusPaid": { "description": "Sales Invoice status" },
+  "statusReturn": "Return",
+  "@statusReturn": { "description": "Sales Invoice status: the invoice is a return" },
+  "statusCreditNoteIssued": "Credit Note Issued",
+  "@statusCreditNoteIssued": { "description": "Sales Invoice status: a return exists against it" },
+  "statusCancelled": "Cancelled",
+  "@statusCancelled": { "description": "Document status: docstatus 2" }
+}

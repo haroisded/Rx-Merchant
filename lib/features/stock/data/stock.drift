@@ -1,0 +1,291 @@
+-- Schema source: 02-stock.md section 3. Copied verbatim; created_at/modified_at added per 00 section 6.6.
+import '../../setup/data/setup.drift';
+import 'batch_table.dart';
+
+CREATE TABLE warehouse (
+  id INTEGER PRIMARY KEY,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  modified_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  name TEXT NOT NULL UNIQUE,
+  parent_id INTEGER REFERENCES warehouse(id),
+  is_group INTEGER NOT NULL DEFAULT 0,
+  warehouse_type TEXT,
+  disabled INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE item_group (
+  id INTEGER PRIMARY KEY,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  modified_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  name TEXT NOT NULL UNIQUE,
+  parent_id INTEGER REFERENCES item_group(id),
+  is_group INTEGER NOT NULL DEFAULT 0,
+  item_tax_template_id INTEGER REFERENCES item_tax_template(id)
+);
+
+CREATE TABLE uom (
+  id INTEGER PRIMARY KEY,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  modified_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  name TEXT NOT NULL UNIQUE,
+  must_be_whole_number INTEGER NOT NULL DEFAULT 0,
+  enabled INTEGER NOT NULL DEFAULT 1
+);
+
+CREATE TABLE brand (
+  id INTEGER PRIMARY KEY,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  modified_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  name TEXT NOT NULL UNIQUE,
+  description TEXT
+);
+
+CREATE TABLE item (
+  id INTEGER PRIMARY KEY,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  modified_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  item_code TEXT NOT NULL UNIQUE,
+  item_name TEXT NOT NULL,
+  item_group_id INTEGER NOT NULL REFERENCES item_group(id),
+  stock_uom_id INTEGER NOT NULL REFERENCES uom(id),     -- Default Unit of Measure
+  disabled INTEGER NOT NULL DEFAULT 0,
+  is_stock_item INTEGER NOT NULL DEFAULT 1,             -- Maintain Stock
+  is_sales_item INTEGER NOT NULL DEFAULT 1,
+  description TEXT,
+  image BLOB,                                           -- JPEG, longest side 512px
+  brand_id INTEGER REFERENCES brand(id),
+  standard_rate REAL NOT NULL DEFAULT 0,                -- Standard Selling Rate, used on create
+  valuation_rate REAL NOT NULL DEFAULT 0,               -- fallback cost when the ledger has none
+  valuation_method TEXT CHECK (valuation_method IN ('FIFO','Moving Average')),  -- NULL = setting
+  allow_negative_stock INTEGER NOT NULL DEFAULT 0,
+  shelf_life_in_days INTEGER,
+  end_of_life TEXT,
+  warranty_period INTEGER,                              -- days
+  sales_uom_id INTEGER REFERENCES uom(id),
+  max_discount REAL NOT NULL DEFAULT 0,
+  default_warehouse_id INTEGER REFERENCES warehouse(id),
+  has_variants INTEGER NOT NULL DEFAULT 0,
+  variant_of_id INTEGER REFERENCES item(id),
+  has_batch_no INTEGER NOT NULL DEFAULT 0,
+  create_new_batch INTEGER NOT NULL DEFAULT 0,          -- Automatically Create New Batch
+  batch_number_series TEXT,
+  has_expiry_date INTEGER NOT NULL DEFAULT 0,
+  has_serial_no INTEGER NOT NULL DEFAULT 0,
+  serial_no_series TEXT
+);
+CREATE INDEX item_group_idx ON item (item_group_id);
+CREATE INDEX item_variant_of_idx ON item (variant_of_id);
+
+CREATE TABLE item_barcode (
+  id INTEGER PRIMARY KEY,
+  item_id INTEGER NOT NULL REFERENCES item(id) ON DELETE CASCADE,
+  barcode TEXT NOT NULL UNIQUE,
+  barcode_type TEXT CHECK (barcode_type IN ('EAN','UPC')),
+  uom_id INTEGER REFERENCES uom(id)
+);
+
+CREATE TABLE item_uom (
+  item_id INTEGER NOT NULL REFERENCES item(id) ON DELETE CASCADE,
+  uom_id INTEGER NOT NULL REFERENCES uom(id),
+  conversion_factor REAL NOT NULL,      -- stock units in one of this unit
+  PRIMARY KEY (item_id, uom_id)
+);
+
+CREATE TABLE item_reorder (
+  id INTEGER PRIMARY KEY,
+  item_id INTEGER NOT NULL REFERENCES item(id) ON DELETE CASCADE,
+  warehouse_id INTEGER NOT NULL REFERENCES warehouse(id),
+  warehouse_reorder_level REAL NOT NULL DEFAULT 0,
+  warehouse_reorder_qty REAL NOT NULL DEFAULT 0,
+  UNIQUE (item_id, warehouse_id)
+);
+
+CREATE TABLE item_tax (
+  id INTEGER PRIMARY KEY,
+  item_id INTEGER NOT NULL REFERENCES item(id) ON DELETE CASCADE,
+  item_tax_template_id INTEGER NOT NULL REFERENCES item_tax_template(id),
+  valid_from TEXT
+);
+
+CREATE TABLE item_attribute (
+  id INTEGER PRIMARY KEY,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  modified_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  name TEXT NOT NULL UNIQUE,
+  numeric_values INTEGER NOT NULL DEFAULT 0,
+  from_range REAL, to_range REAL, increment REAL
+);
+
+CREATE TABLE item_attribute_value (
+  id INTEGER PRIMARY KEY,
+  attribute_id INTEGER NOT NULL REFERENCES item_attribute(id) ON DELETE CASCADE,
+  attribute_value TEXT NOT NULL,
+  abbr TEXT NOT NULL,
+  UNIQUE (attribute_id, attribute_value),
+  UNIQUE (attribute_id, abbr)
+);
+
+-- On a template: which attributes it varies by (attribute_value NULL).
+-- On a variant: the value it has for each attribute.
+CREATE TABLE item_variant_attribute (
+  id INTEGER PRIMARY KEY,
+  item_id INTEGER NOT NULL REFERENCES item(id) ON DELETE CASCADE,
+  attribute_id INTEGER NOT NULL REFERENCES item_attribute(id),
+  attribute_value TEXT,
+  UNIQUE (item_id, attribute_id)
+);
+
+-- The `batch` table is declared in batch_table.dart (see the note there).
+
+CREATE TABLE serial_no (
+  id INTEGER PRIMARY KEY,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  modified_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  serial_no TEXT NOT NULL UNIQUE,
+  item_id INTEGER NOT NULL REFERENCES item(id),
+  status TEXT NOT NULL DEFAULT 'Inactive' CHECK (status IN ('Inactive','Available','Delivered')),
+  warehouse_id INTEGER REFERENCES warehouse(id),        -- set only while Available
+  batch_id INTEGER REFERENCES batch(id),
+  incoming_rate REAL NOT NULL DEFAULT 0,                -- what this unit cost
+  warranty_expiry_date TEXT
+);
+CREATE INDEX serial_item_status_idx ON serial_no (item_id, status, warehouse_id);
+
+CREATE TABLE item_price (
+  id INTEGER PRIMARY KEY,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  modified_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  item_id INTEGER NOT NULL REFERENCES item(id) ON DELETE CASCADE,
+  price_list_id INTEGER NOT NULL REFERENCES price_list(id),
+  uom_id INTEGER REFERENCES uom(id),                    -- NULL = Stock UOM
+  price_list_rate REAL NOT NULL,
+  valid_from TEXT,
+  valid_upto TEXT,
+  batch_id INTEGER REFERENCES batch(id),
+  note TEXT
+);
+CREATE INDEX item_price_lookup_idx ON item_price (item_id, price_list_id, uom_id);
+
+CREATE TABLE stock_entry (
+  id INTEGER PRIMARY KEY,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  modified_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  name TEXT UNIQUE,                                     -- assigned on Submit
+  docstatus INTEGER NOT NULL DEFAULT 0 CHECK (docstatus IN (0,1,2)),
+  purpose TEXT NOT NULL CHECK (purpose IN ('Material Receipt','Material Issue','Material Transfer')),
+  posting_datetime TEXT NOT NULL,
+  from_warehouse_id INTEGER REFERENCES warehouse(id),   -- Default Source Warehouse
+  to_warehouse_id INTEGER REFERENCES warehouse(id),     -- Default Target Warehouse
+  is_opening INTEGER NOT NULL DEFAULT 0,
+  remarks TEXT,
+  total_outgoing_value REAL NOT NULL DEFAULT 0,
+  total_incoming_value REAL NOT NULL DEFAULT 0,
+  total_additional_costs REAL NOT NULL DEFAULT 0,
+  total_amount REAL NOT NULL DEFAULT 0,
+  amended_from_id INTEGER REFERENCES stock_entry(id)
+);
+
+CREATE TABLE stock_entry_item (
+  id INTEGER PRIMARY KEY,
+  stock_entry_id INTEGER NOT NULL REFERENCES stock_entry(id) ON DELETE CASCADE,
+  idx INTEGER NOT NULL,
+  item_id INTEGER NOT NULL REFERENCES item(id),
+  s_warehouse_id INTEGER REFERENCES warehouse(id),      -- Source Warehouse
+  t_warehouse_id INTEGER REFERENCES warehouse(id),      -- Target Warehouse
+  qty REAL NOT NULL,
+  uom_id INTEGER NOT NULL REFERENCES uom(id),
+  conversion_factor REAL NOT NULL DEFAULT 1,
+  transfer_qty REAL NOT NULL,                           -- qty in Stock UOM
+  basic_rate REAL NOT NULL DEFAULT 0,                   -- per Stock UOM
+  basic_amount REAL NOT NULL DEFAULT 0,
+  additional_cost REAL NOT NULL DEFAULT 0,
+  amount REAL NOT NULL DEFAULT 0,
+  valuation_rate REAL NOT NULL DEFAULT 0,
+  allow_zero_valuation_rate INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE stock_entry_additional_cost (
+  id INTEGER PRIMARY KEY,
+  stock_entry_id INTEGER NOT NULL REFERENCES stock_entry(id) ON DELETE CASCADE,
+  description TEXT NOT NULL,
+  amount REAL NOT NULL
+);
+
+CREATE TABLE stock_reconciliation (
+  id INTEGER PRIMARY KEY,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  modified_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  name TEXT UNIQUE,
+  docstatus INTEGER NOT NULL DEFAULT 0 CHECK (docstatus IN (0,1,2)),
+  purpose TEXT NOT NULL CHECK (purpose IN ('Opening Stock','Stock Reconciliation')),
+  posting_datetime TEXT NOT NULL,
+  set_warehouse_id INTEGER REFERENCES warehouse(id),    -- Default Warehouse
+  scan_mode INTEGER NOT NULL DEFAULT 0,
+  difference_amount REAL NOT NULL DEFAULT 0,
+  amended_from_id INTEGER REFERENCES stock_reconciliation(id)
+);
+
+CREATE TABLE stock_reconciliation_item (
+  id INTEGER PRIMARY KEY,
+  stock_reconciliation_id INTEGER NOT NULL REFERENCES stock_reconciliation(id) ON DELETE CASCADE,
+  idx INTEGER NOT NULL,
+  item_id INTEGER NOT NULL REFERENCES item(id),
+  warehouse_id INTEGER NOT NULL REFERENCES warehouse(id),
+  qty REAL NOT NULL,                                    -- counted quantity
+  valuation_rate REAL NOT NULL,
+  current_qty REAL NOT NULL DEFAULT 0,
+  current_valuation_rate REAL NOT NULL DEFAULT 0,
+  quantity_difference REAL NOT NULL DEFAULT 0,
+  amount_difference REAL NOT NULL DEFAULT 0,
+  UNIQUE (stock_reconciliation_id, item_id, warehouse_id)
+);
+
+-- The serial numbers and batches chosen for one transaction line.
+-- The set of rows sharing (voucher_type, voucher_detail_id) is ERPNext's "Serial and Batch Bundle".
+CREATE TABLE serial_and_batch_entry (
+  id INTEGER PRIMARY KEY,
+  voucher_type TEXT NOT NULL,           -- 'Stock Entry' or 'Sales Invoice'
+  voucher_detail_id INTEGER NOT NULL,   -- id of the item row
+  item_id INTEGER NOT NULL REFERENCES item(id),
+  serial_no_id INTEGER REFERENCES serial_no(id),
+  batch_id INTEGER REFERENCES batch(id),
+  qty REAL NOT NULL,                    -- always positive; 1 for a serial number
+  incoming_rate REAL NOT NULL DEFAULT 0,
+  CHECK (serial_no_id IS NOT NULL OR batch_id IS NOT NULL)
+);
+CREATE INDEX sbe_voucher_idx ON serial_and_batch_entry (voucher_type, voucher_detail_id);
+CREATE INDEX sbe_serial_idx ON serial_and_batch_entry (serial_no_id);
+
+CREATE TABLE stock_ledger_entry (
+  id INTEGER PRIMARY KEY,
+  item_id INTEGER NOT NULL REFERENCES item(id),
+  warehouse_id INTEGER NOT NULL REFERENCES warehouse(id),
+  posting_datetime TEXT NOT NULL,
+  voucher_type TEXT NOT NULL,           -- 'Stock Entry', 'Stock Reconciliation', 'Sales Invoice'
+  voucher_id INTEGER NOT NULL,
+  voucher_no TEXT NOT NULL,
+  voucher_detail_id INTEGER NOT NULL,
+  actual_qty REAL NOT NULL,             -- positive in, negative out, in Stock UOM
+  qty_after_transaction REAL NOT NULL,
+  incoming_rate REAL NOT NULL DEFAULT 0,
+  outgoing_rate REAL NOT NULL DEFAULT 0,
+  valuation_rate REAL NOT NULL DEFAULT 0,
+  stock_value REAL NOT NULL DEFAULT 0,
+  stock_value_difference REAL NOT NULL DEFAULT 0,
+  batch_id INTEGER REFERENCES batch(id),
+  is_cancelled INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX sle_chain_idx ON stock_ledger_entry (item_id, warehouse_id, posting_datetime, id);
+CREATE INDEX sle_voucher_idx ON stock_ledger_entry (voucher_type, voucher_id);
+CREATE INDEX sle_batch_idx ON stock_ledger_entry (batch_id, warehouse_id);
+
+-- Running balance per item and warehouse. A cache: it can always be rebuilt from the ledger.
+CREATE TABLE bin (
+  item_id INTEGER NOT NULL REFERENCES item(id),
+  warehouse_id INTEGER NOT NULL REFERENCES warehouse(id),
+  actual_qty REAL NOT NULL DEFAULT 0,
+  valuation_rate REAL NOT NULL DEFAULT 0,
+  stock_value REAL NOT NULL DEFAULT 0,
+  stock_queue TEXT NOT NULL DEFAULT '[]',   -- FIFO layers as JSON: [[qty, rate], ...]
+  PRIMARY KEY (item_id, warehouse_id)
+);

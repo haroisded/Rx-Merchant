@@ -1,0 +1,148 @@
+-- Schema source: 01-setup.md section 3. Copied verbatim; created_at/modified_at added per 00 section 6.6.
+import '../../stock/data/stock.drift';
+import '../../invoices/data/invoices.drift';
+
+-- One-record settings pages, stored as key-value rows (see 00, section 6.5).
+CREATE TABLE singles (
+  doctype TEXT NOT NULL,          -- 'Store Profile', 'System Settings', 'Global Defaults',
+                                  -- 'Selling Settings', 'Stock Settings', 'Print Settings'
+  field   TEXT NOT NULL,
+  value   TEXT,
+  PRIMARY KEY (doctype, field)
+);
+
+CREATE TABLE currency (
+  code TEXT PRIMARY KEY,          -- ISO code, e.g. 'USD'
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  modified_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  enabled INTEGER NOT NULL DEFAULT 1,
+  fraction TEXT,                  -- 'Cent'
+  fraction_units INTEGER NOT NULL DEFAULT 100,
+  smallest_currency_fraction_value REAL NOT NULL DEFAULT 0.01,
+  symbol TEXT,
+  symbol_on_right INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE naming_series_option (
+  id INTEGER PRIMARY KEY,
+  doctype TEXT NOT NULL,          -- 'Sales Invoice', 'Sales Invoice Return', 'Stock Entry', ...
+  pattern TEXT NOT NULL,          -- 'ACC-SINV-.YYYY.-'
+  idx INTEGER NOT NULL,           -- 1 is the default series for the doctype
+  UNIQUE (doctype, pattern)
+);
+
+CREATE TABLE series (
+  name TEXT PRIMARY KEY,          -- resolved prefix, e.g. 'ACC-SINV-2026-'
+  "current" INTEGER NOT NULL DEFAULT 0   -- quoted: CURRENT is an SQL keyword
+) AS SeriesRow;                          -- Dart row class; drift's default is "Sery"
+
+CREATE TABLE mode_of_payment (
+  id INTEGER PRIMARY KEY,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  modified_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  name TEXT NOT NULL UNIQUE,
+  type TEXT NOT NULL DEFAULT 'General' CHECK (type IN ('Cash','Bank','General','Phone')),
+  enabled INTEGER NOT NULL DEFAULT 1
+);
+
+-- Stands in for the tax "Account Head".
+CREATE TABLE tax (
+  id INTEGER PRIMARY KEY,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  modified_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  name TEXT NOT NULL UNIQUE,      -- 'VAT', 'Service Charge'
+  disabled INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE sales_taxes_template (
+  id INTEGER PRIMARY KEY,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  modified_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  title TEXT NOT NULL UNIQUE,
+  is_default INTEGER NOT NULL DEFAULT 0,
+  disabled INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE sales_taxes_template_row (
+  id INTEGER PRIMARY KEY,
+  template_id INTEGER NOT NULL REFERENCES sales_taxes_template(id) ON DELETE CASCADE,
+  idx INTEGER NOT NULL,
+  charge_type TEXT NOT NULL CHECK (charge_type IN
+    ('Actual','On Net Total','On Previous Row Amount','On Previous Row Total','On Item Quantity')),
+  tax_id INTEGER NOT NULL REFERENCES tax(id),
+  description TEXT,
+  rate REAL NOT NULL DEFAULT 0,         -- percent, or amount per unit for 'On Item Quantity'
+  tax_amount REAL NOT NULL DEFAULT 0,   -- used by 'Actual'
+  row_id INTEGER,                       -- Reference Row #
+  included_in_print_rate INTEGER NOT NULL DEFAULT 0,  -- Is this Tax included in Basic Rate?
+  UNIQUE (template_id, idx)
+);
+
+CREATE TABLE item_tax_template (
+  id INTEGER PRIMARY KEY,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  modified_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  title TEXT NOT NULL UNIQUE,
+  disabled INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE item_tax_template_row (
+  id INTEGER PRIMARY KEY,
+  template_id INTEGER NOT NULL REFERENCES item_tax_template(id) ON DELETE CASCADE,
+  tax_id INTEGER NOT NULL REFERENCES tax(id),
+  tax_rate REAL NOT NULL DEFAULT 0,
+  not_applicable INTEGER NOT NULL DEFAULT 0,
+  UNIQUE (template_id, tax_id)
+);
+
+CREATE TABLE price_list (
+  id INTEGER PRIMARY KEY,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  modified_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  name TEXT NOT NULL UNIQUE,
+  enabled INTEGER NOT NULL DEFAULT 1,
+  price_not_uom_dependent INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE pos_profile (
+  id INTEGER PRIMARY KEY,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  modified_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
+  name TEXT NOT NULL UNIQUE,
+  is_default INTEGER NOT NULL DEFAULT 0,
+  disabled INTEGER NOT NULL DEFAULT 0,
+  warehouse_id INTEGER NOT NULL REFERENCES warehouse(id),
+  price_list_id INTEGER NOT NULL REFERENCES price_list(id),
+  taxes_template_id INTEGER REFERENCES sales_taxes_template(id),
+  apply_discount_on TEXT NOT NULL DEFAULT 'Grand Total'
+    CHECK (apply_discount_on IN ('Grand Total','Net Total')),
+  hide_images INTEGER NOT NULL DEFAULT 0,
+  hide_unavailable_items INTEGER NOT NULL DEFAULT 0,
+  allow_rate_change INTEGER NOT NULL DEFAULT 0,
+  auto_add_item_to_cart INTEGER NOT NULL DEFAULT 0,
+  allow_discount_change INTEGER NOT NULL DEFAULT 0,
+  validate_stock_on_save INTEGER NOT NULL DEFAULT 0,
+  set_grand_total_to_default_mop INTEGER NOT NULL DEFAULT 1,
+  print_receipt_on_order_complete INTEGER NOT NULL DEFAULT 0,
+  action_on_new_invoice TEXT NOT NULL DEFAULT 'Always Ask' CHECK (action_on_new_invoice IN
+    ('Always Ask','Save Changes and Load New Invoice','Discard Changes and Load New Invoice')),
+  print_format TEXT NOT NULL DEFAULT 'POS Receipt',   -- 'POS Receipt' or 'Standard'
+  letter_head_id INTEGER REFERENCES letter_head(id),
+  print_heading_id INTEGER REFERENCES print_heading(id),
+  tc_id INTEGER REFERENCES terms_and_conditions(id)
+);
+
+CREATE TABLE pos_profile_payment (
+  id INTEGER PRIMARY KEY,
+  pos_profile_id INTEGER NOT NULL REFERENCES pos_profile(id) ON DELETE CASCADE,
+  mode_of_payment_id INTEGER NOT NULL REFERENCES mode_of_payment(id),
+  is_default INTEGER NOT NULL DEFAULT 0,
+  allow_in_returns INTEGER NOT NULL DEFAULT 0,
+  UNIQUE (pos_profile_id, mode_of_payment_id)
+);
+
+CREATE TABLE pos_profile_item_group (
+  pos_profile_id INTEGER NOT NULL REFERENCES pos_profile(id) ON DELETE CASCADE,
+  item_group_id INTEGER NOT NULL REFERENCES item_group(id),
+  PRIMARY KEY (pos_profile_id, item_group_id)
+);

@@ -1,0 +1,413 @@
+RX MERCHANT - SESSION REPORT
+============================
+
+Written:      2026-11-15 09:47 (+08:00)
+Branch:       main
+Based on:     fafec23 "Added Claude Directory"
+Committed:    nothing. Every change below is in the working tree, for you to commit.
+Covers:       the whole session: milestone M0 (Foundation) from
+              Plans/00-overview-and-foundation.md, then the wrap-up asked for by
+              the updated CLAUDE file (leftovers, code review, this report, the
+              system documentation).
+
+
+1. SUGGESTED COMMIT MESSAGE
+---------------------------
+
+Build M0 foundation: schema, settings, rounding, naming series, adaptive shell
+
+- Add drift database with schema version 1: 48 tables, 14 indexes
+- Add key-value settings access with typed defaults (singles)
+- Add flt() rounding (Banker's, Commercial) and number/date formatters
+- Add naming series resolver with per-prefix counters
+- Add Material 3 theme, localisation, go_router shell with five placeholder
+  destinations, and the first-run wizard gate
+- Add shared widgets: ListDetailPane, LinkField, ChildTable, StatusChip,
+  ReportTable with CSV export
+- Remove the INTERNET permission from release builds
+- Add 93 tests
+- Add system documentation and a code graph (graphify-out)
+
+If you prefer two commits, split off "docs and tooling":
+.claude/erpnext-planner/system-documentation.md, .claude/commits/, .graphifyignore
+and graphify-out/.
+
+
+2. RESULT IN SHORT
+------------------
+
+M0 is done. The app starts on a phone and a tablet emulator, shows the wizard
+gate, and then a navigation frame with five empty destinations.
+
+  flutter analyze               No issues found
+  flutter test                  93 of 93 pass
+  flutter build apk --release   builds, 68.9 MB
+  release manifest              INTERNET permission absent
+  launcher label                Rx Merchant
+
+Not done, stated plainly:
+  - No real device was used. Emulators only.
+  - Fallow could not review this code (it reads TypeScript and JavaScript
+    only). Dart tools were used instead. See section 6.
+  - One emulator rendering fault is open. See section 8, item 1.
+
+
+3. WHAT WAS BUILT (M0, STEPS 1 TO 7)
+------------------------------------
+
+Step 1 - Project setup
+  Added the packages of plan section 4 except thermal printing: drift,
+  drift_flutter, flutter_riverpod, go_router, mobile_scanner, pdf, printing,
+  fl_chart, file_picker, share_plus, path_provider, image_picker, intl, csv,
+  flutter_localizations; dev: drift_dev, build_runner.
+  Added android/app/src/release/AndroidManifest.xml, which removes the
+  INTERNET permission from release builds even when a plugin declares it.
+
+Step 2 - Database schema version 1
+  48 tables and 14 indexes, written as SQL in four .drift files, one per
+  feature (setup 14, stock 22, pos 8, invoices 3), plus the batch table in
+  Dart. created_at and modified_at on the 24 master and document tables.
+  Foreign keys are switched on at every open.
+
+Step 3 - Settings access
+  readSingle, watchSingle, writeSingle on the singles table, and six typed
+  classes with defaults: StoreProfile, SystemSettings, GlobalDefaults,
+  SellingSettings, StockSettings, PrintSettings (51 keys).
+
+Step 4 - Rounding and formatting
+  flt(value, precision, method): Banker's and Commercial rounding, correct
+  on binary float midpoints (2.345, 1.005) and on negative amounts.
+  formatNumber for the six number formats, formatCurrency, formatDate,
+  formatTime, toStorage.
+
+Step 5 - Naming series
+  parseSeries resolves a pattern such as ACC-SINV-.YYYY.- against the
+  posting date. nextName takes the next number in its own transaction, so a
+  failed submit does not use a number up.
+
+Step 6 - Theme, localisation, shell, router, gate
+  Material 3 light and dark themes from one seed. gen-l10n with 21 English
+  messages. go_router with a stateful shell of five destinations. Bottom
+  NavigationBar under 600dp, NavigationRail from 600dp, rail with labels
+  from 840dp. The gate: only the wizard is reachable until setup_complete
+  is set.
+
+Step 7 - Shared widgets
+  WindowSize, AppSpacing, ListDetailPane, LinkField, ChildTable and
+  showRowEditor (bottom sheet on phones, side sheet on tablets), StatusChip,
+  ReportTable and toCsv.
+
+
+4. WRAP-UP WORK (AFTER M0)
+--------------------------
+
+4.1 Leftovers from M0
+  - Bottom-bar label "Cash Register" changed to "Register". At 360dp wide,
+    the most common Android phone width, the long label wrapped to two
+    lines. The screen title is still "Cash Register".
+    Files: lib/l10n/app_en.arb (navCashRegister changed, titleCashRegister
+    added), lib/router.dart, test/app_test.dart. Test written first and seen
+    to fail, then pass.
+  - Launcher name changed from rx_merchant to Rx Merchant.
+    File: android/app/src/main/AndroidManifest.xml.
+  - Left as they were, on purpose:
+      * CAMERA and ACCESS_NETWORK_STATE permissions added by plugins. The
+        camera is needed for barcode scanning later; removing the other
+        could crash a plugin's background job.
+      * modified_at is set on insert only. Nothing updates rows yet.
+
+4.2 Codebase navigation (Graphify)
+  Built a code-only graph with "graphify update ." (no LLM cost): 337 nodes,
+  392 edges, 17 communities. Added .graphifyignore to keep generated code,
+  planning documents and tool folders out of it. Output is in graphify-out/.
+  The full /graphify pipeline was not run: it would also have run paid
+  semantic extraction over the 2.7 MB ERPNext document.
+  Graphify does not parse .drift files, so the schema was read from them
+  directly.
+
+4.3 Code review: section 6.
+
+4.4 Final verification: section 5.
+
+4.5 System documentation
+  Written to .claude/erpnext-planner/system-documentation.md, structured on
+  ISO/IEC/IEEE 15289. One compound document: concept of operations,
+  requirements, architecture, software design, database design, interfaces,
+  build and installation, verification report, user documentation, problem
+  report. The text of the standard is paywalled and was not available; the
+  document says so and says what the structure is based on.
+
+
+5. VERIFICATION EVIDENCE
+------------------------
+
+All run on 2026-11-15, after the last code change.
+
+  $ dart format --output=none --set-exit-if-changed lib test
+  Formatted 34 files (0 changed)
+
+  $ flutter analyze
+  No issues found!
+
+  $ dart fix --dry-run
+  Nothing to fix!
+
+  $ flutter test
+  00:03 +93: All tests passed!
+
+  Tests per file:
+    10  test/app_test.dart
+     4  test/core/db/schema_test.dart
+    13  test/core/db/singles_test.dart
+    11  test/core/naming/naming_series_test.dart
+    13  test/core/numbers/flt_test.dart
+    13  test/core/numbers/format_test.dart
+     5  test/core/widgets/child_table_test.dart
+     7  test/core/widgets/link_field_test.dart
+     5  test/core/widgets/list_detail_pane_test.dart
+     5  test/core/widgets/report_table_test.dart
+     7  test/core/widgets/status_chip_test.dart
+    93  total
+
+  $ flutter build apk --release
+  Built build\app\outputs\flutter-apk\app-release.apk (68.9MB)
+
+  Merged release manifest:
+    android.permission.INTERNET            0 occurrences
+    other permissions                      CAMERA, ACCESS_NETWORK_STATE,
+                                           DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+
+  $ aapt2 dump badging app-release.apk
+  package: name='com.rx_merchant.rx_merchant' versionCode='1' versionName='1.0.0'
+  minSdkVersion:'24'
+  targetSdkVersion:'36'
+  application-label:'Rx Merchant'
+
+  Emulator, phone (Medium_Phone_API_36.1):
+    411dp wide   wizard gate; after Finish setup, bottom bar, 5 destinations
+    360dp wide   same; all five labels on one line
+                 (Register, Invoices, Stock, Dashboard, Setup)
+  Emulator, tablet (Medium_Tablet):
+    landscape    wizard gate; after Finish setup, rail with labels
+    portrait     rail without labels
+
+  Acceptance criteria SET-A1 to SET-A7: all pass, each has a named test.
+
+  Afterwards: emulator closed, app data cleared, display size and density
+  overrides reset, Gradle daemon stopped.
+
+
+6. CODE REVIEW RESULTS
+----------------------
+
+6.1 Fallow
+  Fallow 3.35.0 is installed. It analyses TypeScript and JavaScript only;
+  its own documentation lists "Projects that are not JavaScript or
+  TypeScript" under when not to use it. It was run anyway, for the record:
+
+    fallow dead-code   No issues found
+    fallow dupes       No code duplication found
+    fallow health      Health score: 100 A ... 0 analyzed
+
+  These results say nothing about the app. Fallow found exactly one file to
+  analyse, graphify-out/graph.html, and no Dart. The .fallow cache folder it
+  created was deleted.
+
+6.2 The same checks with Dart tools
+  Unused code          flutter analyze: clean. dart fix: nothing to fix.
+  Unused declarations  Script over lib/. No dead code. Every public
+                       declaration with no caller elsewhere in lib/ is
+                       foundation code for a later milestone and is tested.
+  Unused dependencies  Six packages are declared and not yet imported:
+                       mobile_scanner, pdf, printing, fl_chart, file_picker,
+                       image_picker. Kept: the plan asks for them in M0.
+  Import cycles        None between Dart files. setup.drift and stock.drift
+                       import each other; drift accepts it.
+  Over-engineering     Ponytail audit of all hand-written code (1,131 lines
+                       in lib/). Nothing worth cutting. One unused constant,
+                       AppSpacing.xs, kept as part of the spacing scale.
+  Formatting           test/app_test.dart reformatted after the label edit.
+
+6.3 Fixes made
+  One: formatting of test/app_test.dart. No other problem was found, so
+  there was nothing else for Ponytail to fix.
+
+
+7. DECISIONS MADE ON YOUR BEHALF
+--------------------------------
+
+Each with the reason, and what it costs if it was the wrong call.
+
+  1. No commits, no branch, no worktree. You commit.
+     Cost: no per-task history.
+  2. kotlin.incremental=false in android/gradle.properties. The release
+     build failed without it: project on B:, pub cache on C:.
+     Cost: slower Kotlin recompiles.
+  3. series.current is quoted in setup.drift (CURRENT is an SQL keyword).
+     Row class renamed SeriesRow (drift's default was "Sery"). Cost: none.
+  4. The batch table is declared in Dart
+     (lib/features/stock/data/batch_table.dart), not in stock.drift. Its
+     generated getter clashed with drift's own batch() method. The SQL name
+     and columns are unchanged.
+     Cost: one table in a different file; one build_runner warning.
+  5. setup.drift and stock.drift import each other; per-feature files kept.
+     Cost: none found.
+  6. SystemSettings.roundingMethod returns the stored text;
+     RoundingMethod.fromSetting converts it.
+     Cost: one conversion at each use.
+  7. Date and time formatters are pinned to the en_US locale, so stored
+     date text stays ASCII.
+     Cost: displayed dates never use native digits.
+  8. Added a /loading route, so a set-up store does not flash the wizard at
+     launch. Cost: one route.
+  9. Added AppSpacing (spacing scale) and a placeholder wizard screen with a
+     temporary "Finish setup" button. M1 replaces the wizard.
+     Cost: two small files.
+ 10. LinkField has an errorText parameter and a clear button on optional
+     fields. StatusChip translates known statuses.
+     Cost: two small parameters.
+ 11. Generated localisation files are excluded from analysis; they use
+     delegates deprecated in Flutter 3.47.
+     Cost: real problems in generated code would go unreported.
+ 12. cupertino_icons kept. Without it every build warned about a missing
+     icon font. Cost: one small dependency.
+ 13. "generate: true" and providers.dart were added in step 6 instead of
+     steps 1 and 3, where their first use is. Cost: none.
+ 14. Nav label "Register"; launcher label "Rx Merchant" (this follow-up).
+     Cost: change one message or one attribute.
+ 15. Fallow replaced by Dart tools for the review (this follow-up).
+     Cost: the review is not the one CLAUDE names.
+ 16. Code-only Graphify graph, not the full pipeline (this follow-up).
+     Cost: the graph has no nodes for the plans or ERPNext documents.
+ 17. AppSpacing.xs kept although unused. Cost: one line.
+
+
+8. KNOWN PROBLEMS AND OPEN ITEMS
+--------------------------------
+
+  1. Emulator rendering fault. In hardware GPU mode on this machine, the
+     first app launch after the emulator boots, or after the display density
+     changes, can draw the first screen after the wizard with text missing
+     (app-bar title, part of the body text; earlier, on the tablet, rail
+     icons and labels). It clears on the next repaint.
+     Measured, phone emulator, same release APK:
+       hardware GPU   2 of 2 trigger launches showed it; 6 warm relaunches
+                      were clean
+       software GL    0 of 3 trigger launches; 0 of 6 overall
+     So it follows the emulator's GPU path. The samples are small and the
+     cause inside the emulator is not known. It has not been checked on a
+     real device. In the earlier report I called this a one-off; it is
+     reproducible.
+     Workaround for screen checks: start the emulator with
+     -gpu swiftshader_indirect.
+  2. No real device was used for any check.
+  3. modified_at is never updated. Each milestone that adds an update must
+     set it.
+  4. build_runner prints one warning about the batch table's foreign key.
+     The constraint is correct; the schema test passes.
+  5. The release APK is signed with the debug key (Flutter template
+     default). Fine for installing; it cannot be published.
+  6. The wizard is a placeholder. "Finish setup" collects nothing.
+  7. ACCESS_NETWORK_STATE is in the release manifest, added by a plugin.
+     Harmless without INTERNET.
+
+
+9. NOT BUILT YET
+----------------
+
+  Milestones M1 to M9 (first-run wizard, masters, stock ledger, cash
+  register, invoices, dashboard, variants and batches, import and backup).
+
+  Foundation pieces left for the milestone that first needs them:
+  docstatus rules, amount in words, country defaults (country_info.json),
+  parsing of typed numbers, the app's own camera and Bluetooth permission
+  declarations, a thermal printing package.
+
+
+10. FILES
+---------
+
+Modified (tracked)
+  analysis_options.yaml                      exclude generated l10n files
+  android/app/src/main/AndroidManifest.xml   launcher label "Rx Merchant"
+  android/gradle.properties                  kotlin.incremental=false
+  lib/main.dart                              template counter app replaced
+  pubspec.yaml                               dependencies, generate: true
+  pubspec.lock                               resolved versions
+
+Deleted (tracked)
+  test/widget_test.dart                      template test, replaced
+
+Added - app
+  android/app/src/release/AndroidManifest.xml
+  l10n.yaml
+  lib/app.dart
+  lib/router.dart
+  lib/core/db/app_database.dart
+  lib/core/db/app_database.g.dart            generated (56,713 lines)
+  lib/core/db/providers.dart
+  lib/core/db/singles.dart
+  lib/core/naming/naming_series.dart
+  lib/core/numbers/flt.dart
+  lib/core/numbers/format.dart
+  lib/core/widgets/adaptive_shell.dart
+  lib/core/widgets/child_table.dart
+  lib/core/widgets/link_field.dart
+  lib/core/widgets/list_detail_pane.dart
+  lib/core/widgets/report_table.dart
+  lib/core/widgets/spacing.dart
+  lib/core/widgets/status_chip.dart
+  lib/core/widgets/window_size.dart
+  lib/features/invoices/data/invoices.drift
+  lib/features/pos/data/pos.drift
+  lib/features/setup/data/setup.drift
+  lib/features/setup/ui/wizard_screen.dart
+  lib/features/stock/data/batch_table.dart
+  lib/features/stock/data/stock.drift
+  lib/l10n/app_en.arb
+  lib/l10n/app_localizations.dart            generated
+  lib/l10n/app_localizations_en.dart         generated
+
+Added - tests
+  test/app_test.dart
+  test/core/db/schema_test.dart
+  test/core/db/singles_test.dart
+  test/core/naming/naming_series_test.dart
+  test/core/numbers/flt_test.dart
+  test/core/numbers/format_test.dart
+  test/core/widgets/child_table_test.dart
+  test/core/widgets/link_field_test.dart
+  test/core/widgets/list_detail_pane_test.dart
+  test/core/widgets/pump.dart                test helper
+  test/core/widgets/report_table_test.dart
+  test/core/widgets/status_chip_test.dart
+
+Added - documentation and tooling
+  .claude/erpnext-planner/system-documentation.md
+  .claude/commits/2026-11-15_09-47-00.txt    this report
+  .graphifyignore
+  graphify-out/                              graph.json, graph.html,
+                                             GRAPH_REPORT.md, manifest.json,
+                                             labels, and cache/ (37 files)
+
+Changed by you, not by me
+  .claude/erpnext-planner/current-user-prompt.txt   modified
+  CLAUDE.md                                         deleted
+  CLAUDE.txt                                        added
+
+
+11. BEFORE YOU COMMIT
+---------------------
+
+  - CLAUDE.md is now CLAUDE.txt. Claude Code loads CLAUDE.md automatically
+    at the start of a session; it does not load CLAUDE.txt. Rename it back
+    if you want the rules applied without pointing at the file.
+  - .gitignore has the line ".claude\erpnext-planner" with a backslash. Git
+    does not treat a backslash as a path separator, so the line matches
+    nothing and that folder is still tracked. Use a forward slash if you
+    meant to ignore it. Note that the system documentation lives there.
+  - graphify-out/cache/ can be rebuilt with "graphify update ." at any time.
+    Add it to .gitignore if you do not want 37 cache files in the repository.
+  - The two generated code sets (app_database.g.dart, app_localizations*.dart)
+    are not ignored and will be committed. That keeps a fresh clone
+    buildable without running build_runner first.

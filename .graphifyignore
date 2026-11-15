@@ -1,0 +1,9 @@
+# Generated code: derived from the .drift and .arb sources, not worth graphing.
+*.g.dart
+lib/l10n/app_localizations*.dart
+
+# Planning documents, agent skills and tool state: not part of the app.
+.claude/
+.agents/
+.serena/
+build/
