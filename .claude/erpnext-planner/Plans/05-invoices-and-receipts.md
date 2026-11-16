@@ -43,7 +43,7 @@ Credit Note records the correction while preserving the original sale and its au
 | Return / Credit Note created from the original invoice; negative quantities; full and partial; Update Stock on or off | Same | Kept | |
 | Cumulative returned quantity cannot exceed the invoiced quantity | Same | Kept | |
 | Return through a separate return Delivery Note | none | Dropped | No Delivery Notes |
-| Refund through Payment Entry; allocating a credit to another invoice; keeping credit for later | Refund paid at once on the return, through a payment mode allowed in returns | Adapted | No Payment Entry, no customer to hold a credit |
+| Refund through Payment Entry; allocating a credit to another invoice; keeping credit for later | Refund paid at once on the return, through any enabled payment mode | Adapted | No Payment Entry, no customer to hold a credit; no POS Profile to limit the modes (SET-R14) |
 | Exchange as a return plus a new sale | Same | Kept | |
 | Rate adjustment Debit Note | none | Dropped | Accounting document |
 | Cancel a submitted invoice | Same, with limits | Kept | |
@@ -121,7 +121,7 @@ Filters: status chips, date range. Search by invoice name; scanning the barcode 
 Total, and the status chip.
 
 **INV-R2 Invoice detail.** Read-only once submitted. Sections: header (name, status, posting date
-and time, POS Profile, session); Items; Taxes and Charges; totals; Payments and change; Terms; links
+and time, session); Items; Taxes and Charges; totals; Payments and change; Terms; links
 to the original ("Return Against") or to the returns made against it. Actions: Print, Create > Return
 / Credit Note, Stock Ledger, Cancel. A draft opens in the Cash Register instead.
 
@@ -171,8 +171,8 @@ reference and copies the original items, rates, taxes." The new draft has:
   batch is the one sold.
 
 **INV-R7 Refund.** The totals engine (`03-cash-register.md`) runs on the negative quantities, so Net
-Total, taxes and Grand Total are negative. The refund is entered as payments in modes that the POS
-Profile marks Allow in Returns, and must equal the amount in full. Returning one unit of a 108 item
+Total, taxes and Grand Total are negative. The refund is entered as payments in any enabled Mode of
+Payment, and must equal the amount in full. Returning one unit of a 108 item
 sold with 8% tax included: Net Total −100.00, tax −8.00, Grand Total −108.00, refund 108.00. (POS
 Profile, Payment Methods; Sales Return: Mode of Payment "used when the return transaction itself
 records an immediate payment or refund".)
@@ -217,7 +217,7 @@ always agree on content.
 | Standard | A full-page invoice | PDF on the PDF Page Size |
 | POS Receipt | A till receipt | PDF on a 58mm or 80mm roll, or raw commands to a thermal printer |
 
-The print screen starts on the POS Profile's Print Format and offers the other. (Print Format: "Every
+The print screen starts on the Print Format of POS Settings and offers the other. (Print Format: "Every
 transaction has a default Print Format called 'Standard'"; POS Profile, Print Settings.)
 
 **INV-R13 What may be printed.** A draft prints only with Allow Print for Draft, and then carries the
@@ -225,17 +225,17 @@ heading "DRAFT" when the draft-heading setting is on. A cancelled invoice prints
 for Cancelled, marked "CANCELLED". (Print Settings, 2.3, 2.4, 2.6.)
 
 **INV-R14 Letter Head.** With Print With Letterhead on, the print starts with the letter head: the
-invoice's own, else the POS Profile's, else the default. It shows the logo, then the header text. The
+invoice's own, else the default. It shows the logo, then the header text. The
 footer text is printed at the bottom. In the Standard format, header and footer repeat on every page
 when Repeat Header and Footer is on. The print screen has a switch to print without it. (Letter Head;
 Print Settings, 1.2 and 2.1.)
 
 **INV-R15 Print Heading.** The title of the document. Default "Sales Invoice", or "Credit Note" for a
-return. A Print Heading chosen on the POS Profile replaces it for sales: "the heading can be
+return. A Print Heading chosen on POS Settings replaces it for sales: "the heading can be
 'Invoice', or 'Bill'." (Print Headings; POS Profile.)
 
-**INV-R16 Terms.** When a sale is started, the text of the POS Profile's Terms and Conditions
-template is copied into the invoice's `terms`. Later edits to the template do not change old invoices.
+**INV-R16 Terms.** When a sale is started, the text of the Terms and Conditions template chosen on
+POS Settings is copied into the invoice's `terms`. Later edits to the template do not change old invoices.
 The text prints after the totals. (Terms and Conditions: "ERPNext copies the selected template into
 the transaction.")
 
@@ -288,7 +288,7 @@ out cash drawers." (Raw Printing.)
 it in the invoice list or the Cash Register's recent orders opens the invoice, which is the quickest
 way to start a return.
 
-**INV-R24 When printing happens.** With the profile's Print Receipt on Order Complete: after Submit,
+**INV-R24 When printing happens.** With Print Receipt on Order Complete on POS Settings: after Submit,
 a saved receipt printer prints immediately; otherwise the print preview opens. Any invoice can be
 reprinted at any time from its detail screen.
 
@@ -312,7 +312,7 @@ Cancel. Returns against the invoice are listed at the bottom as links.
 The original's lines, each with a returnable quantity and a quantity stepper that runs from 0 to that
 number; lines at 0 are dropped. An Update Stock switch with the receiving warehouse under it. Rate
 fields become editable only when the switch is off. Totals shown as the refund amount. Then the
-payment panel from the Cash Register, restricted to modes allowed in returns. "Submit" asks for
+payment panel from the Cash Register, with every enabled mode. "Submit" asks for
 confirmation with the refund amount in the dialog.
 
 ### Print screen
@@ -341,7 +341,7 @@ printing is set up. On Expanded the controls sit in a side panel beside the prev
 | Step | Work | Runnable result |
 |---|---|---|
 | INV-B1 | Invoice list with filters and search, invoice detail, Stock Ledger link (INV-R1 to R4) | Every sale from the Cash Register can be found and read |
-| INV-B2 | Letter Head, Print Heading, Terms and Conditions masters; terms copied into new sales (INV-R14 to R16) | A new sale carries the profile's terms |
+| INV-B2 | Letter Head, Print Heading, Terms and Conditions masters; terms copied into new sales (INV-R14 to R16) | A new sale carries the terms chosen on POS Settings |
 | INV-B3 | Print Settings page | Settings save and reload |
 | INV-B4 | Layout step in `logic/` that turns an invoice into print blocks; amount-in-words function; their tests (INV-R17 to R20) | Tests cover compact and full columns, zero-tax rows, wording |
 | INV-B5 | Standard PDF, POS Receipt PDF, print screen with preview, Print and Share (INV-R12, R13, R21) | An invoice prints to a real printer or saves as a PDF |
@@ -380,7 +380,7 @@ Database tests:
 | INV-A15 Submit a return | Return has status Return and a name in the return series; the sale shows Credit Note Issued |
 | INV-A16 Cancel that return | The sale shows Paid again; stock is back out |
 | INV-A17 Return with Update Stock off | No ledger entry; quantity still counted as returned |
-| INV-A18 Refund in a mode without Allow in Returns | Not offered |
+| INV-A18 Refund in a disabled Mode of Payment | Not offered |
 | INV-A19 Return a serialised unit | The serial number is Available again with its original cost |
 | INV-A20 Cancel a sale that has a submitted return | Refused |
 | INV-A21 Cancel a sale after its session is closed | Refused, with "use a return" |

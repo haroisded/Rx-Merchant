@@ -13,17 +13,26 @@
 
 
 # context
-- project has already been setup, using the...
-  flutter create --platforms=android --org com.rx-merchant rx-merchant
-
-  project folder location is: B:\Development-Projects\rx_merchant
-
-- git has already been setted up 
-
 - Plans that has already been finished...
 * "B:\Development-Projects\erpnext-planner\Plans\00-overview-and-foundation.md"
+* "B:\Development-Projects\rx_merchant\.claude\erpnext-planner\Plans\01-setup.md"
+  ( note: you can skim these plans, to gain more context ) 
 
 
 # user-prompt
-- once done, I request read word for word and do only...
-"B:\Development-Projects\rx_merchant\.claude\erpnext-planner\Plans\01-setup.md"
+- Read All of the plans in "B:\Development-Projects\rx_merchant\.claude\erpnext-planner\Plans"
+  word for word 
+
+- Analyze the Current Codebase deeply
+
+- The Reason why I have instructed you to do so, is due to the concern of "POS Profile",
+  I can't see any reason to not Include it ( even though I have already implemented it )
+
+  the mobile application itself, is built for a solo store owner - it's used by a single person
+
+  and so because of this, I plan to remove it
+
+- due to this "request/prompt", other files 
+  affected by this change ( besides the codebase ) 
+
+  might need to be updated as well ( keep this in mind )

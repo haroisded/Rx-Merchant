@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../../core/db/app_database.dart';
+import '../../../core/db/singles.dart';
 import '../../../core/numbers/format.dart';
 import '../logic/tax_template.dart';
 import 'country_info.dart';
@@ -20,18 +21,13 @@ extension SetupQueries on AppDatabase {
     'UNION ALL SELECT 1 FROM pos_closing_entry WHERE docstatus = 1',
   );
 
-  /// An open POS session, for [profileId] or for any profile.
-  Future<bool> sessionOpen({int? profileId}) => _exists(
-    "SELECT 1 FROM pos_opening_entry WHERE status = 'Open'"
-    '${profileId == null ? '' : ' AND pos_profile_id = ?'}',
-    [?profileId],
-  );
+  /// True while a POS session is open.
+  Future<bool> sessionOpen() =>
+      _exists("SELECT 1 FROM pos_opening_entry WHERE status = 'Open'");
 
-  Future<bool> _exists(String query, [List<Object> args = const []]) async {
-    final row = await customSelect(
-      'SELECT EXISTS ($query) AS found',
-      variables: [for (final a in args) Variable(a)],
-    ).getSingle();
+  Future<bool> _exists(String query) async {
+    final row = await customSelect('SELECT EXISTS ($query) AS found')
+        .getSingle();
     return row.read<int>('found') == 1;
   }
 
@@ -64,8 +60,9 @@ extension SetupQueries on AppDatabase {
         updates: {table},
         updateKind: UpdateKind.delete,
       );
-      await _checkPriceLists();
-      await _checkDefaultProfile();
+      if (table.actualTableName == priceList.actualTableName) {
+        await _checkPriceLists();
+      }
     }),
   );
 
@@ -86,20 +83,38 @@ extension SetupQueries on AppDatabase {
   Future<int> saveTax(TaxCompanion row) =>
       upsert(tax, row.copyWith(modifiedAt: _now), row.id);
 
-  /// SET-R13: at least one list stays enabled.
+  /// SET-R13. Renaming the Default Price List renames it in Selling
+  /// Settings too, which keeps it by name.
   Future<int> savePriceList(PriceListCompanion row) => transaction(() async {
+    final defaultName = await _defaultPriceListName();
+    final old = row.id.present
+        ? await (select(
+            priceList,
+          )..where((p) => p.id.equals(row.id.value))).getSingleOrNull()
+        : null;
     final id = await upsert(priceList, row.copyWith(modifiedAt: _now), row.id);
+    if (old?.name == defaultName && row.name.present) {
+      await writeSingle(SellingSettings.doctype, {
+        'selling_price_list': row.name.value,
+      });
+    }
     await _checkPriceLists();
     return id;
   });
 
+  Future<String> _defaultPriceListName() async =>
+      SellingSettings(await readSingle(SellingSettings.doctype))
+          .sellingPriceList;
+
+  /// SET-R13: the Default Price List is the Cash Register's, so it exists and
+  /// stays enabled (which also keeps at least one list enabled).
   Future<void> _checkPriceLists() async {
-    final enabled = await (select(
+    final name = await _defaultPriceListName();
+    final list = await (select(
       priceList,
-    )..where((p) => p.enabled.equals(1))).get();
-    final any = await select(priceList).get();
-    if (any.isNotEmpty && enabled.isEmpty) {
-      throw const RefusedException(Refusal.lastEnabledPriceList);
+    )..where((p) => p.name.equals(name))).getSingleOrNull();
+    if (list?.enabled != 1) {
+      throw const RefusedException(Refusal.defaultPriceList);
     }
   }
 
@@ -196,127 +211,6 @@ extension SetupQueries on AppDatabase {
     }
     return id;
   });
-
-  // ---- POS Profile -------------------------------------------------------
-
-  /// The payment methods and item group ids of POS Profile [id].
-  Future<({List<PosProfilePaymentData> payments, Set<int> itemGroupIds})>
-  posProfileLines(int id) async => (
-    payments: await (select(
-      posProfilePayment,
-    )..where((p) => p.posProfileId.equals(id))).get(),
-    itemGroupIds: {
-      for (final g in await (select(
-        posProfileItemGroup,
-      )..where((g) => g.posProfileId.equals(id))).get())
-        g.itemGroupId,
-    },
-  );
-
-  /// Saves a POS Profile with its payment methods and item groups (SET-R14).
-  Future<int> savePosProfile(
-    PosProfileCompanion profile,
-    List<PosProfilePaymentCompanion> payments,
-    Set<int> itemGroupIds,
-  ) => transaction(() async {
-    if (profile.id case Value(present: true, :final value)
-        when await sessionOpen(profileId: value)) {
-      throw const RefusedException(Refusal.profileSessionOpen);
-    }
-    final store = await (select(
-      warehouse,
-    )..where((w) => w.id.equals(profile.warehouseId.value))).getSingle();
-    if (store.isGroup == 1) {
-      throw const RefusedException(Refusal.groupWarehouse);
-    }
-    if (payments.isNotEmpty &&
-        payments.where((p) => p.isDefault.value == 1).length != 1) {
-      throw const RefusedException(Refusal.oneDefaultPayment);
-    }
-    await _refuseDisabled(profile, payments);
-
-    final id = await upsert(
-      posProfile,
-      profile.copyWith(modifiedAt: _now),
-      profile.id,
-    );
-    if (profile.isDefault.value == 1) {
-      await (update(posProfile)..where((p) => p.id.equals(id).not())).write(
-        PosProfileCompanion(isDefault: const Value(0), modifiedAt: _now),
-      );
-    }
-    await (delete(
-      posProfilePayment,
-    )..where((p) => p.posProfileId.equals(id))).go();
-    for (final p in payments) {
-      await refuseOnConstraint(
-        () => into(
-          posProfilePayment,
-        ).insert(p.copyWith(id: const Value.absent(), posProfileId: Value(id))),
-      );
-    }
-    await (delete(
-      posProfileItemGroup,
-    )..where((g) => g.posProfileId.equals(id))).go();
-    for (final groupId in itemGroupIds) {
-      await into(posProfileItemGroup).insert(
-        PosProfileItemGroupCompanion.insert(
-          posProfileId: id,
-          itemGroupId: groupId,
-        ),
-      );
-    }
-    await _checkDefaultProfile();
-    return id;
-  });
-
-  /// SET-R8, R13, R9: disabled masters cannot be chosen.
-  Future<void> _refuseDisabled(
-    PosProfileCompanion profile,
-    List<PosProfilePaymentCompanion> payments,
-  ) async {
-    final list = await (select(
-      priceList,
-    )..where((p) => p.id.equals(profile.priceListId.value))).getSingle();
-    final templateId = profile.taxesTemplateId.present
-        ? profile.taxesTemplateId.value
-        : null;
-    final template = templateId == null
-        ? null
-        : await (select(
-            salesTaxesTemplate,
-          )..where((t) => t.id.equals(templateId))).getSingle();
-    final modes =
-        await (select(modeOfPayment)..where(
-              (m) => m.id.isIn(payments.map((p) => p.modeOfPaymentId.value)),
-            ))
-            .get();
-    if (list.enabled == 0 ||
-        template?.disabled == 1 ||
-        modes.any((m) => m.enabled == 0)) {
-      throw const RefusedException(Refusal.disabledChoice);
-    }
-  }
-
-  /// SET-R14: while any profile is enabled, exactly one enabled profile is
-  /// the default.
-  Future<void> _checkDefaultProfile() async {
-    final enabled = await (select(
-      posProfile,
-    )..where((p) => p.disabled.equals(0))).get();
-    if (enabled.isNotEmpty &&
-        enabled.where((p) => p.isDefault == 1).length != 1) {
-      throw const RefusedException(Refusal.oneDefaultProfile);
-    }
-  }
-
-  /// Deleting a profile is refused while its session is open.
-  Future<void> deletePosProfile(int id) async {
-    if (await sessionOpen(profileId: id)) {
-      throw const RefusedException(Refusal.profileSessionOpen);
-    }
-    await deleteMaster(posProfile, id);
-  }
 
   // ---- Naming Series -----------------------------------------------------
 

@@ -1,11 +1,11 @@
 # Graph Report - rx_merchant  (2026-11-16)
 
 ## Corpus Check
-- 61 files · ~27,416 words
+- 61 files · ~27,758 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 876 nodes · 1220 edges · 51 communities (46 shown, 2 thin omitted)
+- 881 nodes · 1228 edges · 49 communities (44 shown, 2 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
@@ -26,7 +26,7 @@
 - batch_table.dart
 - flt.dart
 - spacing.dart
-- tax_template_test.dart
+- package:flutter_test/flutter_test.dart
 - MainActivity.kt
 - rx_merchant
 - data_import.dart
@@ -41,28 +41,26 @@
 - tax_template.dart
 - wizard_screen.dart
 - naming_series_page.dart
-- setup_screen.dart
+- child_table.dart
 - backup.dart
 - data_import_db.dart
-- refusal.dart
+- list_detail_pane.dart
 - State
 - ConsumerState
 - appDatabaseProvider
 - StatelessWidget
 - setup_db_test.dart
-- singles_test.dart
+- schema_test.dart
 - AppDatabase
 - CLAUDE.md
 - ../../../core/db/app_database.dart
 - import_backup_test.dart
-- adaptive_shell.dart
+- singles_test.dart
 - data_import_test.dart
 - package:drift/drift.dart
 - l10n/app_localizations.dart
 - build
 - barcode.dart
-- _BackupsPageState
-- package:flutter_test/flutter_test.dart
 
 ## God Nodes (most connected - your core abstractions)
 1. `appDatabaseProvider` - 28 edges
@@ -91,15 +89,15 @@
 ## Import Cycles
 - None detected.
 
-## Communities (51 total, 2 thin omitted)
+## Communities (49 total, 2 thin omitted)
 
 ### Community 0 - "singles.dart"
 Cohesion: 0.03
 Nodes (63): double get, abbr, addDraftHeading, allowNegativeStock, allowPrintForCancelled, allowPrintForDraft, autoCreateSerialAndBatchBundleForOutward, autoIndent (+55 more)
 
 ### Community 1 - "report_table.dart"
-Cohesion: 0.06
-Nodes (29): build, ChildTable, _edit, readOnly, rows, _sideSheetRadius, _sideSheetWidth, build (+21 more)
+Cohesion: 0.14
+Nodes (13): build, columns, _export, exportName, filters, _isNumeric, ReportTable, rows (+5 more)
 
 ### Community 2 - "router.dart"
 Cohesion: 0.05
@@ -107,10 +105,10 @@ Nodes (40): app.dart, app_database.dart, core/db/providers.dart, core/widgets/ad
 
 ### Community 3 - "package:material_ui/material_ui.dart"
 Cohesion: 0.05
-Nodes (35): Chip, compact,
+Nodes (34): Chip, compact,
 
   
-  medium,, expanded, of, WindowSize, package:material_ui/material_ui.dart, package:rx_merchant/app.dart, package:rx_merchant/core/widgets/child_table.dart (+27 more)
+  medium,, expanded, of, WindowSize, package:material_ui/material_ui.dart, package:rx_merchant/app.dart, package:rx_merchant/core/widgets/child_table.dart (+26 more)
 
 ### Community 4 - "formats.dart"
 Cohesion: 0.08
@@ -121,8 +119,8 @@ Cohesion: 0.08
 Nodes (25): cut, decimalPart, decimalSeparator, dot, fixed, formatCurrency, formatDate, formatNumber (+17 more)
 
 ### Community 6 - "link_field.dart"
-Cohesion: 0.18
-Nodes (10): build, errorText, label, LinkField, mandatory, onChanged, onCreateNew, value (+2 more)
+Cohesion: 0.17
+Nodes (11): build, errorText, label, LinkField, mandatory, onChanged, onCreateNew, value (+3 more)
 
 ### Community 7 - "app_test.dart"
 Cohesion: 0.17
@@ -141,9 +139,9 @@ Nodes (11): dart:math, flt, fromSetting, method, _relativeError, rounded, Roundi
 Cohesion: 0.25
 Nodes (7): AppSpacing, lg, md, sm, unit, xs, static const double
 
-### Community 11 - "tax_template_test.dart"
-Cohesion: 0.18
-Nodes (9): package:rx_merchant/core/numbers/flt.dart, package:rx_merchant/features/setup/logic/tax_template.dart, bankers, commercial, main, main, qty, row (+1 more)
+### Community 11 - "package:flutter_test/flutter_test.dart"
+Cohesion: 0.14
+Nodes (12): package:flutter_test/flutter_test.dart, package:rx_merchant/core/numbers/flt.dart, package:rx_merchant/core/numbers/format.dart, package:rx_merchant/features/setup/logic/tax_template.dart, bankers, commercial, main, main (+4 more)
 
 ### Community 17 - "data_import.dart"
 Cohesion: 0.04
@@ -159,19 +157,19 @@ Nodes (39): class, ItemTaxTemplateData?, _amount, createState, db, _description,
 
 ### Community 20 - "pos_profile_page.dart"
 Cohesion: 0.07
-Nodes (32): ../../../core/widgets/child_table.dart, _actionsOnNewInvoice, _allowInReturns, build, _Choices, _choicesProvider, createState, db (+24 more)
+Nodes (30): ../../../core/widgets/child_table.dart, _actionsOnNewInvoice, _allowInReturns, build, _Choices, _choicesProvider, createState, db (+22 more)
 
 ### Community 21 - "simple_masters.dart"
 Cohesion: 0.09
 Nodes (29): CurrencyCompanion?, FormState, storeCurrencyProvider, build, _choice, createState, CurrencyPage, _CurrencyPageState (+21 more)
 
 ### Community 22 - "country_info.dart"
-Cohesion: 0.08
-Nodes (24): dart:convert, ../../features/stock/data/batch_table.dart, int get, migration, schemaVersion, bytes, code, CountryInfo (+16 more)
+Cohesion: 0.06
+Nodes (29): dart:convert, Exception, bytes, code, CountryInfo, currency, currencyName, currencyPrecision (+21 more)
 
 ### Community 23 - "data_pages.dart"
-Cohesion: 0.08
-Nodes (24): dart:typed_data, ../data/backup.dart, ../data/data_import_db.dart, ImportRecordType, ImportType, _body, _busy, _chooseFile (+16 more)
+Cohesion: 0.07
+Nodes (29): dart:typed_data, ../data/backup.dart, ../data/data_import_db.dart, ImportRecordType, ImportType, _body, _busy, _chooseFile (+21 more)
 
 ### Community 24 - "setup_queries.dart"
 Cohesion: 0.08
@@ -186,40 +184,40 @@ Cohesion: 0.08
 Nodes (23): bool get, ../../../core/numbers/flt.dart, _int, ChargeType, description, effectiveRate, included, isPreviousRow (+15 more)
 
 ### Community 27 - "wizard_screen.dart"
-Cohesion: 0.09
-Nodes (23): ../../../core/widgets/link_field.dart, ../data/country_info.dart, ../data/seed.dart, _abbr, _abbrEdited, _busy, _canGoOn, _country (+15 more)
+Cohesion: 0.05
+Nodes (45): ../../../core/widgets/link_field.dart, ../../../core/widgets/list_detail_pane.dart, ../../../core/widgets/spacing.dart, ../data/country_info.dart, data_pages.dart, ../data/seed.dart, AdaptiveShell, build (+37 more)
 
 ### Community 28 - "naming_series_page.dart"
 Cohesion: 0.11
 Nodes (21): ../../../core/naming/naming_series.dart, ../data/setup_queries.dart, form_kit.dart, build, createState, current, db, digits (+13 more)
 
-### Community 29 - "setup_screen.dart"
-Cohesion: 0.12
-Nodes (15): ../../../core/widgets/list_detail_pane.dart, ../../../core/widgets/spacing.dart, data_pages.dart, build, id, page, path, selected (+7 more)
+### Community 29 - "child_table.dart"
+Cohesion: 0.20
+Nodes (9): build, ChildTable, _edit, readOnly, rows, _sideSheetRadius, _sideSheetWidth, List (+1 more)
 
 ### Community 30 - "backup.dart"
-Cohesion: 0.13
-Nodes (14): File, backupDirectory, checkRestorable, close, databasePath, out, restoreDatabase, _stamp (+6 more)
+Cohesion: 0.14
+Nodes (13): File, backupDirectory, checkRestorable, close, databasePath, out, restoreDatabase, _stamp (+5 more)
 
 ### Community 31 - "data_import_db.dart"
 Cohesion: 0.15
 Nodes (12): ../../../core/numbers/format.dart, double d when, _cell, d, exportRows, _ids, ImportLogLine, importLookups (+4 more)
 
-### Community 32 - "refusal.dart"
-Cohesion: 0.17
-Nodes (11): Exception, detail, _foreignKey, _primaryKey, reason, Refusal, RefusedException, toString (+3 more)
+### Community 32 - "list_detail_pane.dart"
+Cohesion: 0.25
+Nodes (7): build, detail, list, ListDetailPane, _listWidth, Widget?, window_size.dart
 
 ### Community 33 - "State"
 Cohesion: 0.23
 Nodes (12): MasterList, _MasterListState, _PaymentEditor, _PaymentEditorState, NamedMasterForm, _NamedMasterFormState, _ItemTaxRowEditor, _ItemTaxRowEditorState (+4 more)
 
 ### Community 34 - "ConsumerState"
-Cohesion: 0.24
-Nodes (11): ConsumerState, ConsumerStatefulWidget, DataExportPage, _DataExportPageState, DataImportPage, _DataImportPageState, NamingSeriesPage, _ItemTaxTemplateForm (+3 more)
+Cohesion: 0.21
+Nodes (13): ConsumerState, ConsumerStatefulWidget, DataExportPage, _DataExportPageState, DataImportPage, _DataImportPageState, NamingSeriesPage, _PosProfileForm (+5 more)
 
 ### Community 35 - "appDatabaseProvider"
-Cohesion: 0.18
-Nodes (11): appDatabaseProvider, _restore, _start, _save, _updateSeries, initState, _save, initState (+3 more)
+Cohesion: 0.14
+Nodes (15): appDatabaseProvider, BackupsPage, _BackupsPageState, _backupsProvider, build, restoreAndReopen, _start, _save (+7 more)
 
 ### Community 36 - "StatelessWidget"
 Cohesion: 0.18
@@ -229,9 +227,9 @@ Nodes (11): _RecordTypePicker, FieldGrid, FormPage, LockNote, SectionHeading, Se
 Cohesion: 0.20
 Nodes (9): package:rx_merchant/features/setup/data/country_info.dart, package:rx_merchant/features/setup/data/seed.dart, package:rx_merchant/features/setup/data/setup_queries.dart, completeSetup, db, main, philippines, refused (+1 more)
 
-### Community 38 - "singles_test.dart"
-Cohesion: 0.25
-Nodes (7): package:drift/native.dart, package:rx_merchant/core/db/app_database.dart, package:rx_merchant/core/db/singles.dart, package:rx_merchant/core/naming/naming_series.dart, db, main, main
+### Community 38 - "schema_test.dart"
+Cohesion: 0.22
+Nodes (8): package:drift/native.dart, package:rx_merchant/core/db/app_database.dart, package:rx_merchant/core/naming/naming_series.dart, db, main, namesOf, specTables, main
 
 ### Community 39 - "AppDatabase"
 Cohesion: 0.25
@@ -249,17 +247,17 @@ Nodes (7): ../../../core/db/app_database.dart, ../../../core/db/singles.dart, co
 Cohesion: 0.25
 Nodes (7): dart:io, package:rx_merchant/features/setup/data/backup.dart, package:rx_merchant/features/setup/data/data_import_db.dart, package:rx_merchant/features/setup/data/refusal.dart, package:sqlite3/sqlite3.dart, setup_db_test.dart, main
 
-### Community 43 - "adaptive_shell.dart"
-Cohesion: 0.29
-Nodes (6): AdaptiveShell, build, _go, navigationShell, package:go_router/go_router.dart, StatefulNavigationShell
+### Community 43 - "singles_test.dart"
+Cohesion: 0.50
+Nodes (3): package:rx_merchant/core/db/singles.dart, db, main
 
 ### Community 44 - "data_import_test.dart"
 Cohesion: 0.29
 Nodes (6): package:rx_merchant/features/setup/logic/data_import.dart, package:rx_merchant/features/stock/logic/barcode.dart, item, kinds, lookups, main
 
 ### Community 45 - "package:drift/drift.dart"
-Cohesion: 0.33
-Nodes (5): package:drift/drift.dart, db, main, namesOf, specTables
+Cohesion: 0.25
+Nodes (7): ../../features/stock/data/batch_table.dart, int get, migration, schemaVersion, MigrationStrategy get, package:drift/drift.dart, package:drift_flutter/drift_flutter.dart
 
 ### Community 46 - "l10n/app_localizations.dart"
 Cohesion: 0.40
@@ -273,17 +271,9 @@ Nodes (5): build, ItemTaxTemplatePage, itemTaxTemplatesProvider, SalesTaxesTempl
 Cohesion: 0.40
 Nodes (4): _checkDigitOk, digitsOnly, sum, validBarcode
 
-### Community 49 - "_BackupsPageState"
-Cohesion: 0.50
-Nodes (4): BackupsPage, _BackupsPageState, _backupsProvider, build
-
-### Community 50 - "package:flutter_test/flutter_test.dart"
-Cohesion: 0.50
-Nodes (3): package:flutter_test/flutter_test.dart, package:rx_merchant/core/numbers/format.dart, main
-
 ## Knowledge Gaps
-- **547 isolated node(s):** `AppTheme`, `_seed`, `light`, `dark`, `_from` (+542 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 637 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **552 isolated node(s):** `AppTheme`, `_seed`, `light`, `dark`, `_from` (+547 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 641 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **2 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
@@ -293,13 +283,13 @@ _Questions this graph is uniquely positioned to answer:_
   _High betweenness centrality (0.024) - this node is a cross-community bridge._
 - **Why does `Formats` connect `router.dart` to `tax_template_pages.dart`, `formats.dart`?**
   _High betweenness centrality (0.022) - this node is a cross-community bridge._
-- **Why does `AppDatabase` connect `AppDatabase` to `router.dart`, `formats.dart`, `singles_test.dart`, `package:drift/drift.dart`, `country_info.dart`?**
+- **Why does `AppDatabase` connect `AppDatabase` to `router.dart`, `formats.dart`, `schema_test.dart`, `singles_test.dart`, `package:drift/drift.dart`?**
   _High betweenness centrality (0.018) - this node is a cross-community bridge._
 - **What connects `AppTheme`, `_seed`, `light` to the rest of the system?**
-  _547 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _552 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `singles.dart` be split into smaller, more focused modules?**
   _Cohesion score 0.03125 - nodes in this community are weakly interconnected._
 - **Should `report_table.dart` be split into smaller, more focused modules?**
-  _Cohesion score 0.06451612903225806 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.14285714285714285 - nodes in this community are weakly interconnected._
 - **Should `router.dart` be split into smaller, more focused modules?**
   _Cohesion score 0.05391120507399577 - nodes in this community are weakly interconnected._

@@ -74,10 +74,20 @@ class _SinglesFormState extends ConsumerState<SinglesForm> {
     ref.read(appDatabaseProvider).readSingle(widget.doctype).then((stored) {
       if (mounted) {
         setState(
-          () => _values = {for (final f in _fields) f.key: f.read(stored)},
+          () =>
+              _values = {for (final f in _fields) f.key: _readField(f, stored)},
         );
       }
     });
+  }
+
+  /// A stored choice that is no longer offered (a Mode of Payment or Terms
+  /// disabled since) reads as blank, so Save does not write it back.
+  String _readField(SingleField f, Map<String, String> stored) {
+    final value = f.read(stored);
+    return f.kind == FieldKind.choice && !f.options.contains(value)
+        ? ''
+        : value;
   }
 
   Future<void> _save() async {
@@ -547,6 +557,156 @@ class SellingSettingsPage extends ConsumerWidget {
                 l.validateSellingPrice,
                 kind: FieldKind.check,
                 read: (v) => _flag(SellingSettings(v).validateSellingPrice),
+              ),
+            ],
+          ),
+        ],
+      );
+    });
+  }
+}
+
+/// What the POS Settings links can name: enabled modes, print headings,
+/// enabled terms.
+final _posChoicesProvider =
+    FutureProvider.autoDispose<
+      ({List<String> modes, List<String> headings, List<String> terms})
+    >((ref) async {
+      final db = ref.watch(appDatabaseProvider);
+      return (
+        modes: await (db.select(
+          db.modeOfPayment,
+        )..where((m) => m.enabled.equals(1))).map((m) => m.name).get(),
+        headings: await db.select(db.printHeading).map((h) => h.name).get(),
+        terms: await (db.select(
+          db.termsAndConditions,
+        )..where((t) => t.disabled.equals(0))).map((t) => t.title).get(),
+      );
+    });
+
+/// The one Cash Register's settings (SET-R14). The warehouse, price list,
+/// taxes and letter head are the store defaults: Stock Settings, Selling
+/// Settings, the default tax template and the default Letter Head.
+class PosSettingsPage extends ConsumerWidget {
+  const PosSettingsPage({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+    return _when(ref.watch(_posChoicesProvider), (choices) {
+      String noneOr(String o) => o.isEmpty ? l.none : o;
+      SingleField check(
+        String key,
+        String label,
+        bool Function(PosSettings) read,
+      ) => SingleField(
+        key,
+        label,
+        kind: FieldKind.check,
+        read: (v) => _flag(read(PosSettings(v))),
+      );
+      return SinglesForm(
+        doctype: PosSettings.doctype,
+        title: l.posSettings,
+        sections: [
+          (
+            l.paymentMethods,
+            [
+              SingleField(
+                'default_mode_of_payment',
+                l.defaultModeOfPayment,
+                kind: FieldKind.choice,
+                options: choices.modes,
+                read: (v) => PosSettings(v).defaultModeOfPayment,
+              ),
+            ],
+          ),
+          (
+            l.configurations,
+            [
+              check('hide_images', l.hideImages, (s) => s.hideImages),
+              check(
+                'hide_unavailable_items',
+                l.hideUnavailableItems,
+                (s) => s.hideUnavailableItems,
+              ),
+              check(
+                'allow_rate_change',
+                l.allowRateChange,
+                (s) => s.allowRateChange,
+              ),
+              check(
+                'auto_add_item_to_cart',
+                l.autoAddItemToCart,
+                (s) => s.autoAddItemToCart,
+              ),
+              check(
+                'allow_discount_change',
+                l.allowDiscountChange,
+                (s) => s.allowDiscountChange,
+              ),
+              check(
+                'validate_stock_on_save',
+                l.validateStockOnSave,
+                (s) => s.validateStockOnSave,
+              ),
+              check(
+                'set_grand_total_to_default_mop',
+                l.setGrandTotalToDefaultMop,
+                (s) => s.setGrandTotalToDefaultMop,
+              ),
+              check(
+                'print_receipt_on_order_complete',
+                l.printReceiptOnOrderComplete,
+                (s) => s.printReceiptOnOrderComplete,
+              ),
+              SingleField(
+                'action_on_new_invoice',
+                l.actionOnNewInvoice,
+                kind: FieldKind.choice,
+                options: const [
+                  'Always Ask',
+                  'Save Changes and Load New Invoice',
+                  'Discard Changes and Load New Invoice',
+                ],
+                read: (v) => PosSettings(v).actionOnNewInvoice,
+              ),
+              // Net Total spreads the discount over the items before tax;
+              // Grand Total takes it off the after-tax total.
+              SingleField(
+                'apply_discount_on',
+                l.applyDiscountOn,
+                kind: FieldKind.choice,
+                options: const ['Grand Total', 'Net Total'],
+                read: (v) => PosSettings(v).applyDiscountOn,
+              ),
+            ],
+          ),
+          (
+            l.printSettings,
+            [
+              SingleField(
+                'print_format',
+                l.printFormat,
+                kind: FieldKind.choice,
+                options: const ['POS Receipt', 'Standard'],
+                read: (v) => PosSettings(v).printFormat,
+              ),
+              SingleField(
+                'select_print_heading',
+                l.printHeading,
+                kind: FieldKind.choice,
+                options: ['', ...choices.headings],
+                optionLabel: noneOr,
+                read: (v) => PosSettings(v).selectPrintHeading ?? '',
+              ),
+              SingleField(
+                'tc_name',
+                l.termsAndConditions,
+                kind: FieldKind.choice,
+                options: ['', ...choices.terms],
+                optionLabel: noneOr,
+                read: (v) => PosSettings(v).tcName ?? '',
               ),
             ],
           ),

@@ -10,7 +10,6 @@ CREATE TABLE pos_opening_entry (
   name TEXT UNIQUE,                         -- assigned on Submit
   docstatus INTEGER NOT NULL DEFAULT 0 CHECK (docstatus IN (0,1,2)),
   status TEXT NOT NULL DEFAULT 'Draft' CHECK (status IN ('Draft','Open','Closed','Cancelled')),
-  pos_profile_id INTEGER NOT NULL REFERENCES pos_profile(id),
   period_start_datetime TEXT NOT NULL,
   period_end_datetime TEXT
 );
@@ -32,7 +31,6 @@ CREATE TABLE pos_closing_entry (
   name TEXT UNIQUE,
   docstatus INTEGER NOT NULL DEFAULT 0 CHECK (docstatus IN (0,1,2)),
   pos_opening_entry_id INTEGER NOT NULL REFERENCES pos_opening_entry(id),
-  pos_profile_id INTEGER NOT NULL REFERENCES pos_profile(id),
   period_start_datetime TEXT NOT NULL,
   period_end_datetime TEXT NOT NULL,
   posting_datetime TEXT NOT NULL,
@@ -64,7 +62,6 @@ CREATE TABLE sales_invoice (
   status TEXT NOT NULL DEFAULT 'Draft'
     CHECK (status IN ('Draft','Paid','Return','Credit Note Issued','Cancelled')),
   posting_datetime TEXT NOT NULL,
-  pos_profile_id INTEGER NOT NULL REFERENCES pos_profile(id),
   pos_opening_entry_id INTEGER NOT NULL REFERENCES pos_opening_entry(id),
   is_return INTEGER NOT NULL DEFAULT 0,
   return_against_id INTEGER REFERENCES sales_invoice(id),

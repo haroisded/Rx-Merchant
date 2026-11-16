@@ -1,0 +1,398 @@
+RX MERCHANT - SESSION REPORT
+============================
+
+Written:      2026-11-16 22:00 (+08:00)
+Branch:       main
+Based on:     d5b4836 "RX MERCHANT - SESSION REPORT" (the Setup plan, issue 2)
+Committed:    nothing. Every change below is in the working tree, for you to commit.
+Covers:       the whole session: the request in
+              .claude/erpnext-planner/current-user-prompt.txt to remove the POS
+              Profile (one owner, one register), across code, tests and every
+              document it touches; then the wrap-up the CLAUDE file asks for
+              (Flutter and Ponytail reviews, Ponytail fixes, this report, the
+              system documentation).
+
+
+1. SUGGESTED COMMIT MESSAGE
+---------------------------
+
+Remove POS Profile: one owner, one register
+
+- Drop pos_profile, pos_profile_payment, pos_profile_item_group and the
+  pos_profile_id columns of pos_opening_entry, pos_closing_entry and
+  sales_invoice; schema v1 edited in place (no migration)
+- Add a POS Settings page (singles): Default Mode of Payment, the eight
+  configuration switches, Action on New Invoice, Apply Discount On, Print
+  Format, Print Heading, Terms and Conditions
+- Register defaults come from the store: Stock Settings warehouse, Selling
+  Settings price list, default tax template, default letter head
+- Default Price List must stay enabled and follows a rename
+- SinglesForm no longer saves back a choice that is no longer offered
+- Update plans 00, 01, 02, 03, 05 (both copies) and the system documentation
+- Tests: 140 -> 141
+
+If you prefer two commits, split off "docs and tooling":
+.claude/erpnext-planner/ (plans, system-documentation.md), .claude/commits/
+and graphify-out/.
+
+
+2. RESULT IN SHORT
+------------------
+
+The POS Profile is gone from the app, the schema and the plans. Its
+settings now live where ERPNext keeps them when there is no profile, plus
+one POS Settings page for the register's own options.
+
+  flutter analyze               No issues found
+  dart fix --dry-run            Nothing to fix
+  dart format (check)           0 files changed
+  flutter test                  141 of 141 pass
+  flutter build apk --release   builds, 75.0 MB
+  rg -i "pos.?profile" lib test 0 hits outside doc comments that name
+                                ERPNext's POS Profile as the source
+
+Not done, stated plainly:
+  - No real device was used. Phone emulator only; the tablet emulator was
+    not run this time (see section 5).
+  - No migration: you chose to edit schema v1 in place. See section 8,
+    item 1, before you run this build on a device that has old data.
+  - Plans/context-ai-response.txt (both copies) and the earlier session
+    reports still say "POS Profile". They are records of past sessions and
+    were left as written.
+
+
+3. WHAT WAS DONE
+----------------
+
+3.1 Decisions you made (asked at the start)
+  - Payment modes: the register offers every enabled Mode of Payment, for
+    sales and refunds; one Default Mode of Payment (Cash when unset).
+    "Allow in Returns" is dropped.
+  - The POS Profile's Item Groups filter is dropped.
+  - Schema v1 is edited in place; no migration.
+  - Both copies of the plans are updated.
+
+3.2 Where each POS Profile field went
+  Warehouse                       Stock Settings, Default Warehouse
+  Price List                      Selling Settings, Default Price List
+  Taxes and Charges               the Sales Taxes and Charges Template
+                                  marked Default
+  Letterhead                      the Letter Head marked Default
+  Payment Methods + default       all enabled modes; POS Settings,
+                                  Default Mode of Payment
+  Allow in Returns, Item Groups,
+  Name, Default, Disabled         dropped
+  Configurations (8 switches),
+  Action on New Invoice,
+  Apply Discount On, Print Format,
+  Print Heading, Terms            POS Settings (keys are ERPNext's POS
+                                  Profile field names)
+
+  Each sale already copies warehouse, price list, template, discount mode,
+  letter head, heading and terms onto sales_invoice, so dropping
+  pos_profile_id loses nothing. The old "no edit while its session is open"
+  lock is gone: a settings change only affects sales started afterwards.
+
+3.3 Code
+  Schema
+    lib/features/setup/data/setup.drift   three POS Profile tables removed;
+                                          its imports of stock and invoices
+                                          removed (ends the mutual import)
+    lib/features/pos/data/pos.drift       pos_profile_id removed from
+                                          pos_opening_entry,
+                                          pos_closing_entry, sales_invoice
+    lib/core/db/app_database.g.dart       regenerated; schemaVersion still 1
+    45 tables (was 48), 14 indexes (unchanged)
+
+  Settings
+    lib/core/db/singles.dart              new PosSettings class, every key
+                                          with its default; blank Print
+                                          Heading / Terms read as none;
+                                          blank Default Mode of Payment
+                                          reads as Cash
+
+  Data
+    lib/features/setup/data/seed.dart     no Main Counter profile; payment
+                                          modes inserted in one loop
+    lib/features/setup/data/setup_queries.dart
+      - removed posProfileLines, savePosProfile, _refuseDisabled,
+        _checkDefaultProfile, deletePosProfile
+      - sessionOpen() no longer takes a profile
+      - Default Price List guard (SET-R13): a save or delete of a price
+        list is refused when the Selling Settings default would be missing
+        or disabled. It replaces "at least one list stays enabled" and is
+        stricter. A rename of the default list is written into Selling
+        Settings in the same transaction.
+    lib/features/setup/data/refusal.dart  removed profileSessionOpen,
+                                          groupWarehouse, oneDefaultPayment,
+                                          oneDefaultProfile, disabledChoice;
+                                          lastEnabledPriceList became
+                                          defaultPriceList
+
+  Interface
+    lib/features/setup/ui/pos_profile_page.dart   deleted (569 lines)
+    lib/features/setup/ui/settings_pages.dart
+      - PosSettingsPage on the existing SinglesForm: Payment Methods,
+        Configurations, Print Settings
+      - SinglesForm: a stored choice that is no longer offered reads as
+        blank, so Save does not write it back (review fix)
+    lib/features/setup/ui/setup_screen.dart  Setup > Selling now links
+                                          "POS Settings" (slug pos-settings)
+    lib/features/setup/ui/form_kit.dart   refusal texts follow refusal.dart
+    lib/l10n/app_en.arb                   added posSettings,
+                                          defaultModeOfPayment,
+                                          refusedDefaultPriceList; removed 14
+                                          unused messages; the wizard's last
+                                          step now says a template must be
+                                          "made the Default". 216 messages
+                                          (was 227).
+
+  Net: about 617 fewer hand-written lines in lib/ and test/.
+
+3.4 Tests (140 -> 141)
+  Removed   3 POS Profile tests (session lock, default profile, group
+            warehouse / payment default / disabled choices)
+  Changed   schema_test: 45 tables; SET-A12 seed asserts; SET-A14 now the
+            Default Price List (disable and delete refused, also beside
+            another enabled list; allowed once another is the default);
+            the "used master cannot be deleted" test now references Cash
+            from a session's opening amounts
+  Added     SET-A16 a rename follows into Selling Settings; POS Settings
+            defaults; blank "None" reads as none; widget test: POS Settings
+            does not save back a mode no longer offered
+
+3.5 Documents
+  Plans (repo copy, then copied over the external copy in
+  B:\Development-Projects\erpnext-planner\Plans; all six files identical
+  afterwards):
+    00  "No POS Profile" under the exclusion consequences; singles now has
+        seven groups; table index without the three tables; M4 names POS
+        Settings; glossary row
+    01  scope rows rewritten (each POS Profile field: kept where, or
+        dropped why); DDL without the three tables; new POS Settings key
+        table; SET-R3, R8, R9, R13 and R14 rewritten; Setup home and
+        settings pages; SET-B7; SET-A14, A16; section 8 row for bringing
+        profiles back
+    02  Item Group scope reason; STK-R10 step 4; Default Warehouse is the
+        register's, follows renames, cannot be a group (STK-R1)
+    03  scope rows; DDL without pos_profile_id; POS-R2 without a profile;
+        new POS-R2a (what a sale copies when it starts); R3, R6 to R8, R10,
+        R13, R15, R16, R17, R19, R20, R21; opening dialog; item detail;
+        POS-B4
+    05  INV-R2, R7 (refund in any enabled mode), R12, R14 to R16, R24;
+        return form; INV-A18; INV-B2
+  .claude/erpnext-planner/system-documentation.md   issue 3 (section 7 of
+        this report)
+  graphify-out/   "graphify update .": 860 nodes, 1,177 edges, 46
+                  communities (was 881 / 1,228 / 49)
+
+
+4. CODE REVIEW RESULTS
+----------------------
+
+The CLAUDE file asks for "Flutter Review" and "Ponytail Review", then
+Ponytail fixes.
+
+4.1 Ponytail review (ponytail-review skill, on the diff)
+  "Lean already. Ship." Nothing to cut.
+
+4.2 Flutter review
+  flutter analyze, dart fix, and the code-review skill: two independent
+  reviewers of the working tree against d5b4836, one for standards (plan 00
+  sections 5 to 7, CLAUDE.md, a code-smell list), one against the updated
+  plans. No hard violations, no blocking spec defects.
+
+  Fixed (smallest change at the cause):
+   1. Every master delete ran the Default Price List check, so deleting a
+      Tax could be refused for a price-list reason. Now only price-list
+      deletes run it.
+   2. A stored choice no longer offered (for example a Mode of Payment
+      disabled after it was made the default) showed blank and was
+      written back on Save. SinglesForm now reads it as blank. One widget
+      test.
+   3. A blank Default Mode of Payment read as blank, against its comment.
+      It now reads as Cash.
+   4. SET-A14's delete case beside another enabled list was not tested,
+      and SET-A16's test had no label. Added; labelled.
+   5. Vague names: c -> choices, _text -> _optionalText.
+
+  Left as they are, with the reason:
+   - POS Settings choices are queried inside a UI provider; the Selling
+     Settings page already does the same.
+   - The small check() helper exists on the POS Settings page only.
+   - Option strings appear in the page and in PosSettings comments.
+   - The choices provider is a FutureProvider: only one Setup page is open
+     at a time, so its choices cannot go stale underneath it.
+
+
+5. VERIFICATION EVIDENCE
+------------------------
+
+All run on 2026-11-16, after the last code change.
+
+  $ dart format --output=none --set-exit-if-changed lib test
+  Formatted 55 files (0 changed)
+
+  $ flutter analyze
+  No issues found!
+
+  $ dart fix --dry-run
+  Nothing to fix!
+
+  $ flutter test
+  141 tests passed
+
+  $ flutter build apk --release
+  Built build\app\outputs\flutter-apk\app-release.apk (75.0MB)
+
+  Emulator, phone (Medium_Phone_API_36.1, 360dp wide), after a cold boot,
+  the old app uninstalled and the fresh APK installed:
+    - Wizard: Language, Region (United States, USD), Store "Test Store";
+      the last step reads "Sales are tax-free until a Sales Taxes and
+      Charges Template is made the Default." Open Cash Register lands on
+      the shell.
+    - Setup > Selling lists POS Settings, Mode of Payment, Price List,
+      Selling Settings.
+    - POS Settings: Payment Methods (Default Mode of Payment: Cash),
+      Configurations (eight switches; Set Grand Total to Default Payment
+      Method on; Action on New Invoice: Always Ask; Apply Discount On:
+      Grand Total), Print Settings (POS Receipt, Print Heading None,
+      Terms None). A switch changed, Save shows "Saved".
+    - Price List > Standard Selling: Enabled switched off, Save refused:
+      "This is the Default Price List in Selling Settings, which the Cash
+      Register sells from. It must stay enabled. Choose another Default
+      Price List first."
+    - logcat: 0 Flutter errors.
+    - On first open, the top of POS Settings drew as garbled lines; a
+      scroll repainted it correctly. This matches the known emulator GPU
+      fault (P-1), not the app.
+  Not checked this time: the tablet emulator.
+
+  Before that, the first emulator session (software GL) crashed with
+  "UpdateLayeredWindowIndirect failed ... A device attached to the system
+  is not functioning"; you restarted the emulator.
+
+
+6. DECISIONS MADE ON YOUR BEHALF
+--------------------------------
+
+  1. The new page is called "POS Settings", ERPNext's own name for its
+     POS settings doctype, and its keys are the POS Profile's field names
+     (hide_images, tc_name, select_print_heading, ...).
+     Cost: a reader may look for a "POS Profile" that is not there.
+  2. The Default Price List guard replaces "at least one Price List stays
+     enabled". It is stricter: the default list itself must stay enabled.
+     Cost: to disable it you first pick another default in Selling
+     Settings.
+  3. Selling Settings keeps the default price list by name (as before), so
+     a rename is carried across in the same transaction.
+     Cost: one extra read on every price list save.
+  4. Print Heading and Terms and Conditions are on POS Settings now, with a
+     "None" choice, although their masters arrive with plan 05.
+     Cost: two empty dropdowns until then.
+  5. Unused messages and refusals were deleted, not kept for later
+     (warehouse, itemGroups, taxesAndCharges, ...). Plan 02 or 03 adds them
+     back when a screen needs them.
+  6. The external plans folder was overwritten with the edited files (you
+     asked for both copies). The two copies are identical again.
+  7. Past records (both context-ai-response.txt files, the earlier session
+     reports) were not edited.
+
+
+7. SYSTEM DOCUMENTATION
+-----------------------
+
+.claude/erpnext-planner/system-documentation.md is now issue 3, same
+ISO/IEC/IEEE 15289 structure. Changed: document control and change
+history; glossary (POS Settings); concept of operations and the exclusions
+table (POS Profile row); requirements SET-R3, R8, R13, R14 and acceptance
+SET-A14, A16; C-10 (45 tables); file tree and sizes; routes; design
+decisions D-1, D-2, D-5 and new D-27 to D-30; settings access (seven
+classes); data and UI module tables; message count; table catalogue and
+counts; settings keys (POS Settings); Setup groups; configuration status
+(d5b4836); verification summary, test table and trace; issue 3 review
+findings; user guide (payment modes, register price list, VAT); new
+problem P-13 (old databases and backups); migration policy note; summary.
+
+
+8. KNOWN PROBLEMS AND OPEN ITEMS
+--------------------------------
+
+  1. Old data does not match the schema (P-13). The emulator database and
+     every backup taken before this change still have the POS Profile
+     tables and a NOT NULL pos_profile_id on pos_opening_entry,
+     pos_closing_entry and sales_invoice. Restore accepts them (schema
+     version is still 1). Setup works on them; the first session or sale
+     in M5 would fail. Clear app data on every device that ran an earlier
+     build, and do not restore backups such as RCS-backup-*.sqlite taken
+     before today's change.
+  2. No real device was used for any check.
+  3. Stock Settings keeps the Default Warehouse by name. The rename-follow
+     and "not a group" rules are written into plan 02 (STK-R1) for the
+     Stock Settings and Warehouse pages, which are not built yet.
+  4. The register's fallback when the Default Mode of Payment is disabled
+     ("first enabled mode of Type Cash") is register work in plan 03 (M5).
+  5. Unchanged from earlier issues: release APK signed with the debug key;
+     leaving a form with unsaved changes discards them; emulator GPU text
+     fault (P-1).
+
+
+9. FILES
+--------
+
+Deleted
+  lib/features/setup/ui/pos_profile_page.dart
+
+Modified - app
+  lib/core/db/app_database.g.dart            generated
+  lib/core/db/singles.dart
+  lib/features/pos/data/pos.drift
+  lib/features/setup/data/refusal.dart
+  lib/features/setup/data/seed.dart
+  lib/features/setup/data/setup.drift
+  lib/features/setup/data/setup_queries.dart
+  lib/features/setup/ui/form_kit.dart
+  lib/features/setup/ui/settings_pages.dart
+  lib/features/setup/ui/setup_screen.dart
+  lib/l10n/app_en.arb
+  lib/l10n/app_localizations.dart            generated
+  lib/l10n/app_localizations_en.dart         generated
+
+Modified - tests
+  test/app_test.dart
+  test/core/db/schema_test.dart
+  test/core/db/singles_test.dart
+  test/features/setup/data/setup_db_test.dart
+
+Modified - documents and tooling
+  .claude/erpnext-planner/Plans/00-overview-and-foundation.md
+  .claude/erpnext-planner/Plans/01-setup.md
+  .claude/erpnext-planner/Plans/02-stock.md
+  .claude/erpnext-planner/Plans/03-cash-register.md
+  .claude/erpnext-planner/Plans/05-invoices-and-receipts.md
+  .claude/erpnext-planner/system-documentation.md
+  graphify-out/                              rebuilt; previous copy in
+                                             graphify-out/2026-11-16/
+
+Added
+  .claude/commits/2026-11-16_22-00-06.txt    this report
+
+Outside the repository (no git)
+  B:\Development-Projects\erpnext-planner\Plans\ 00, 01, 02, 03, 05
+                                             overwritten with the edited
+                                             plans
+
+Changed by you, not by me
+  .claude/erpnext-planner/current-user-prompt.txt   modified
+  CLAUDE.md                                         modified
+
+
+10. BEFORE YOU COMMIT
+---------------------
+
+  - schemaVersion is still 1 although the tables changed (your decision).
+    Clear the app's data on the emulator before running this build.
+  - The .gitignore line ".claude\erpnext-planner" (backslash) from earlier
+    reports is unchanged: that folder is still tracked.
+  - graphify-out/2026-11-16/ is a backup Graphify made; delete it if you
+    do not want it in the repository.

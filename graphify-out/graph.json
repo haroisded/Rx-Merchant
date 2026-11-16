@@ -50,6 +50,17 @@
       "source_location": null
     },
     {
+      "id": "lib_core_db_singles_actiononnewinvoice",
+      "label": "actionOnNewInvoice",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "singles.dart",
+      "file_type": "code",
+      "norm_label": "actiononnewinvoice",
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null
+    },
+    {
       "id": "lib_core_db_singles_adddraftheading",
       "label": "addDraftHeading",
       "_origin": "ast",
@@ -57,6 +68,17 @@
       "community_name": "singles.dart",
       "file_type": "code",
       "norm_label": "adddraftheading",
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_core_db_singles_allowdiscountchange",
+      "label": "allowDiscountChange",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "singles.dart",
+      "file_type": "code",
+      "norm_label": "allowdiscountchange",
       "source_file": "lib/core/db/singles.dart",
       "source_location": null
     },
@@ -90,6 +112,39 @@
       "community_name": "singles.dart",
       "file_type": "code",
       "norm_label": "allowprintfordraft",
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_core_db_singles_allowratechange",
+      "label": "allowRateChange",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "singles.dart",
+      "file_type": "code",
+      "norm_label": "allowratechange",
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_core_db_singles_applydiscounton",
+      "label": "applyDiscountOn",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "singles.dart",
+      "file_type": "code",
+      "norm_label": "applydiscounton",
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_core_db_singles_autoadditemtocart",
+      "label": "autoAddItemToCart",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "singles.dart",
+      "file_type": "code",
+      "norm_label": "autoadditemtocart",
       "source_file": "lib/core/db/singles.dart",
       "source_location": null
     },
@@ -178,6 +233,17 @@
       "community_name": "singles.dart",
       "file_type": "code",
       "norm_label": "defaultcurrency",
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_core_db_singles_defaultmodeofpayment",
+      "label": "defaultModeOfPayment",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "singles.dart",
+      "file_type": "code",
+      "norm_label": "defaultmodeofpayment",
       "source_file": "lib/core/db/singles.dart",
       "source_location": null
     },
@@ -314,6 +380,28 @@
       "source_location": null
     },
     {
+      "id": "lib_core_db_singles_hideimages",
+      "label": "hideImages",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "singles.dart",
+      "file_type": "code",
+      "norm_label": "hideimages",
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_core_db_singles_hideunavailableitems",
+      "label": "hideUnavailableItems",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "singles.dart",
+      "file_type": "code",
+      "norm_label": "hideunavailableitems",
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null
+    },
+    {
       "id": "lib_core_db_singles_itemgroup",
       "label": "itemGroup",
       "_origin": "ast",
@@ -380,6 +468,17 @@
       "source_location": null
     },
     {
+      "id": "lib_core_db_singles_optionaltext",
+      "label": "_optionalText",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "singles.dart",
+      "file_type": "code",
+      "norm_label": "_optionaltext",
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null
+    },
+    {
       "id": "lib_core_db_singles_pdfpagesize",
       "label": "pdfPageSize",
       "_origin": "ast",
@@ -398,6 +497,39 @@
       "community_name": "singles.dart",
       "file_type": "code",
       "norm_label": "pickserialandbatchbasedon",
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_core_db_singles_possettings",
+      "label": "PosSettings",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "singles.dart",
+      "file_type": "code",
+      "norm_label": "possettings",
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_core_db_singles_printformat",
+      "label": "printFormat",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "singles.dart",
+      "file_type": "code",
+      "norm_label": "printformat",
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_core_db_singles_printreceiptonordercomplete",
+      "label": "printReceiptOnOrderComplete",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "singles.dart",
+      "file_type": "code",
+      "norm_label": "printreceiptonordercomplete",
       "source_file": "lib/core/db/singles.dart",
       "source_location": null
     },
@@ -534,6 +666,17 @@
       "source_location": null
     },
     {
+      "id": "lib_core_db_singles_selectprintheading",
+      "label": "selectPrintHeading",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "singles.dart",
+      "file_type": "code",
+      "norm_label": "selectprintheading",
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null
+    },
+    {
       "id": "lib_core_db_singles_sellingpricelist",
       "label": "sellingPriceList",
       "_origin": "ast",
@@ -552,6 +695,17 @@
       "community_name": "singles.dart",
       "file_type": "code",
       "norm_label": "sellingsettings",
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_core_db_singles_setgrandtotaltodefaultmop",
+      "label": "setGrandTotalToDefaultMop",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "singles.dart",
+      "file_type": "code",
+      "norm_label": "setgrandtotaltodefaultmop",
       "source_file": "lib/core/db/singles.dart",
       "source_location": null
     },
@@ -633,6 +787,17 @@
       "source_location": null
     },
     {
+      "id": "lib_core_db_singles_tcname",
+      "label": "tcName",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "singles.dart",
+      "file_type": "code",
+      "norm_label": "tcname",
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null
+    },
+    {
       "id": "lib_core_db_singles_timeformat",
       "label": "timeFormat",
       "_origin": "ast",
@@ -673,6 +838,17 @@
       "community_name": "singles.dart",
       "file_type": "code",
       "norm_label": "validatesellingprice",
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_core_db_singles_validatestockonsave",
+      "label": "validateStockOnSave",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "singles.dart",
+      "file_type": "code",
+      "norm_label": "validatestockonsave",
       "source_file": "lib/core/db/singles.dart",
       "source_location": null
     },
@@ -718,6 +894,160 @@
       "file_type": "code",
       "norm_label": "writesingle",
       "source_file": "lib/core/db/singles.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_core_widgets_child_table",
+      "label": "child_table.dart",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "report_table.dart",
+      "file_type": "code",
+      "norm_label": "child_table.dart",
+      "source_file": "lib/core/widgets/child_table.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_core_widgets_child_table_build",
+      "label": "build",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "report_table.dart",
+      "file_type": "code",
+      "norm_label": "build",
+      "source_file": "lib/core/widgets/child_table.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_core_widgets_child_table_childtable",
+      "label": "ChildTable",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "report_table.dart",
+      "file_type": "code",
+      "norm_label": "childtable",
+      "source_file": "lib/core/widgets/child_table.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_core_widgets_child_table_edit",
+      "label": "_edit",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "report_table.dart",
+      "file_type": "code",
+      "norm_label": "_edit",
+      "source_file": "lib/core/widgets/child_table.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_core_widgets_child_table_readonly",
+      "label": "readOnly",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "report_table.dart",
+      "file_type": "code",
+      "norm_label": "readonly",
+      "source_file": "lib/core/widgets/child_table.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_core_widgets_child_table_rows",
+      "label": "rows",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "report_table.dart",
+      "file_type": "code",
+      "norm_label": "rows",
+      "source_file": "lib/core/widgets/child_table.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_core_widgets_child_table_sidesheetradius",
+      "label": "_sideSheetRadius",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "report_table.dart",
+      "file_type": "code",
+      "norm_label": "_sidesheetradius",
+      "source_file": "lib/core/widgets/child_table.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_core_widgets_child_table_sidesheetwidth",
+      "label": "_sideSheetWidth",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "report_table.dart",
+      "file_type": "code",
+      "norm_label": "_sidesheetwidth",
+      "source_file": "lib/core/widgets/child_table.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_core_widgets_list_detail_pane",
+      "label": "list_detail_pane.dart",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "report_table.dart",
+      "file_type": "code",
+      "norm_label": "list_detail_pane.dart",
+      "source_file": "lib/core/widgets/list_detail_pane.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_core_widgets_list_detail_pane_build",
+      "label": "build",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "report_table.dart",
+      "file_type": "code",
+      "norm_label": "build",
+      "source_file": "lib/core/widgets/list_detail_pane.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_core_widgets_list_detail_pane_detail",
+      "label": "detail",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "report_table.dart",
+      "file_type": "code",
+      "norm_label": "detail",
+      "source_file": "lib/core/widgets/list_detail_pane.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_core_widgets_list_detail_pane_list",
+      "label": "list",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "report_table.dart",
+      "file_type": "code",
+      "norm_label": "list",
+      "source_file": "lib/core/widgets/list_detail_pane.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_core_widgets_list_detail_pane_listdetailpane",
+      "label": "ListDetailPane",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "report_table.dart",
+      "file_type": "code",
+      "norm_label": "listdetailpane",
+      "source_file": "lib/core/widgets/list_detail_pane.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_core_widgets_list_detail_pane_listwidth",
+      "label": "_listWidth",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "report_table.dart",
+      "file_type": "code",
+      "norm_label": "_listwidth",
+      "source_file": "lib/core/widgets/list_detail_pane.dart",
       "source_location": null
     },
     {
@@ -831,6 +1161,17 @@
       "source_location": null
     },
     {
+      "id": "list",
+      "label": "List",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "report_table.dart",
+      "file_type": "code",
+      "norm_label": "list",
+      "source_file": null,
+      "source_location": null
+    },
+    {
       "id": "package_csv_csv_dart",
       "label": "package:csv/csv.dart",
       "_origin": "ast",
@@ -864,6 +1205,17 @@
       "source_location": null
     },
     {
+      "id": "r",
+      "label": "R",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "report_table.dart",
+      "file_type": "code",
+      "norm_label": "r",
+      "source_file": null,
+      "source_location": null
+    },
+    {
       "id": "spacing_dart",
       "label": "spacing.dart",
       "_origin": "ast",
@@ -871,6 +1223,28 @@
       "community_name": "report_table.dart",
       "file_type": "code",
       "norm_label": "spacing.dart",
+      "source_file": null,
+      "source_location": null
+    },
+    {
+      "id": "widget",
+      "label": "Widget?",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "report_table.dart",
+      "file_type": "code",
+      "norm_label": "widget?",
+      "source_file": null,
+      "source_location": null
+    },
+    {
+      "id": "window_size_dart",
+      "label": "window_size.dart",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "report_table.dart",
+      "file_type": "code",
+      "norm_label": "window_size.dart",
       "source_file": null,
       "source_location": null
     },
@@ -2121,6 +2495,28 @@
       "source_location": null
     },
     {
+      "id": "lib_features_setup_ui_settings_pages_poschoicesprovider",
+      "label": "_posChoicesProvider",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "settings_pages.dart",
+      "file_type": "code",
+      "norm_label": "_poschoicesprovider",
+      "source_file": "lib/features/setup/ui/settings_pages.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_features_setup_ui_settings_pages_possettingspage",
+      "label": "PosSettingsPage",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "settings_pages.dart",
+      "file_type": "code",
+      "norm_label": "possettingspage",
+      "source_file": "lib/features/setup/ui/settings_pages.dart",
+      "source_location": null
+    },
+    {
       "id": "lib_features_setup_ui_settings_pages_range",
       "label": "_range",
       "_origin": "ast",
@@ -2128,6 +2524,17 @@
       "community_name": "settings_pages.dart",
       "file_type": "code",
       "norm_label": "_range",
+      "source_file": "lib/features/setup/ui/settings_pages.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_features_setup_ui_settings_pages_readfield",
+      "label": "_readField",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "settings_pages.dart",
+      "file_type": "code",
+      "norm_label": "_readfield",
       "source_file": "lib/features/setup/ui/settings_pages.dart",
       "source_location": null
     },
@@ -2271,6 +2678,17 @@
       "community_name": "tax_template_pages.dart",
       "file_type": "code",
       "norm_label": "class",
+      "source_file": null,
+      "source_location": null
+    },
+    {
+      "id": "core_widgets_child_table_dart",
+      "label": "../../../core/widgets/child_table.dart",
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "tax_template_pages.dart",
+      "file_type": "code",
+      "norm_label": "../../../core/widgets/child_table.dart",
       "source_file": null,
       "source_location": null
     },
@@ -3188,343 +3606,134 @@
       "source_location": null
     },
     {
-      "id": "core_widgets_child_table_dart",
-      "label": "../../../core/widgets/child_table.dart",
+      "id": "exception",
+      "label": "Exception",
       "_origin": "ast",
       "community": 20,
-      "community_name": "pos_profile_page.dart",
+      "community_name": "refusal.dart",
       "file_type": "code",
-      "norm_label": "../../../core/widgets/child_table.dart",
+      "norm_label": "exception",
       "source_file": null,
       "source_location": null
     },
     {
-      "id": "lib_features_setup_ui_pos_profile_page",
-      "label": "pos_profile_page.dart",
+      "id": "lib_features_setup_data_refusal",
+      "label": "refusal.dart",
       "_origin": "ast",
       "community": 20,
-      "community_name": "pos_profile_page.dart",
+      "community_name": "refusal.dart",
       "file_type": "code",
-      "norm_label": "pos_profile_page.dart",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
+      "norm_label": "refusal.dart",
+      "source_file": "lib/features/setup/data/refusal.dart",
       "source_location": null
     },
     {
-      "id": "lib_features_setup_ui_pos_profile_page_actionsonnewinvoice",
-      "label": "_actionsOnNewInvoice",
+      "id": "lib_features_setup_data_refusal_detail",
+      "label": "detail",
       "_origin": "ast",
       "community": 20,
-      "community_name": "pos_profile_page.dart",
+      "community_name": "refusal.dart",
       "file_type": "code",
-      "norm_label": "_actionsonnewinvoice",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
+      "norm_label": "detail",
+      "source_file": "lib/features/setup/data/refusal.dart",
       "source_location": null
     },
     {
-      "id": "lib_features_setup_ui_pos_profile_page_allowinreturns",
-      "label": "_allowInReturns",
+      "id": "lib_features_setup_data_refusal_foreignkey",
+      "label": "_foreignKey",
       "_origin": "ast",
       "community": 20,
-      "community_name": "pos_profile_page.dart",
+      "community_name": "refusal.dart",
       "file_type": "code",
-      "norm_label": "_allowinreturns",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
+      "norm_label": "_foreignkey",
+      "source_file": "lib/features/setup/data/refusal.dart",
       "source_location": null
     },
     {
-      "id": "lib_features_setup_ui_pos_profile_page_build",
-      "label": "build",
+      "id": "lib_features_setup_data_refusal_primarykey",
+      "label": "_primaryKey",
       "_origin": "ast",
       "community": 20,
-      "community_name": "pos_profile_page.dart",
+      "community_name": "refusal.dart",
       "file_type": "code",
-      "norm_label": "build",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
+      "norm_label": "_primarykey",
+      "source_file": "lib/features/setup/data/refusal.dart",
       "source_location": null
     },
     {
-      "id": "lib_features_setup_ui_pos_profile_page_choices",
-      "label": "_Choices",
+      "id": "lib_features_setup_data_refusal_reason",
+      "label": "reason",
       "_origin": "ast",
       "community": 20,
-      "community_name": "pos_profile_page.dart",
+      "community_name": "refusal.dart",
       "file_type": "code",
-      "norm_label": "_choices",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
+      "norm_label": "reason",
+      "source_file": "lib/features/setup/data/refusal.dart",
       "source_location": null
     },
     {
-      "id": "lib_features_setup_ui_pos_profile_page_choicesprovider",
-      "label": "_choicesProvider",
+      "id": "lib_features_setup_data_refusal_refusal",
+      "label": "Refusal",
       "_origin": "ast",
       "community": 20,
-      "community_name": "pos_profile_page.dart",
+      "community_name": "refusal.dart",
       "file_type": "code",
-      "norm_label": "_choicesprovider",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
+      "norm_label": "refusal",
+      "source_file": "lib/features/setup/data/refusal.dart",
       "source_location": null
     },
     {
-      "id": "lib_features_setup_ui_pos_profile_page_createstate",
-      "label": "createState",
+      "id": "lib_features_setup_data_refusal_refusedexception",
+      "label": "RefusedException",
       "_origin": "ast",
       "community": 20,
-      "community_name": "pos_profile_page.dart",
+      "community_name": "refusal.dart",
       "file_type": "code",
-      "norm_label": "createstate",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
+      "norm_label": "refusedexception",
+      "source_file": "lib/features/setup/data/refusal.dart",
       "source_location": null
     },
     {
-      "id": "lib_features_setup_ui_pos_profile_page_db",
-      "label": "db",
+      "id": "lib_features_setup_data_refusal_tostring",
+      "label": "toString",
       "_origin": "ast",
       "community": 20,
-      "community_name": "pos_profile_page.dart",
+      "community_name": "refusal.dart",
       "file_type": "code",
-      "norm_label": "db",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
+      "norm_label": "tostring",
+      "source_file": "lib/features/setup/data/refusal.dart",
       "source_location": null
     },
     {
-      "id": "lib_features_setup_ui_pos_profile_page_dispose",
-      "label": "dispose",
+      "id": "lib_features_setup_data_refusal_unique",
+      "label": "_unique",
       "_origin": "ast",
       "community": 20,
-      "community_name": "pos_profile_page.dart",
+      "community_name": "refusal.dart",
       "file_type": "code",
-      "norm_label": "dispose",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
+      "norm_label": "_unique",
+      "source_file": "lib/features/setup/data/refusal.dart",
       "source_location": null
     },
     {
-      "id": "lib_features_setup_ui_pos_profile_page_formkey",
-      "label": "_formKey",
+      "id": "package_drift_remote_dart",
+      "label": "package:drift/remote.dart",
       "_origin": "ast",
       "community": 20,
-      "community_name": "pos_profile_page.dart",
+      "community_name": "refusal.dart",
       "file_type": "code",
-      "norm_label": "_formkey",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_ui_pos_profile_page_groups",
-      "label": "_groups",
-      "_origin": "ast",
-      "community": 20,
-      "community_name": "pos_profile_page.dart",
-      "file_type": "code",
-      "norm_label": "_groups",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_ui_pos_profile_page_id",
-      "label": "id",
-      "_origin": "ast",
-      "community": 20,
-      "community_name": "pos_profile_page.dart",
-      "file_type": "code",
-      "norm_label": "id",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_ui_pos_profile_page_isdefault",
-      "label": "_isDefault",
-      "_origin": "ast",
-      "community": 20,
-      "community_name": "pos_profile_page.dart",
-      "file_type": "code",
-      "norm_label": "_isdefault",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_ui_pos_profile_page_modeid",
-      "label": "_modeId",
-      "_origin": "ast",
-      "community": 20,
-      "community_name": "pos_profile_page.dart",
-      "file_type": "code",
-      "norm_label": "_modeid",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_ui_pos_profile_page_modes",
-      "label": "modes",
-      "_origin": "ast",
-      "community": 20,
-      "community_name": "pos_profile_page.dart",
-      "file_type": "code",
-      "norm_label": "modes",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_ui_pos_profile_page_name",
-      "label": "_name",
-      "_origin": "ast",
-      "community": 20,
-      "community_name": "pos_profile_page.dart",
-      "file_type": "code",
-      "norm_label": "_name",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_ui_pos_profile_page_ondelete",
-      "label": "onDelete",
-      "_origin": "ast",
-      "community": 20,
-      "community_name": "pos_profile_page.dart",
-      "file_type": "code",
-      "norm_label": "ondelete",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_ui_pos_profile_page_ondone",
-      "label": "onDone",
-      "_origin": "ast",
-      "community": 20,
-      "community_name": "pos_profile_page.dart",
-      "file_type": "code",
-      "norm_label": "ondone",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_ui_pos_profile_page_p",
-      "label": "_p",
-      "_origin": "ast",
-      "community": 20,
-      "community_name": "pos_profile_page.dart",
-      "file_type": "code",
-      "norm_label": "_p",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_ui_pos_profile_page_path",
-      "label": "path",
-      "_origin": "ast",
-      "community": 20,
-      "community_name": "pos_profile_page.dart",
-      "file_type": "code",
-      "norm_label": "path",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_ui_pos_profile_page_payment",
-      "label": "_Payment",
-      "_origin": "ast",
-      "community": 20,
-      "community_name": "pos_profile_page.dart",
-      "file_type": "code",
-      "norm_label": "_payment",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_ui_pos_profile_page_payments",
-      "label": "_payments",
-      "_origin": "ast",
-      "community": 20,
-      "community_name": "pos_profile_page.dart",
-      "file_type": "code",
-      "norm_label": "_payments",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_ui_pos_profile_page_posprofilepage",
-      "label": "PosProfilePage",
-      "_origin": "ast",
-      "community": 20,
-      "community_name": "pos_profile_page.dart",
-      "file_type": "code",
-      "norm_label": "posprofilepage",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_ui_pos_profile_page_posprofilesprovider",
-      "label": "posProfilesProvider",
-      "_origin": "ast",
-      "community": 20,
-      "community_name": "pos_profile_page.dart",
-      "file_type": "code",
-      "norm_label": "posprofilesprovider",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_ui_pos_profile_page_profile",
-      "label": "profile",
-      "_origin": "ast",
-      "community": 20,
-      "community_name": "pos_profile_page.dart",
-      "file_type": "code",
-      "norm_label": "profile",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_ui_pos_profile_page_row",
-      "label": "row",
-      "_origin": "ast",
-      "community": 20,
-      "community_name": "pos_profile_page.dart",
-      "file_type": "code",
-      "norm_label": "row",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_ui_pos_profile_page_select",
-      "label": "select",
-      "_origin": "ast",
-      "community": 20,
-      "community_name": "pos_profile_page.dart",
-      "file_type": "code",
-      "norm_label": "select",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_ui_pos_profile_page_set",
-      "label": "_set",
-      "_origin": "ast",
-      "community": 20,
-      "community_name": "pos_profile_page.dart",
-      "file_type": "code",
-      "norm_label": "_set",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null
-    },
-    {
-      "id": "posprofilecompanion",
-      "label": "PosProfileCompanion",
-      "_origin": "ast",
-      "community": 20,
-      "community_name": "pos_profile_page.dart",
-      "file_type": "code",
-      "norm_label": "posprofilecompanion",
+      "norm_label": "package:drift/remote.dart",
       "source_file": null,
       "source_location": null
     },
     {
-      "id": "posprofiledata",
-      "label": "PosProfileData?",
+      "id": "t",
+      "label": "T",
       "_origin": "ast",
       "community": 20,
-      "community_name": "pos_profile_page.dart",
+      "community_name": "refusal.dart",
       "file_type": "code",
-      "norm_label": "posprofiledata?",
+      "norm_label": "t",
       "source_file": null,
       "source_location": null
     },
@@ -3738,6 +3947,28 @@
       "source_location": null
     },
     {
+      "id": "lib_features_setup_ui_simple_masters_namedmasterform",
+      "label": "NamedMasterForm",
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "simple_masters.dart",
+      "file_type": "code",
+      "norm_label": "namedmasterform",
+      "source_file": "lib/features/setup/ui/simple_masters.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_features_setup_ui_simple_masters_namedmasterformstate",
+      "label": "_NamedMasterFormState",
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "simple_masters.dart",
+      "file_type": "code",
+      "norm_label": "_namedmasterformstate",
+      "source_file": "lib/features/setup/ui/simple_masters.dart",
+      "source_location": null
+    },
+    {
       "id": "lib_features_setup_ui_simple_masters_path",
       "label": "path",
       "_origin": "ast",
@@ -3866,17 +4097,6 @@
       "community_name": "country_info.dart",
       "file_type": "code",
       "norm_label": "dart:convert",
-      "source_file": null,
-      "source_location": null
-    },
-    {
-      "id": "exception",
-      "label": "Exception",
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "country_info.dart",
-      "file_type": "code",
-      "norm_label": "exception",
       "source_file": null,
       "source_location": null
     },
@@ -4068,116 +4288,6 @@
       "source_location": null
     },
     {
-      "id": "lib_features_setup_data_refusal",
-      "label": "refusal.dart",
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "country_info.dart",
-      "file_type": "code",
-      "norm_label": "refusal.dart",
-      "source_file": "lib/features/setup/data/refusal.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_data_refusal_detail",
-      "label": "detail",
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "country_info.dart",
-      "file_type": "code",
-      "norm_label": "detail",
-      "source_file": "lib/features/setup/data/refusal.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_data_refusal_foreignkey",
-      "label": "_foreignKey",
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "country_info.dart",
-      "file_type": "code",
-      "norm_label": "_foreignkey",
-      "source_file": "lib/features/setup/data/refusal.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_data_refusal_primarykey",
-      "label": "_primaryKey",
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "country_info.dart",
-      "file_type": "code",
-      "norm_label": "_primarykey",
-      "source_file": "lib/features/setup/data/refusal.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_data_refusal_reason",
-      "label": "reason",
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "country_info.dart",
-      "file_type": "code",
-      "norm_label": "reason",
-      "source_file": "lib/features/setup/data/refusal.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_data_refusal_refusal",
-      "label": "Refusal",
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "country_info.dart",
-      "file_type": "code",
-      "norm_label": "refusal",
-      "source_file": "lib/features/setup/data/refusal.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_data_refusal_refusedexception",
-      "label": "RefusedException",
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "country_info.dart",
-      "file_type": "code",
-      "norm_label": "refusedexception",
-      "source_file": "lib/features/setup/data/refusal.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_data_refusal_tostring",
-      "label": "toString",
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "country_info.dart",
-      "file_type": "code",
-      "norm_label": "tostring",
-      "source_file": "lib/features/setup/data/refusal.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_data_refusal_unique",
-      "label": "_unique",
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "country_info.dart",
-      "file_type": "code",
-      "norm_label": "_unique",
-      "source_file": "lib/features/setup/data/refusal.dart",
-      "source_location": null
-    },
-    {
-      "id": "package_drift_remote_dart",
-      "label": "package:drift/remote.dart",
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "country_info.dart",
-      "file_type": "code",
-      "norm_label": "package:drift/remote.dart",
-      "source_file": null,
-      "source_location": null
-    },
-    {
       "id": "package_flutter_services_dart",
       "label": "package:flutter/services.dart",
       "_origin": "ast",
@@ -4185,17 +4295,6 @@
       "community_name": "country_info.dart",
       "file_type": "code",
       "norm_label": "package:flutter/services.dart",
-      "source_file": null,
-      "source_location": null
-    },
-    {
-      "id": "string",
-      "label": "String?",
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "country_info.dart",
-      "file_type": "code",
-      "norm_label": "string?",
       "source_file": null,
       "source_location": null
     },
@@ -4563,17 +4662,6 @@
       "source_location": null
     },
     {
-      "id": "lib_features_setup_data_setup_queries_checkdefaultprofile",
-      "label": "_checkDefaultProfile",
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "setup_queries.dart",
-      "file_type": "code",
-      "norm_label": "_checkdefaultprofile",
-      "source_file": "lib/features/setup/data/setup_queries.dart",
-      "source_location": null
-    },
-    {
       "id": "lib_features_setup_data_setup_queries_checkpricelists",
       "label": "_checkPriceLists",
       "_origin": "ast",
@@ -4585,6 +4673,17 @@
       "source_location": null
     },
     {
+      "id": "lib_features_setup_data_setup_queries_defaultpricelistname",
+      "label": "_defaultPriceListName",
+      "_origin": "ast",
+      "community": 24,
+      "community_name": "setup_queries.dart",
+      "file_type": "code",
+      "norm_label": "_defaultpricelistname",
+      "source_file": "lib/features/setup/data/setup_queries.dart",
+      "source_location": null
+    },
+    {
       "id": "lib_features_setup_data_setup_queries_deletemaster",
       "label": "deleteMaster",
       "_origin": "ast",
@@ -4592,17 +4691,6 @@
       "community_name": "setup_queries.dart",
       "file_type": "code",
       "norm_label": "deletemaster",
-      "source_file": "lib/features/setup/data/setup_queries.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_data_setup_queries_deleteposprofile",
-      "label": "deletePosProfile",
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "setup_queries.dart",
-      "file_type": "code",
-      "norm_label": "deleteposprofile",
       "source_file": "lib/features/setup/data/setup_queries.dart",
       "source_location": null
     },
@@ -4647,17 +4735,6 @@
       "community_name": "setup_queries.dart",
       "file_type": "code",
       "norm_label": "_now",
-      "source_file": "lib/features/setup/data/setup_queries.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_data_setup_queries_refusedisabled",
-      "label": "_refuseDisabled",
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "setup_queries.dart",
-      "file_type": "code",
-      "norm_label": "_refusedisabled",
       "source_file": "lib/features/setup/data/setup_queries.dart",
       "source_location": null
     },
@@ -4713,17 +4790,6 @@
       "community_name": "setup_queries.dart",
       "file_type": "code",
       "norm_label": "savenamingseries",
-      "source_file": "lib/features/setup/data/setup_queries.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_data_setup_queries_saveposprofile",
-      "label": "savePosProfile",
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "setup_queries.dart",
-      "file_type": "code",
-      "norm_label": "saveposprofile",
       "source_file": "lib/features/setup/data/setup_queries.dart",
       "source_location": null
     },
@@ -5388,13 +5454,13 @@
       "source_location": null
     },
     {
-      "id": "data_seed_dart",
-      "label": "../data/seed.dart",
+      "id": "l10n_app_localizations_dart",
+      "label": "l10n/app_localizations.dart",
       "_origin": "ast",
       "community": 27,
       "community_name": "wizard_screen.dart",
       "file_type": "code",
-      "norm_label": "../data/seed.dart",
+      "norm_label": "l10n/app_localizations.dart",
       "source_file": null,
       "source_location": null
     },
@@ -5451,6 +5517,50 @@
       "file_type": "code",
       "norm_label": "navigationshell",
       "source_file": "lib/core/widgets/adaptive_shell.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_core_widgets_status_chip",
+      "label": "status_chip.dart",
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "wizard_screen.dart",
+      "file_type": "code",
+      "norm_label": "status_chip.dart",
+      "source_file": "lib/core/widgets/status_chip.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_core_widgets_status_chip_build",
+      "label": "build",
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "wizard_screen.dart",
+      "file_type": "code",
+      "norm_label": "build",
+      "source_file": "lib/core/widgets/status_chip.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_core_widgets_status_chip_status",
+      "label": "status",
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "wizard_screen.dart",
+      "file_type": "code",
+      "norm_label": "status",
+      "source_file": "lib/core/widgets/status_chip.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_core_widgets_status_chip_statuschip",
+      "label": "StatusChip",
+      "_origin": "ast",
+      "community": 27,
+      "community_name": "wizard_screen.dart",
+      "file_type": "code",
+      "norm_label": "statuschip",
+      "source_file": "lib/core/widgets/status_chip.dart",
       "source_location": null
     },
     {
@@ -5762,28 +5872,6 @@
       "source_location": null
     },
     {
-      "id": "lib_features_setup_ui_wizard_screen_wizardscreen",
-      "label": "WizardScreen",
-      "_origin": "ast",
-      "community": 27,
-      "community_name": "wizard_screen.dart",
-      "file_type": "code",
-      "norm_label": "wizardscreen",
-      "source_file": "lib/features/setup/ui/wizard_screen.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_ui_wizard_screen_wizardscreenstate",
-      "label": "_WizardScreenState",
-      "_origin": "ast",
-      "community": 27,
-      "community_name": "wizard_screen.dart",
-      "file_type": "code",
-      "norm_label": "_wizardscreenstate",
-      "source_file": "lib/features/setup/ui/wizard_screen.dart",
-      "source_location": null
-    },
-    {
       "id": "naming_series_page_dart",
       "label": "naming_series_page.dart",
       "_origin": "ast",
@@ -5802,17 +5890,6 @@
       "community_name": "wizard_screen.dart",
       "file_type": "code",
       "norm_label": "package:go_router/go_router.dart",
-      "source_file": null,
-      "source_location": null
-    },
-    {
-      "id": "pos_profile_page_dart",
-      "label": "pos_profile_page.dart",
-      "_origin": "ast",
-      "community": 27,
-      "community_name": "wizard_screen.dart",
-      "file_type": "code",
-      "norm_label": "pos_profile_page.dart",
       "source_file": null,
       "source_location": null
     },
@@ -5868,6 +5945,17 @@
       "community_name": "naming_series_page.dart",
       "file_type": "code",
       "norm_label": "../../../core/naming/naming_series.dart",
+      "source_file": null,
+      "source_location": null
+    },
+    {
+      "id": "data_seed_dart",
+      "label": "../data/seed.dart",
+      "_origin": "ast",
+      "community": 28,
+      "community_name": "naming_series_page.dart",
+      "file_type": "code",
+      "norm_label": "../data/seed.dart",
       "source_file": null,
       "source_location": null
     },
@@ -6103,116 +6191,6 @@
       "source_location": null
     },
     {
-      "id": "lib_core_widgets_child_table",
-      "label": "child_table.dart",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "child_table.dart",
-      "file_type": "code",
-      "norm_label": "child_table.dart",
-      "source_file": "lib/core/widgets/child_table.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_core_widgets_child_table_build",
-      "label": "build",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "child_table.dart",
-      "file_type": "code",
-      "norm_label": "build",
-      "source_file": "lib/core/widgets/child_table.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_core_widgets_child_table_childtable",
-      "label": "ChildTable",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "child_table.dart",
-      "file_type": "code",
-      "norm_label": "childtable",
-      "source_file": "lib/core/widgets/child_table.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_core_widgets_child_table_edit",
-      "label": "_edit",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "child_table.dart",
-      "file_type": "code",
-      "norm_label": "_edit",
-      "source_file": "lib/core/widgets/child_table.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_core_widgets_child_table_readonly",
-      "label": "readOnly",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "child_table.dart",
-      "file_type": "code",
-      "norm_label": "readonly",
-      "source_file": "lib/core/widgets/child_table.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_core_widgets_child_table_rows",
-      "label": "rows",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "child_table.dart",
-      "file_type": "code",
-      "norm_label": "rows",
-      "source_file": "lib/core/widgets/child_table.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_core_widgets_child_table_sidesheetradius",
-      "label": "_sideSheetRadius",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "child_table.dart",
-      "file_type": "code",
-      "norm_label": "_sidesheetradius",
-      "source_file": "lib/core/widgets/child_table.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_core_widgets_child_table_sidesheetwidth",
-      "label": "_sideSheetWidth",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "child_table.dart",
-      "file_type": "code",
-      "norm_label": "_sidesheetwidth",
-      "source_file": "lib/core/widgets/child_table.dart",
-      "source_location": null
-    },
-    {
-      "id": "list",
-      "label": "List",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "child_table.dart",
-      "file_type": "code",
-      "norm_label": "list",
-      "source_file": null,
-      "source_location": null
-    },
-    {
-      "id": "r",
-      "label": "R",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "child_table.dart",
-      "file_type": "code",
-      "norm_label": "r",
-      "source_file": null,
-      "source_location": null
-    },
-    {
       "id": "chip",
       "label": "Chip",
       "_origin": "ast",
@@ -6374,6 +6352,17 @@
       "community_name": "package:material_ui/material_ui.dart",
       "file_type": "code",
       "norm_label": "pump.dart",
+      "source_file": null,
+      "source_location": null
+    },
+    {
+      "id": "string",
+      "label": "String?",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "package:material_ui/material_ui.dart",
+      "file_type": "code",
+      "norm_label": "string?",
       "source_file": null,
       "source_location": null
     },
@@ -6961,94 +6950,6 @@
       "source_location": null
     },
     {
-      "id": "lib_core_widgets_list_detail_pane",
-      "label": "list_detail_pane.dart",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "list_detail_pane.dart",
-      "file_type": "code",
-      "norm_label": "list_detail_pane.dart",
-      "source_file": "lib/core/widgets/list_detail_pane.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_core_widgets_list_detail_pane_build",
-      "label": "build",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "list_detail_pane.dart",
-      "file_type": "code",
-      "norm_label": "build",
-      "source_file": "lib/core/widgets/list_detail_pane.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_core_widgets_list_detail_pane_detail",
-      "label": "detail",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "list_detail_pane.dart",
-      "file_type": "code",
-      "norm_label": "detail",
-      "source_file": "lib/core/widgets/list_detail_pane.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_core_widgets_list_detail_pane_list",
-      "label": "list",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "list_detail_pane.dart",
-      "file_type": "code",
-      "norm_label": "list",
-      "source_file": "lib/core/widgets/list_detail_pane.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_core_widgets_list_detail_pane_listdetailpane",
-      "label": "ListDetailPane",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "list_detail_pane.dart",
-      "file_type": "code",
-      "norm_label": "listdetailpane",
-      "source_file": "lib/core/widgets/list_detail_pane.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_core_widgets_list_detail_pane_listwidth",
-      "label": "_listWidth",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "list_detail_pane.dart",
-      "file_type": "code",
-      "norm_label": "_listwidth",
-      "source_file": "lib/core/widgets/list_detail_pane.dart",
-      "source_location": null
-    },
-    {
-      "id": "widget",
-      "label": "Widget?",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "list_detail_pane.dart",
-      "file_type": "code",
-      "norm_label": "widget?",
-      "source_file": null,
-      "source_location": null
-    },
-    {
-      "id": "window_size_dart",
-      "label": "window_size.dart",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "list_detail_pane.dart",
-      "file_type": "code",
-      "norm_label": "window_size.dart",
-      "source_file": null,
-      "source_location": null
-    },
-    {
       "id": "lib_features_setup_ui_form_kit_masterlist",
       "label": "MasterList",
       "_origin": "ast",
@@ -7068,50 +6969,6 @@
       "file_type": "code",
       "norm_label": "_masterliststate",
       "source_file": "lib/features/setup/ui/form_kit.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_ui_pos_profile_page_paymenteditor",
-      "label": "_PaymentEditor",
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "State",
-      "file_type": "code",
-      "norm_label": "_paymenteditor",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_ui_pos_profile_page_paymenteditorstate",
-      "label": "_PaymentEditorState",
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "State",
-      "file_type": "code",
-      "norm_label": "_paymenteditorstate",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_ui_simple_masters_namedmasterform",
-      "label": "NamedMasterForm",
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "State",
-      "file_type": "code",
-      "norm_label": "namedmasterform",
-      "source_file": "lib/features/setup/ui/simple_masters.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_ui_simple_masters_namedmasterformstate",
-      "label": "_NamedMasterFormState",
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "State",
-      "file_type": "code",
-      "norm_label": "_namedmasterformstate",
-      "source_file": "lib/features/setup/ui/simple_masters.dart",
       "source_location": null
     },
     {
@@ -7258,28 +7115,6 @@
       "source_location": null
     },
     {
-      "id": "lib_features_setup_ui_pos_profile_page_posprofileform",
-      "label": "_PosProfileForm",
-      "_origin": "ast",
-      "community": 34,
-      "community_name": "ConsumerState",
-      "file_type": "code",
-      "norm_label": "_posprofileform",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_ui_pos_profile_page_posprofileformstate",
-      "label": "_PosProfileFormState",
-      "_origin": "ast",
-      "community": 34,
-      "community_name": "ConsumerState",
-      "file_type": "code",
-      "norm_label": "_posprofileformstate",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null
-    },
-    {
       "id": "lib_features_setup_ui_tax_template_pages_itemtaxtemplateform",
       "label": "_ItemTaxTemplateForm",
       "_origin": "ast",
@@ -7321,6 +7156,28 @@
       "file_type": "code",
       "norm_label": "_salestaxestemplateformstate",
       "source_file": "lib/features/setup/ui/tax_template_pages.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_features_setup_ui_wizard_screen_wizardscreen",
+      "label": "WizardScreen",
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "ConsumerState",
+      "file_type": "code",
+      "norm_label": "wizardscreen",
+      "source_file": "lib/features/setup/ui/wizard_screen.dart",
+      "source_location": null
+    },
+    {
+      "id": "lib_features_setup_ui_wizard_screen_wizardscreenstate",
+      "label": "_WizardScreenState",
+      "_origin": "ast",
+      "community": 34,
+      "community_name": "ConsumerState",
+      "file_type": "code",
+      "norm_label": "_wizardscreenstate",
+      "source_file": "lib/features/setup/ui/wizard_screen.dart",
       "source_location": null
     },
     {
@@ -7420,28 +7277,6 @@
       "file_type": "code",
       "norm_label": "_updateseries",
       "source_file": "lib/features/setup/ui/naming_series_page.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_ui_pos_profile_page_initstate",
-      "label": "initState",
-      "_origin": "ast",
-      "community": 35,
-      "community_name": "appDatabaseProvider",
-      "file_type": "code",
-      "norm_label": "initstate",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_features_setup_ui_pos_profile_page_save",
-      "label": "_save",
-      "_origin": "ast",
-      "community": 35,
-      "community_name": "appDatabaseProvider",
-      "file_type": "code",
-      "norm_label": "_save",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
       "source_location": null
     },
     {
@@ -8203,7 +8038,7 @@
       "node_kind": "heading",
       "norm_label": "code review",
       "source_file": "CLAUDE.md",
-      "source_location": "L11"
+      "source_location": "L14"
     },
     {
       "id": "claude_codebase_navigation",
@@ -8227,7 +8062,7 @@
       "node_kind": "heading",
       "norm_label": "commits",
       "source_file": "CLAUDE.md",
-      "source_location": "L18"
+      "source_location": "L24"
     },
     {
       "id": "claude_documentation",
@@ -8239,7 +8074,7 @@
       "node_kind": "heading",
       "norm_label": "documentation",
       "source_file": "CLAUDE.md",
-      "source_location": "L29"
+      "source_location": "L36"
     },
     {
       "id": "claude_expected_ai_response",
@@ -8251,7 +8086,7 @@
       "node_kind": "heading",
       "norm_label": "expected ai response",
       "source_file": "CLAUDE.md",
-      "source_location": "L7"
+      "source_location": "L9"
     },
     {
       "id": "claude_finalization",
@@ -8263,7 +8098,7 @@
       "node_kind": "heading",
       "norm_label": "finalization",
       "source_file": "CLAUDE.md",
-      "source_location": "L16"
+      "source_location": "L22"
     },
     {
       "id": "claude_tool_calling",
@@ -8275,7 +8110,7 @@
       "node_kind": "heading",
       "norm_label": "tool calling",
       "source_file": "CLAUDE.md",
-      "source_location": "L4"
+      "source_location": "L5"
     },
     {
       "id": "core_db_app_database_dart",
@@ -8660,61 +8495,6 @@
       "file_type": "code",
       "norm_label": "package:drift_flutter/drift_flutter.dart",
       "source_file": null,
-      "source_location": null
-    },
-    {
-      "id": "l10n_app_localizations_dart",
-      "label": "l10n/app_localizations.dart",
-      "_origin": "ast",
-      "community": 46,
-      "community_name": "l10n/app_localizations.dart",
-      "file_type": "code",
-      "norm_label": "l10n/app_localizations.dart",
-      "source_file": null,
-      "source_location": null
-    },
-    {
-      "id": "lib_core_widgets_status_chip",
-      "label": "status_chip.dart",
-      "_origin": "ast",
-      "community": 46,
-      "community_name": "l10n/app_localizations.dart",
-      "file_type": "code",
-      "norm_label": "status_chip.dart",
-      "source_file": "lib/core/widgets/status_chip.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_core_widgets_status_chip_build",
-      "label": "build",
-      "_origin": "ast",
-      "community": 46,
-      "community_name": "l10n/app_localizations.dart",
-      "file_type": "code",
-      "norm_label": "build",
-      "source_file": "lib/core/widgets/status_chip.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_core_widgets_status_chip_status",
-      "label": "status",
-      "_origin": "ast",
-      "community": 46,
-      "community_name": "l10n/app_localizations.dart",
-      "file_type": "code",
-      "norm_label": "status",
-      "source_file": "lib/core/widgets/status_chip.dart",
-      "source_location": null
-    },
-    {
-      "id": "lib_core_widgets_status_chip_statuschip",
-      "label": "StatusChip",
-      "_origin": "ast",
-      "community": 46,
-      "community_name": "l10n/app_localizations.dart",
-      "file_type": "code",
-      "norm_label": "statuschip",
-      "source_file": "lib/core/widgets/status_chip.dart",
       "source_location": null
     },
     {
@@ -9210,17 +8990,6 @@
       "file_type": "code",
       "norm_label": "value",
       "source_file": "lib/core/widgets/link_field.dart",
-      "source_location": null
-    },
-    {
-      "id": "t",
-      "label": "T",
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "link_field.dart",
-      "file_type": "code",
-      "norm_label": "t",
-      "source_file": null,
       "source_location": null
     },
     {
@@ -9965,102 +9734,6 @@
       "weight": 1.0
     },
     {
-      "source": "lib_features_setup_ui_pos_profile_page_build",
-      "target": "lib_core_db_providers_appdatabaseprovider",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "riverpod_reference",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page_build",
-      "target": "lib_features_setup_ui_pos_profile_page_choicesprovider",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "riverpod_reference",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page_build",
-      "target": "lib_features_setup_ui_pos_profile_page_posprofilesprovider",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "riverpod_reference",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page_initstate",
-      "target": "lib_core_db_providers_appdatabaseprovider",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "riverpod_reference",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page_posprofileformstate",
-      "target": "lib_core_db_providers_appdatabaseprovider",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "riverpod_reference",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page_posprofilepage",
-      "target": "lib_features_setup_ui_pos_profile_page_choicesprovider",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "riverpod_reference",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page_posprofilepage",
-      "target": "lib_features_setup_ui_pos_profile_page_posprofilesprovider",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "riverpod_reference",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page_save",
-      "target": "lib_core_db_providers_appdatabaseprovider",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "riverpod_reference",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
       "source": "lib_features_setup_ui_settings_pages_build",
       "target": "lib_core_db_providers_appdatabaseprovider",
       "relation": "references",
@@ -10122,6 +9795,18 @@
     },
     {
       "source": "lib_features_setup_ui_settings_pages_build",
+      "target": "lib_features_setup_ui_settings_pages_poschoicesprovider",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "riverpod_reference",
+      "source_file": "lib/features/setup/ui/settings_pages.dart",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "lib_features_setup_ui_settings_pages_build",
       "target": "lib_features_setup_ui_settings_pages_submittedprovider",
       "relation": "references",
       "_origin": "ast",
@@ -10171,6 +9856,18 @@
     {
       "source": "lib_features_setup_ui_settings_pages_initstate",
       "target": "lib_core_db_providers_appdatabaseprovider",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "riverpod_reference",
+      "source_file": "lib/features/setup/ui/settings_pages.dart",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "lib_features_setup_ui_settings_pages_possettingspage",
+      "target": "lib_features_setup_ui_settings_pages_poschoicesprovider",
       "relation": "references",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -10801,30 +10498,6 @@
       "confidence_score": 1.0,
       "context": "type_lookup",
       "source_file": "lib/features/setup/ui/form_kit.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "formstate",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "type_lookup",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "posprofiledata",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "type_lookup",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
       "source_location": null,
       "weight": 1.0
     },
@@ -11717,102 +11390,6 @@
       "weight": 1.0
     },
     {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_core_db_singles_int",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "variable_type",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "list",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "variable_type",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "posprofilecompanion",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "variable_type",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "set",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "variable_type",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "string",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "variable_type",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "typedef",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "variable_type",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "valuechanged",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "variable_type",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "voidcallback",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "variable_type",
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
       "source": "lib_features_setup_ui_settings_pages",
       "target": "iterable",
       "relation": "references",
@@ -12176,7 +11753,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "CLAUDE.md",
-      "source_location": "L11",
+      "source_location": "L14",
       "weight": 1.0
     },
     {
@@ -12187,7 +11764,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "CLAUDE.md",
-      "source_location": "L16",
+      "source_location": "L22",
       "weight": 1.0
     },
     {
@@ -12198,7 +11775,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "CLAUDE.md",
-      "source_location": "L4",
+      "source_location": "L5",
       "weight": 1.0
     },
     {
@@ -12209,7 +11786,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "CLAUDE.md",
-      "source_location": "L7",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -12220,7 +11797,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "CLAUDE.md",
-      "source_location": "L18",
+      "source_location": "L24",
       "weight": 1.0
     },
     {
@@ -12231,7 +11808,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "CLAUDE.md",
-      "source_location": "L29",
+      "source_location": "L36",
       "weight": 1.0
     },
     {
@@ -12456,7 +12033,29 @@
     },
     {
       "source": "lib_core_db_singles",
+      "target": "lib_core_db_singles_actiononnewinvoice",
+      "relation": "defines",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "lib_core_db_singles",
       "target": "lib_core_db_singles_adddraftheading",
+      "relation": "defines",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "lib_core_db_singles",
+      "target": "lib_core_db_singles_allowdiscountchange",
       "relation": "defines",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -12490,6 +12089,39 @@
     {
       "source": "lib_core_db_singles",
       "target": "lib_core_db_singles_allowprintfordraft",
+      "relation": "defines",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "lib_core_db_singles",
+      "target": "lib_core_db_singles_allowratechange",
+      "relation": "defines",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "lib_core_db_singles",
+      "target": "lib_core_db_singles_applydiscounton",
+      "relation": "defines",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "lib_core_db_singles",
+      "target": "lib_core_db_singles_autoadditemtocart",
       "relation": "defines",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -12578,6 +12210,17 @@
     {
       "source": "lib_core_db_singles",
       "target": "lib_core_db_singles_defaultcurrency",
+      "relation": "defines",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "lib_core_db_singles",
+      "target": "lib_core_db_singles_defaultmodeofpayment",
       "relation": "defines",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -12731,6 +12374,28 @@
     },
     {
       "source": "lib_core_db_singles",
+      "target": "lib_core_db_singles_hideimages",
+      "relation": "defines",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "lib_core_db_singles",
+      "target": "lib_core_db_singles_hideunavailableitems",
+      "relation": "defines",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "lib_core_db_singles",
       "target": "lib_core_db_singles_int",
       "relation": "defines",
       "_origin": "ast",
@@ -12808,6 +12473,17 @@
     },
     {
       "source": "lib_core_db_singles",
+      "target": "lib_core_db_singles_optionaltext",
+      "relation": "defines",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "lib_core_db_singles",
       "target": "lib_core_db_singles_pdfpagesize",
       "relation": "defines",
       "_origin": "ast",
@@ -12820,6 +12496,39 @@
     {
       "source": "lib_core_db_singles",
       "target": "lib_core_db_singles_pickserialandbatchbasedon",
+      "relation": "defines",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "lib_core_db_singles",
+      "target": "lib_core_db_singles_possettings",
+      "relation": "defines",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "lib_core_db_singles",
+      "target": "lib_core_db_singles_printformat",
+      "relation": "defines",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "lib_core_db_singles",
+      "target": "lib_core_db_singles_printreceiptonordercomplete",
       "relation": "defines",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -12962,6 +12671,17 @@
     },
     {
       "source": "lib_core_db_singles",
+      "target": "lib_core_db_singles_selectprintheading",
+      "relation": "defines",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "lib_core_db_singles",
       "target": "lib_core_db_singles_sellingpricelist",
       "relation": "defines",
       "_origin": "ast",
@@ -12974,6 +12694,17 @@
     {
       "source": "lib_core_db_singles",
       "target": "lib_core_db_singles_sellingsettings",
+      "relation": "defines",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "lib_core_db_singles",
+      "target": "lib_core_db_singles_setgrandtotaltodefaultmop",
       "relation": "defines",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -13083,6 +12814,17 @@
     },
     {
       "source": "lib_core_db_singles",
+      "target": "lib_core_db_singles_tcname",
+      "relation": "defines",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "lib_core_db_singles",
       "target": "lib_core_db_singles_timeformat",
       "relation": "defines",
       "_origin": "ast",
@@ -13117,6 +12859,17 @@
     {
       "source": "lib_core_db_singles",
       "target": "lib_core_db_singles_validatesellingprice",
+      "relation": "defines",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/core/db/singles.dart",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "lib_core_db_singles",
+      "target": "lib_core_db_singles_validatestockonsave",
       "relation": "defines",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -14766,17 +14519,6 @@
     },
     {
       "source": "lib_features_setup_data_setup_queries",
-      "target": "lib_features_setup_data_setup_queries_checkdefaultprofile",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/data/setup_queries.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_data_setup_queries",
       "target": "lib_features_setup_data_setup_queries_checkpricelists",
       "relation": "defines",
       "_origin": "ast",
@@ -14788,7 +14530,7 @@
     },
     {
       "source": "lib_features_setup_data_setup_queries",
-      "target": "lib_features_setup_data_setup_queries_deletemaster",
+      "target": "lib_features_setup_data_setup_queries_defaultpricelistname",
       "relation": "defines",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -14799,7 +14541,7 @@
     },
     {
       "source": "lib_features_setup_data_setup_queries",
-      "target": "lib_features_setup_data_setup_queries_deleteposprofile",
+      "target": "lib_features_setup_data_setup_queries_deletemaster",
       "relation": "defines",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -14844,17 +14586,6 @@
     {
       "source": "lib_features_setup_data_setup_queries",
       "target": "lib_features_setup_data_setup_queries_now",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/data/setup_queries.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_data_setup_queries",
-      "target": "lib_features_setup_data_setup_queries_refusedisabled",
       "relation": "defines",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -14910,17 +14641,6 @@
     {
       "source": "lib_features_setup_data_setup_queries",
       "target": "lib_features_setup_data_setup_queries_savenamingseries",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/data/setup_queries.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_data_setup_queries",
-      "target": "lib_features_setup_data_setup_queries_saveposprofile",
       "relation": "defines",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -16679,369 +16399,6 @@
       "weight": 1.0
     },
     {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_actionsonnewinvoice",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_allowinreturns",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_build",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_choices",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_choicesprovider",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_createstate",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_db",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_dispose",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_formkey",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_groups",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_id",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_initstate",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_isdefault",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_modeid",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_modes",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_name",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_ondelete",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_ondone",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_p",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_path",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_payment",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_paymenteditor",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_paymenteditorstate",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_payments",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_posprofileform",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_posprofileformstate",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_posprofilepage",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_posprofilesprovider",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_profile",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_row",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_save",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_select",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "lib_features_setup_ui_pos_profile_page_set",
-      "relation": "defines",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
       "source": "lib_features_setup_ui_settings_pages",
       "target": "lib_features_setup_ui_settings_pages_build",
       "relation": "defines",
@@ -17307,7 +16664,40 @@
     },
     {
       "source": "lib_features_setup_ui_settings_pages",
+      "target": "lib_features_setup_ui_settings_pages_poschoicesprovider",
+      "relation": "defines",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/features/setup/ui/settings_pages.dart",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "lib_features_setup_ui_settings_pages",
+      "target": "lib_features_setup_ui_settings_pages_possettingspage",
+      "relation": "defines",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/features/setup/ui/settings_pages.dart",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "lib_features_setup_ui_settings_pages",
       "target": "lib_features_setup_ui_settings_pages_range",
+      "relation": "defines",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/features/setup/ui/settings_pages.dart",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "lib_features_setup_ui_settings_pages",
+      "target": "lib_features_setup_ui_settings_pages_readfield",
       "relation": "defines",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -20343,6 +19733,17 @@
     },
     {
       "source": "lib_features_setup_data_setup_queries",
+      "target": "core_db_singles_dart",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/features/setup/data/setup_queries.dart",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "lib_features_setup_data_setup_queries",
       "target": "core_numbers_format_dart",
       "relation": "imports",
       "_origin": "ast",
@@ -20771,138 +20172,6 @@
       "weight": 1.0
     },
     {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "core_db_app_database_dart",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "core_db_providers_dart",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "core_widgets_child_table_dart",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "core_widgets_spacing_dart",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "data_setup_queries_dart",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "form_kit_dart",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "l10n_app_localizations_dart",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "package_drift_drift_dart",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "package_flutter_riverpod_flutter_riverpod_dart",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "package_go_router_go_router_dart",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "package_material_ui_material_ui_dart",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page",
-      "target": "simple_masters_dart",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
       "source": "lib_features_setup_ui_settings_pages",
       "target": "core_db_providers_dart",
       "relation": "imports",
@@ -21081,17 +20350,6 @@
     {
       "source": "lib_features_setup_ui_setup_screen",
       "target": "package_material_ui_material_ui_dart",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/setup_screen.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_setup_screen",
-      "target": "pos_profile_page_dart",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -22839,61 +22097,6 @@
       "weight": 1.0
     },
     {
-      "source": "lib_features_setup_ui_pos_profile_page_paymenteditor",
-      "target": "statefulwidget",
-      "relation": "inherits",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page_paymenteditorstate",
-      "target": "state",
-      "relation": "inherits",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page_posprofileform",
-      "target": "consumerstatefulwidget",
-      "relation": "inherits",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page_posprofileformstate",
-      "target": "consumerstate",
-      "relation": "inherits",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page_posprofilepage",
-      "target": "consumerwidget",
-      "relation": "inherits",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
       "source": "lib_features_setup_ui_settings_pages_formatpreview",
       "target": "consumerwidget",
       "relation": "inherits",
@@ -22906,6 +22109,17 @@
     },
     {
       "source": "lib_features_setup_ui_settings_pages_globaldefaultspage",
+      "target": "consumerwidget",
+      "relation": "inherits",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/features/setup/ui/settings_pages.dart",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "lib_features_setup_ui_settings_pages_possettingspage",
       "target": "consumerwidget",
       "relation": "inherits",
       "_origin": "ast",
@@ -23312,28 +22526,6 @@
       "weight": 1.0
     },
     {
-      "source": "lib_features_setup_ui_pos_profile_page_paymenteditorstate",
-      "target": "lib_features_setup_ui_pos_profile_page_paymenteditor",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
-      "source": "lib_features_setup_ui_pos_profile_page_posprofileformstate",
-      "target": "lib_features_setup_ui_pos_profile_page_posprofileform",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/features/setup/ui/pos_profile_page.dart",
-      "source_location": null,
-      "weight": 1.0
-    },
-    {
       "source": "lib_features_setup_ui_settings_pages_singlesformstate",
       "target": "lib_features_setup_ui_settings_pages_singlesform",
       "relation": "references",
@@ -23423,5 +22615,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "97bfd3385bce5078b39561a7666137f94c28487e"
+  "built_at_commit": "d5b4836b7d67dbb1c7a5d0c835e679e04f2d3455"
 }

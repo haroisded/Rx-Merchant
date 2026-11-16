@@ -1,11 +1,10 @@
 -- Schema source: 01-setup.md section 3. Copied verbatim; created_at/modified_at added per 00 section 6.6.
-import '../../stock/data/stock.drift';
-import '../../invoices/data/invoices.drift';
 
 -- One-record settings pages, stored as key-value rows (see 00, section 6.5).
 CREATE TABLE singles (
   doctype TEXT NOT NULL,          -- 'Store Profile', 'System Settings', 'Global Defaults',
-                                  -- 'Selling Settings', 'Stock Settings', 'Print Settings'
+                                  -- 'Selling Settings', 'POS Settings', 'Stock Settings',
+                                  -- 'Print Settings'
   field   TEXT NOT NULL,
   value   TEXT,
   PRIMARY KEY (doctype, field)
@@ -102,47 +101,4 @@ CREATE TABLE price_list (
   name TEXT NOT NULL UNIQUE,
   enabled INTEGER NOT NULL DEFAULT 1,
   price_not_uom_dependent INTEGER NOT NULL DEFAULT 0
-);
-
-CREATE TABLE pos_profile (
-  id INTEGER PRIMARY KEY,
-  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
-  modified_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S','now','localtime')),
-  name TEXT NOT NULL UNIQUE,
-  is_default INTEGER NOT NULL DEFAULT 0,
-  disabled INTEGER NOT NULL DEFAULT 0,
-  warehouse_id INTEGER NOT NULL REFERENCES warehouse(id),
-  price_list_id INTEGER NOT NULL REFERENCES price_list(id),
-  taxes_template_id INTEGER REFERENCES sales_taxes_template(id),
-  apply_discount_on TEXT NOT NULL DEFAULT 'Grand Total'
-    CHECK (apply_discount_on IN ('Grand Total','Net Total')),
-  hide_images INTEGER NOT NULL DEFAULT 0,
-  hide_unavailable_items INTEGER NOT NULL DEFAULT 0,
-  allow_rate_change INTEGER NOT NULL DEFAULT 0,
-  auto_add_item_to_cart INTEGER NOT NULL DEFAULT 0,
-  allow_discount_change INTEGER NOT NULL DEFAULT 0,
-  validate_stock_on_save INTEGER NOT NULL DEFAULT 0,
-  set_grand_total_to_default_mop INTEGER NOT NULL DEFAULT 1,
-  print_receipt_on_order_complete INTEGER NOT NULL DEFAULT 0,
-  action_on_new_invoice TEXT NOT NULL DEFAULT 'Always Ask' CHECK (action_on_new_invoice IN
-    ('Always Ask','Save Changes and Load New Invoice','Discard Changes and Load New Invoice')),
-  print_format TEXT NOT NULL DEFAULT 'POS Receipt',   -- 'POS Receipt' or 'Standard'
-  letter_head_id INTEGER REFERENCES letter_head(id),
-  print_heading_id INTEGER REFERENCES print_heading(id),
-  tc_id INTEGER REFERENCES terms_and_conditions(id)
-);
-
-CREATE TABLE pos_profile_payment (
-  id INTEGER PRIMARY KEY,
-  pos_profile_id INTEGER NOT NULL REFERENCES pos_profile(id) ON DELETE CASCADE,
-  mode_of_payment_id INTEGER NOT NULL REFERENCES mode_of_payment(id),
-  is_default INTEGER NOT NULL DEFAULT 0,
-  allow_in_returns INTEGER NOT NULL DEFAULT 0,
-  UNIQUE (pos_profile_id, mode_of_payment_id)
-);
-
-CREATE TABLE pos_profile_item_group (
-  pos_profile_id INTEGER NOT NULL REFERENCES pos_profile(id) ON DELETE CASCADE,
-  item_group_id INTEGER NOT NULL REFERENCES item_group(id),
-  PRIMARY KEY (pos_profile_id, item_group_id)
 );

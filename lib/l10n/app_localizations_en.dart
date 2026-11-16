@@ -185,33 +185,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'This record is used elsewhere. Disable it instead of deleting it.';
 
   @override
-  String get refusedLastEnabledPriceList =>
-      'At least one Price List must stay enabled.';
+  String get refusedDefaultPriceList =>
+      'This is the Default Price List in Selling Settings, which the Cash Register sells from. It must stay enabled. Choose another Default Price List first.';
 
   @override
   String refusedSeriesBelowUsed(String number) {
     return 'Number $number is already used in this series. Set $number or higher.';
   }
-
-  @override
-  String get refusedProfileSessionOpen =>
-      'This POS Profile has an open POS session. Close the session first.';
-
-  @override
-  String get refusedGroupWarehouse =>
-      'A group warehouse holds no stock. Choose a warehouse inside it.';
-
-  @override
-  String get refusedOneDefaultPayment =>
-      'Exactly one payment method must be the default.';
-
-  @override
-  String get refusedOneDefaultProfile =>
-      'Exactly one enabled POS Profile must be the default. Make another profile the default first.';
-
-  @override
-  String get refusedDisabledChoice =>
-      'A disabled Price List, template or Mode of Payment cannot be chosen.';
 
   @override
   String get refusedNotABackup =>
@@ -239,7 +219,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String wizardDoneBody(String store) {
-    return '$store is ready to sell. Sales are tax-free until a Sales Taxes and Charges Template is chosen on the POS Profile.';
+    return '$store is ready to sell. Sales are tax-free until a Sales Taxes and Charges Template is made the Default.';
   }
 
   @override
@@ -284,7 +264,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get currency => 'Currency';
 
   @override
-  String get posProfile => 'POS Profile';
+  String get posSettings => 'POS Settings';
 
   @override
   String get modeOfPayment => 'Mode of Payment';
@@ -513,16 +493,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'A rate here replaces the rate of the same tax for the items using this template. Not Applicable removes the tax; a rate of 0 keeps the item taxable at zero.';
 
   @override
-  String get warehouse => 'Warehouse';
-
-  @override
   String get paymentMethods => 'Payment Methods';
 
   @override
-  String get allowInReturns => 'Allow in Returns';
-
-  @override
-  String get noPaymentMethodsHint => 'With no payment methods, Cash is used.';
+  String get defaultModeOfPayment => 'Default Mode of Payment';
 
   @override
   String get configurations => 'Configurations';
@@ -556,20 +530,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionOnNewInvoice => 'Action on New Invoice';
 
   @override
-  String get itemGroups => 'Item Groups';
-
-  @override
-  String get itemGroupsHint =>
-      'Only items in the chosen groups and their sub-groups are shown. None chosen shows every item.';
-
-  @override
   String get printFormat => 'Print Format';
-
-  @override
-  String get pricingAndTaxes => 'Price List and Taxes';
-
-  @override
-  String get taxesAndCharges => 'Taxes and Charges';
 
   @override
   String get applyDiscountOn => 'Apply Discount On';

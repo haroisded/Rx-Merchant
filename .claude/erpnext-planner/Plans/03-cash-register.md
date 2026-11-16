@@ -47,14 +47,14 @@ order of steps in the totals calculation (POS-R9 to R14).
 | POS Invoice, later consolidated into a Sales Invoice at closing | One `sales_invoice` per sale, posted to the stock ledger at once | Adapted | Consolidation exists to spare the General Ledger, which this app does not have. "Sales Invoice with Update Stock" is the documented direct flow |
 | "Reserved for POS Transactions" quantity | none | Dropped | Stock is deducted at the moment of sale, so nothing waits to be reserved |
 | Sale blocked when not enough stock is on hand | Same | Kept | |
-| Profile warehouse takes priority over the item's warehouse | Same | Kept | |
+| POS Profile chosen for the session; profile warehouse takes priority over the item's warehouse | No profile. The register always sells from Stock Settings' Default Warehouse, which takes priority over the item's | Adapted | One owner, one register (`00`, section 2; SET-R14) |
 | Multiple payment methods on one sale | Same | Kept | |
 | Allow Partial Payment, outstanding amount, Unpaid / Overdue / Partly Paid statuses | none | Dropped | No customer to owe the balance |
 | Change amount | Same, without "Account for Change Amount" | Kept | |
 | Write Off Account, Limit | none | Dropped | Accounts excluded |
 | Item discount (% or amount), Additional Discount on Net Total or Grand Total | Same | Kept | |
 | Allow User to Edit Rate / Edit Discount | Same | Kept | |
-| Taxes from the profile's template, inclusive or exclusive, item tax overrides | Same | Kept | |
+| Taxes from the profile's template, inclusive or exclusive, item tax overrides | Taxes from the default Sales Taxes and Charges Template; the rest the same | Adapted | No POS Profile |
 | Sell in another unit of measure | Same | Kept | |
 | Rounded Total, Rounding Adjustment, In Words | Same | Kept | |
 | Save as draft, Action on New Invoice | Same | Kept | |
@@ -73,7 +73,6 @@ CREATE TABLE pos_opening_entry (
   name TEXT UNIQUE,                         -- assigned on Submit
   docstatus INTEGER NOT NULL DEFAULT 0 CHECK (docstatus IN (0,1,2)),
   status TEXT NOT NULL DEFAULT 'Draft' CHECK (status IN ('Draft','Open','Closed','Cancelled')),
-  pos_profile_id INTEGER NOT NULL REFERENCES pos_profile(id),
   period_start_datetime TEXT NOT NULL,
   period_end_datetime TEXT
 );
@@ -93,7 +92,6 @@ CREATE TABLE pos_closing_entry (
   name TEXT UNIQUE,
   docstatus INTEGER NOT NULL DEFAULT 0 CHECK (docstatus IN (0,1,2)),
   pos_opening_entry_id INTEGER NOT NULL REFERENCES pos_opening_entry(id),
-  pos_profile_id INTEGER NOT NULL REFERENCES pos_profile(id),
   period_start_datetime TEXT NOT NULL,
   period_end_datetime TEXT NOT NULL,
   posting_datetime TEXT NOT NULL,
@@ -123,7 +121,6 @@ CREATE TABLE sales_invoice (
   status TEXT NOT NULL DEFAULT 'Draft'
     CHECK (status IN ('Draft','Paid','Return','Credit Note Issued','Cancelled')),
   posting_datetime TEXT NOT NULL,
-  pos_profile_id INTEGER NOT NULL REFERENCES pos_profile(id),
   pos_opening_entry_id INTEGER NOT NULL REFERENCES pos_opening_entry(id),
   is_return INTEGER NOT NULL DEFAULT 0,
   return_against_id INTEGER REFERENCES sales_invoice(id),
@@ -213,18 +210,24 @@ CREATE TABLE sales_invoice_payment (
 Entry. Opening the Cash Register with no open session shows the opening dialog. "Before selling, open
 a session with an Opening Entry." (POS Workflows.)
 
-**POS-R2 POS Opening Entry.** Fields (ERPNext's standard form): POS Profile (the default profile is
-preselected; disabled profiles are not offered), period start (now), and one row per payment mode of
-the profile with its Opening Amount, zero by default. Submitting it sets the status to Open. Only one
-entry can be Open at a time.
+**POS-R2 POS Opening Entry.** Fields (ERPNext's standard form, without the POS Profile, which this app
+does not keep): period start (now), and one row per enabled Mode of Payment with its Opening Amount,
+zero by default. Submitting it sets the status to Open. Only one entry can be Open at a time.
+
+**POS-R2a What a sale starts with.** A new sale copies, from the settings in force when it starts
+(SET-R14): the Default Warehouse of Stock Settings into `set_warehouse_id`, the Default Price List of
+Selling Settings into `price_list_id`, the default Sales Taxes and Charges Template (if not disabled)
+into `taxes_template_id` and its rows, Apply Discount On from POS Settings, the default Letter Head,
+and the Print Heading and Terms and Conditions of POS Settings. Changing a setting later changes only
+sales started afterwards.
 
 ### Building the sale
 
-**POS-R3 Item selector.** Shows items that are enabled, are sales items, are not templates, are not
-past End of Life, and belong to the profile's Item Groups when that table has rows. Each item shows
-its name, price in the profile's price list, available quantity in the profile's warehouse, and its
-image unless Hide images is on, in which case the selector is a list. With Hide unavailable Items on,
-stock items with no positive stock are hidden. (POS Profile, Configurations.)
+**POS-R3 Item selector.** Shows items that are enabled, are sales items, are not templates and are not
+past End of Life. Each item shows its name, price in the sale's price list, available quantity in the
+sale's warehouse, and its image unless POS Settings has Hide images on, in which case the selector is
+a list. With Hide unavailable Items on, stock items with no positive stock are hidden. (POS Profile,
+Configurations.)
 
 **POS-R4 Finding and adding.**
 - The search field matches Item Name, Item Code and barcode. A group filter narrows by Item Group.
@@ -240,16 +243,16 @@ Unit of Measure, else its Stock UOM; only units in the item's UoM table are offe
 `stock_qty = qty × conversion_factor`. Whole-number units refuse fractions (STK-R3). (Sell Items in
 Different Units of Measure.)
 
-**POS-R6 Price.** Price List Rate comes from the lookup in STK-R10 for the profile's price list, the
+**POS-R6 Price.** Price List Rate comes from the lookup in STK-R10 for the sale's price list, the
 line's unit and the posting date. Changing the unit looks the price up again. Price List Rate is
 editable only when Selling Settings allows editing it. "Price List Rate remains the reference rate."
 (Apply Discounts.)
 
-**POS-R7 Editing the rate.** Allowed only when the profile has Allow User to Edit Rate. A rate below
+**POS-R7 Editing the rate.** Allowed only when POS Settings has Allow User to Edit Rate. A rate below
 the Price List Rate is recorded as a discount: `discount_percentage = (price_list_rate − rate) ÷
 price_list_rate × 100`. A rate above it leaves the discount at zero.
 
-**POS-R8 Item discount.** Allowed only when the profile has Allow User to Edit Discount. Enter either
+**POS-R8 Item discount.** Allowed only when POS Settings has Allow User to Edit Discount. Enter either
 Discount (%) or Discount Amount; the other is derived. `rate = price_list_rate − discount_amount`.
 "Item-level discounts are calculated against the Price List Rate." If the item has Max Discount (%)
 above zero, a larger percentage is refused. Example: Price List Rate 200, discount 10%, rate 180;
@@ -264,7 +267,8 @@ ERPNext's.
 `net_rate = rate`, `net_amount = amount`. Then `total_qty = Σ qty`, `total = Σ amount`,
 `net_total = Σ net_amount`.
 
-**POS-R10 Tax rows.** The profile's template rows are copied into the sale when it starts (SET-R10).
+**POS-R10 Tax rows.** The default template's rows are copied into the sale when it starts (SET-R10,
+POS-R2a).
 They are calculated in order; each produces an Amount and a running Total.
 
 | Type | Amount for the row |
@@ -301,8 +305,8 @@ contains the tax, so the net amount is worked backwards before the rows are calc
 Example: rate 108, 8% included: net 100.00, tax 8.00, Grand Total 108.00, not 116.64. The line shows
 Rate 108.00 and Net Rate 100.00. (Tax Inclusive Accounting.)
 
-**POS-R13 Additional discount.** Entered as a percentage or an amount, applied on the profile's
-Apply Discount On. Editing it requires Allow User to Edit Discount.
+**POS-R13 Additional discount.** Entered as a percentage or an amount, applied on the sale's Apply
+Discount On (copied from POS Settings). Editing it requires Allow User to Edit Discount.
 
 - **On Net Total.** `discount_amount = flt(net_total × percentage ÷ 100)` when a percentage is given.
   Each line's net amount is reduced by `discount_amount × line net amount ÷ net_total`; the last line
@@ -339,8 +343,9 @@ rounding issue; Currency.)
 ### Payment
 
 **POS-R15 Payment.**
-- Only the profile's payment modes are offered. With Set Grand Total to Default Payment Method on,
-  the default mode is pre-filled with the amount to pay.
+- Every enabled Mode of Payment is offered. With Set Grand Total to Default Payment Method on, the
+  Default Mode of Payment of POS Settings is pre-filled with the amount to pay (Cash when that mode is
+  missing or disabled, SET-R14).
 - Several modes can share one sale. The sale cannot be completed until the payments cover the amount
   to pay. There is no partial payment.
 - `paid_amount = Σ payments`. `change_amount = paid_amount − amount to pay`.
@@ -360,16 +365,17 @@ change 45.10. Card 800 is refused. (POS Profile, Payment Methods; Mode of Paymen
 5. No item discount exceeds the item's Max Discount.
 6. With "Validate selling price against purchase or valuation rate" on: no line's net rate per stock
    unit is below the item's valuation rate in the warehouse.
-7. Stock: each stock item has enough in the profile's warehouse as of the posting date and time,
-   unless negative stock is allowed for it. The same check runs when a draft is saved if the profile
+7. Stock: each stock item has enough in the sale's warehouse as of the posting date and time,
+   unless negative stock is allowed for it. The same check runs when a draft is saved if POS Settings
    has Validate Stock on Save.
 8. Batch and serial lines have entries that add up to the line quantity (POS-R21).
 9. Payments satisfy POS-R15.
 
 **POS-R17 Effects of Submit.** In one transaction:
 1. The name is taken from the Sales Invoice naming series.
-2. For each stock-item line, a Stock Ledger Entry of `−stock_qty` is written against the profile's
-   warehouse, which "gets priority" over the item's own. The cost per stock unit that the ledger
+2. For each stock-item line, a Stock Ledger Entry of `−stock_qty` is written against the sale's
+   warehouse (Stock Settings' Default Warehouse), which "gets priority" over the item's own, as the
+   POS Profile warehouse does in ERPNext. The cost per stock unit that the ledger
    returns is saved on the line as `incoming_rate`.
 3. Serial numbers on the sale become Delivered and get their warranty expiry (STK-R24, R26).
 4. With auto-insert on, a missing Item Price is created (STK-R11).
@@ -382,7 +388,7 @@ Ask, Save Changes and Load New Invoice, or Discard Changes and Load New Invoice.
 reopened, edited, completed or deleted. Prices and stock are re-checked when it is completed. A held
 order completed in a later session is attached to that session. (POS Profile.)
 
-**POS-R19 Recent orders.** A list of this profile's invoices filtered by status (Draft, Paid,
+**POS-R19 Recent orders.** A list of the register's invoices filtered by status (Draft, Paid,
 Return), searchable by name. A draft offers Edit and Delete. A paid sale offers Print Receipt and
 Return, which starts the flow in `05-invoices-and-receipts.md`.
 
@@ -393,7 +399,8 @@ standard form):
 - Period start (from the opening entry) and period end (now).
 - The session's submitted invoices, sales and returns, with their count.
 - Total Quantity, Net Total, taxes and Grand Total summed over them. Returns are negative.
-- Payment Reconciliation, one row per payment mode: Opening Amount; Expected Amount = opening amount
+- Payment Reconciliation, one row per payment mode on the opening entry or used in the session (a mode
+  enabled mid-session gets a row with Opening Amount 0): Opening Amount; Expected Amount = opening amount
   + payments received in that mode − refunds paid in that mode − change given (change is taken from
   the Cash-type mode of the sale); Closing Amount, typed by the owner after counting; Difference =
   Closing Amount − Expected Amount.
@@ -416,7 +423,7 @@ Example: opening cash 500. Sale A: cash 1,000, change 245.10. Sale B: card 500, 
 - Scanning a batch barcode is not assumed; batches are chosen in the item detail panel.
 - With "Auto Create Serial and Batch Bundle For Outward" on, a line left without entries is filled at
   Submit using Pick Serial / Batch Based On. With it off, Submit is refused until they are chosen.
-- Only Available serial numbers in the profile's warehouse, and unexpired batches with stock there,
+- Only Available serial numbers in the sale's warehouse, and unexpired batches with stock there,
   can be chosen.
 
 ## 5. Screens
@@ -426,8 +433,8 @@ an order summary. The Cash Register is the one screen that uses two panes from M
 
 ### Opening dialog
 
-`AlertDialog` on Compact, centred card otherwise: POS Profile `DropdownMenu`, a list of payment modes
-with an Opening Amount field each, and "Open" as the `FilledButton`.
+`AlertDialog` on Compact, centred card otherwise: a list of the enabled payment modes with an Opening
+Amount field each, and "Open" as the `FilledButton`.
 
 ### POS screen
 
@@ -435,7 +442,7 @@ with an Opening Amount field each, and "Open" as the `FilledButton`.
 |---|---|
 | Item selector | `SearchBar` with a scan button; Item Group `DropdownMenu`; grid of item `Card`s (image, name, price, available quantity; quantity in `ColorScheme.error` at zero) or a `ListTile` list when Hide images is on |
 | Cart | Lines with name, quantity × rate, amount, and discount when present; swipe to remove. Below: Net Total, each tax row, discount, Grand Total, Rounded Total. Buttons: "Add Discount" (`OutlinedButton`), "Checkout" (`FilledButton`) |
-| Item detail | Quantity (stepper and field), UOM, Rate, Discount (%), Discount Amount, Price List Rate, Available Qty, warehouse, Serial / Batch Entries when relevant. Fields the profile does not allow are read-only |
+| Item detail | Quantity (stepper and field), UOM, Rate, Discount (%), Discount Amount, Price List Rate, Available Qty, warehouse, Serial / Batch Entries when relevant. Fields POS Settings does not allow are read-only |
 | Payment | One `Card` per payment mode with its amount; a number pad; Grand Total, Paid Amount, and To Be Paid or Change; "Complete Order" |
 | Order summary | Invoice name and status chip, lines, totals, payments, change. Buttons: "Print Receipt", "New Order" |
 | Menu (`MenuAnchor` in the app bar) | Toggle Recent Orders, Save as Draft, Close the POS |
@@ -469,7 +476,7 @@ Reconciliation table with an editable Closing Amount column and the Difference s
 | POS-B1 | POS Opening Entry dialog and gate (POS-R1, R2) | The Cash Register asks to open a session, then opens |
 | POS-B2 | Totals engine in `logic/` with all of POS-R9 to R14 and its unit tests | Every worked example in section 4 passes |
 | POS-B3 | Item selector and cart: search, group filter, grid and list, barcode scan, add and merge, stock check on add (POS-R3 to R5) | Items can be scanned into a cart with live totals |
-| POS-B4 | Item detail panel and Add Discount, with profile permissions (POS-R6 to R8, R13) | Unit, rate and discounts change the totals correctly |
+| POS-B4 | Item detail panel and Add Discount, with POS Settings permissions (POS-R6 to R8, R13) | Unit, rate and discounts change the totals correctly |
 | POS-B5 | Payment panel: modes, split payment, change, default amount (POS-R15) | Change is right for cash, split and refused overpayment |
 | POS-B6 | Submit: checks, naming, ledger posting, statuses, order summary (POS-R16, R17) | A sale reduces stock and appears in the Stock Ledger |
 | POS-B7 | Save as Draft, Action on New Invoice, Recent Orders (POS-R18, R19) | A held order survives an app restart and can be completed |

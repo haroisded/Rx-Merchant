@@ -418,47 +418,17 @@ abstract class AppLocalizations {
   /// **'This record is used elsewhere. Disable it instead of deleting it.'**
   String get refusedReferenced;
 
-  /// No description provided for @refusedLastEnabledPriceList.
+  /// No description provided for @refusedDefaultPriceList.
   ///
   /// In en, this message translates to:
-  /// **'At least one Price List must stay enabled.'**
-  String get refusedLastEnabledPriceList;
+  /// **'This is the Default Price List in Selling Settings, which the Cash Register sells from. It must stay enabled. Choose another Default Price List first.'**
+  String get refusedDefaultPriceList;
 
   /// No description provided for @refusedSeriesBelowUsed.
   ///
   /// In en, this message translates to:
   /// **'Number {number} is already used in this series. Set {number} or higher.'**
   String refusedSeriesBelowUsed(String number);
-
-  /// No description provided for @refusedProfileSessionOpen.
-  ///
-  /// In en, this message translates to:
-  /// **'This POS Profile has an open POS session. Close the session first.'**
-  String get refusedProfileSessionOpen;
-
-  /// No description provided for @refusedGroupWarehouse.
-  ///
-  /// In en, this message translates to:
-  /// **'A group warehouse holds no stock. Choose a warehouse inside it.'**
-  String get refusedGroupWarehouse;
-
-  /// No description provided for @refusedOneDefaultPayment.
-  ///
-  /// In en, this message translates to:
-  /// **'Exactly one payment method must be the default.'**
-  String get refusedOneDefaultPayment;
-
-  /// No description provided for @refusedOneDefaultProfile.
-  ///
-  /// In en, this message translates to:
-  /// **'Exactly one enabled POS Profile must be the default. Make another profile the default first.'**
-  String get refusedOneDefaultProfile;
-
-  /// No description provided for @refusedDisabledChoice.
-  ///
-  /// In en, this message translates to:
-  /// **'A disabled Price List, template or Mode of Payment cannot be chosen.'**
-  String get refusedDisabledChoice;
 
   /// No description provided for @refusedNotABackup.
   ///
@@ -505,7 +475,7 @@ abstract class AppLocalizations {
   /// No description provided for @wizardDoneBody.
   ///
   /// In en, this message translates to:
-  /// **'{store} is ready to sell. Sales are tax-free until a Sales Taxes and Charges Template is chosen on the POS Profile.'**
+  /// **'{store} is ready to sell. Sales are tax-free until a Sales Taxes and Charges Template is made the Default.'**
   String wizardDoneBody(String store);
 
   /// No description provided for @stepOf.
@@ -586,11 +556,11 @@ abstract class AppLocalizations {
   /// **'Currency'**
   String get currency;
 
-  /// No description provided for @posProfile.
+  /// No description provided for @posSettings.
   ///
   /// In en, this message translates to:
-  /// **'POS Profile'**
-  String get posProfile;
+  /// **'POS Settings'**
+  String get posSettings;
 
   /// No description provided for @modeOfPayment.
   ///
@@ -1024,29 +994,17 @@ abstract class AppLocalizations {
   /// **'A rate here replaces the rate of the same tax for the items using this template. Not Applicable removes the tax; a rate of 0 keeps the item taxable at zero.'**
   String get itemTaxTemplateHelp;
 
-  /// No description provided for @warehouse.
-  ///
-  /// In en, this message translates to:
-  /// **'Warehouse'**
-  String get warehouse;
-
   /// No description provided for @paymentMethods.
   ///
   /// In en, this message translates to:
   /// **'Payment Methods'**
   String get paymentMethods;
 
-  /// No description provided for @allowInReturns.
+  /// No description provided for @defaultModeOfPayment.
   ///
   /// In en, this message translates to:
-  /// **'Allow in Returns'**
-  String get allowInReturns;
-
-  /// No description provided for @noPaymentMethodsHint.
-  ///
-  /// In en, this message translates to:
-  /// **'With no payment methods, Cash is used.'**
-  String get noPaymentMethodsHint;
+  /// **'Default Mode of Payment'**
+  String get defaultModeOfPayment;
 
   /// No description provided for @configurations.
   ///
@@ -1108,35 +1066,11 @@ abstract class AppLocalizations {
   /// **'Action on New Invoice'**
   String get actionOnNewInvoice;
 
-  /// No description provided for @itemGroups.
-  ///
-  /// In en, this message translates to:
-  /// **'Item Groups'**
-  String get itemGroups;
-
-  /// No description provided for @itemGroupsHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Only items in the chosen groups and their sub-groups are shown. None chosen shows every item.'**
-  String get itemGroupsHint;
-
   /// No description provided for @printFormat.
   ///
   /// In en, this message translates to:
   /// **'Print Format'**
   String get printFormat;
-
-  /// No description provided for @pricingAndTaxes.
-  ///
-  /// In en, this message translates to:
-  /// **'Price List and Taxes'**
-  String get pricingAndTaxes;
-
-  /// No description provided for @taxesAndCharges.
-  ///
-  /// In en, this message translates to:
-  /// **'Taxes and Charges'**
-  String get taxesAndCharges;
 
   /// No description provided for @applyDiscountOn.
   ///

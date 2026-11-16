@@ -1,46 +1,57 @@
 # Codebase Navigation
-For Codebase Navigation, use [Graphify]
+
+For Codebase Navigation, use \[Graphify]
 
 # Tool Calling
-For tool calling, always use [Context Mode]
+
+For tool calling, always use \[Context Mode]
 
 # Expected AI Response
+
 When Reporting information to me, be extremely concise
 and sacrifice grammar for the sake of concision
 
 # Code Review
-Once done coding and reviewing through
-the use of flutter review, use [Ponytail] to fix 
-any problems reported
 
-# Finalization 
+Once done coding...
 
-## Commits 
+use both "Flutter Review" and "Ponytail Review",
+
+once done on the reviews - use \[Ponytail] to fix any problems reported
+
+# Finalization
+
+## Commits
+
 Once "Done Coding" and "Code Review", write a "Detailed Report",
 of what was done in this "current-session" in a .txt file
 
 the name of the .txt file, is the current date and timestamp
 
 the .txt file is stored in...
-"B:\Development-Projects\rx_merchant\.claude\commits"
+"B:\\Development-Projects\\rx\_merchant.claude\\commits"
 
-( the user will do the commit ) 
+( the user will do the commit )
 
 ## Documentation
+
 Write a detailed "System Documentation" based on what the current system has,
 which can be checked through...
-* the current codebase 
-* git commit history 
+
+* the current codebase
+* git commit history
 * what was just implemented today
 
-using the "ISO/IEC/IEEE 15289" as the standard writing 
+using the "ISO/IEC/IEEE 15289" as the standard writing
 of the "System Documentation"
 
-write it in the "B:\Development-Projects\rx_merchant\.claude\erpnext-planner\system-documentation.md"
+write it in the "B:\\Development-Projects\\rx\_merchant.claude\\erpnext-planner\\system-documentation.md"
+
 
 
 ( note ):
-markdown filepath: "B:\Development-Projects\rx_merchant\.claude\erpnext-planner\system-documentation.md"
+markdown filepath: "B:\\Development-Projects\\rx\_merchant.claude\\erpnext-planner\\system-documentation.md"
 
-if the [markdown filepath] currently has contents, then just update 
+if the \[markdown filepath] currently has contents, then just update
 the current file if there were any changes
+

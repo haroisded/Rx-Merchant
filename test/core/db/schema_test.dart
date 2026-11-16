@@ -8,8 +8,7 @@ const specTables = <String>{
   // 01-setup.md
   'singles', 'currency', 'naming_series_option', 'series', 'mode_of_payment',
   'tax', 'sales_taxes_template', 'sales_taxes_template_row',
-  'item_tax_template', 'item_tax_template_row', 'price_list', 'pos_profile',
-  'pos_profile_payment', 'pos_profile_item_group',
+  'item_tax_template', 'item_tax_template_row', 'price_list',
   // 02-stock.md
   'warehouse', 'item_group', 'uom', 'brand', 'item', 'item_barcode',
   'item_uom', 'item_reorder', 'item_tax', 'item_attribute',
@@ -42,8 +41,8 @@ void main() {
     return rows.map((r) => r.read<String>('name')).toList();
   }
 
-  test('schema v1 creates exactly the 48 tables of the table index', () async {
-    expect(specTables, hasLength(48));
+  test('schema v1 creates exactly the 45 tables of the table index', () async {
+    expect(specTables, hasLength(45));
     expect((await namesOf('table')).toSet(), specTables);
   });
 

@@ -67,8 +67,15 @@ behaves.
 | Item Tax Template: Title, Tax Rates rows, Not Applicable, Disabled | Same | Kept | |
 | Price List: Enabled, Price Not UOM Dependent | Same | Kept | |
 | Price List: Buying, country restriction, customer tagging | none | Dropped | No purchasing, no customers |
-| POS Profile: Warehouse, Payment Methods (Default, Allow in Returns), Item Group filter, Price List, Taxes and Charges, Apply Discount On, Print Format, Letterhead, Print Heading, Terms and Conditions | Same | Kept | |
-| POS Profile configurations: Hide images, Hide unavailable Items, Allow User to Edit Rate, Automatically Add Filtered Item To Cart, Allow User to Edit Discount, Validate Stock on Save, Set Grand Total to Default Payment Method, Print Receipt on Order Complete, Action on New Invoice | Same | Kept | |
+| POS Profile as a list of profiles, with Name, Default and Disabled | none | Dropped | One owner, one device, one cash register: there is nothing to choose between. Its fields move as in the rows below |
+| POS Profile: Warehouse | Stock Settings, Default Warehouse (`02-stock.md`) | Adapted | Where ERPNext takes it from when there is no profile |
+| POS Profile: Price List | Selling Settings, Default Price List | Adapted | Same |
+| POS Profile: Taxes and Charges | The Sales Taxes and Charges Template marked Default | Adapted | Same |
+| POS Profile: Letterhead | The Letter Head marked Default (`05-invoices-and-receipts.md`) | Adapted | Same |
+| POS Profile: Payment Methods and their Default | Every enabled Mode of Payment is offered; one Default Mode of Payment on **POS Settings** | Adapted | With one register the table would repeat the Mode of Payment list |
+| POS Profile: Allow in Returns | none | Dropped | A refund may use any enabled mode |
+| POS Profile: Item Groups filter | none | Dropped | It lets different counters show different items; the Cash Register's Item Group filter covers browsing |
+| POS Profile: Apply Discount On, Print Format, Print Heading, Terms and Conditions; configurations Hide images, Hide unavailable Items, Allow User to Edit Rate, Automatically Add Filtered Item To Cart, Allow User to Edit Discount, Validate Stock on Save, Set Grand Total to Default Payment Method, Print Receipt on Order Complete, Action on New Invoice | **POS Settings**, one settings page | Adapted | Same labels and field names as the POS Profile |
 | POS Profile: Allow Partial Payment | none | Dropped | No customer to owe the balance |
 | POS Profile: Ignore Pricing Rule | none | Dropped | Pricing Rules are not built (section 8) |
 | POS Profile: Company, Customer, Customer Group, Applicable for Users, Currency, accounts, Accounting Dimensions, Tax Category | none | Dropped | Excluded areas; currency is the store's |
@@ -86,7 +93,8 @@ behaves.
 -- One-record settings pages, stored as key-value rows (see 00, section 6.5).
 CREATE TABLE singles (
   doctype TEXT NOT NULL,          -- 'Store Profile', 'System Settings', 'Global Defaults',
-                                  -- 'Selling Settings', 'Stock Settings', 'Print Settings'
+                                  -- 'Selling Settings', 'POS Settings', 'Stock Settings',
+                                  -- 'Print Settings'
   field   TEXT NOT NULL,
   value   TEXT,
   PRIMARY KEY (doctype, field)
@@ -172,47 +180,6 @@ CREATE TABLE price_list (
   enabled INTEGER NOT NULL DEFAULT 1,
   price_not_uom_dependent INTEGER NOT NULL DEFAULT 0
 );
-
-CREATE TABLE pos_profile (
-  id INTEGER PRIMARY KEY,
-  name TEXT NOT NULL UNIQUE,
-  is_default INTEGER NOT NULL DEFAULT 0,
-  disabled INTEGER NOT NULL DEFAULT 0,
-  warehouse_id INTEGER NOT NULL REFERENCES warehouse(id),
-  price_list_id INTEGER NOT NULL REFERENCES price_list(id),
-  taxes_template_id INTEGER REFERENCES sales_taxes_template(id),
-  apply_discount_on TEXT NOT NULL DEFAULT 'Grand Total'
-    CHECK (apply_discount_on IN ('Grand Total','Net Total')),
-  hide_images INTEGER NOT NULL DEFAULT 0,
-  hide_unavailable_items INTEGER NOT NULL DEFAULT 0,
-  allow_rate_change INTEGER NOT NULL DEFAULT 0,
-  auto_add_item_to_cart INTEGER NOT NULL DEFAULT 0,
-  allow_discount_change INTEGER NOT NULL DEFAULT 0,
-  validate_stock_on_save INTEGER NOT NULL DEFAULT 0,
-  set_grand_total_to_default_mop INTEGER NOT NULL DEFAULT 1,
-  print_receipt_on_order_complete INTEGER NOT NULL DEFAULT 0,
-  action_on_new_invoice TEXT NOT NULL DEFAULT 'Always Ask' CHECK (action_on_new_invoice IN
-    ('Always Ask','Save Changes and Load New Invoice','Discard Changes and Load New Invoice')),
-  print_format TEXT NOT NULL DEFAULT 'POS Receipt',   -- 'POS Receipt' or 'Standard'
-  letter_head_id INTEGER REFERENCES letter_head(id),
-  print_heading_id INTEGER REFERENCES print_heading(id),
-  tc_id INTEGER REFERENCES terms_and_conditions(id)
-);
-
-CREATE TABLE pos_profile_payment (
-  id INTEGER PRIMARY KEY,
-  pos_profile_id INTEGER NOT NULL REFERENCES pos_profile(id) ON DELETE CASCADE,
-  mode_of_payment_id INTEGER NOT NULL REFERENCES mode_of_payment(id),
-  is_default INTEGER NOT NULL DEFAULT 0,
-  allow_in_returns INTEGER NOT NULL DEFAULT 0,
-  UNIQUE (pos_profile_id, mode_of_payment_id)
-);
-
-CREATE TABLE pos_profile_item_group (
-  pos_profile_id INTEGER NOT NULL REFERENCES pos_profile(id) ON DELETE CASCADE,
-  item_group_id INTEGER NOT NULL REFERENCES item_group(id),
-  PRIMARY KEY (pos_profile_id, item_group_id)
-);
 ```
 
 ### Settings stored in `singles`
@@ -262,6 +229,25 @@ CREATE TABLE pos_profile_item_group (
 | Allow editing Price List rate in transactions | `editable_price_list_rate` | 0 |
 | Validate selling price against purchase or valuation rate | `validate_selling_price` | 0 |
 
+**POS Settings** (the one cash register; keys are ERPNext's POS Profile field names)
+
+| Label | Key | Default | Options |
+|---|---|---|---|
+| Default Mode of Payment | `default_mode_of_payment` | Cash | Enabled Modes of Payment |
+| Hide images | `hide_images` | 0 | |
+| Hide unavailable Items | `hide_unavailable_items` | 0 | |
+| Allow User to Edit Rate | `allow_rate_change` | 0 | |
+| Automatically Add Filtered Item To Cart | `auto_add_item_to_cart` | 0 | |
+| Allow User to Edit Discount | `allow_discount_change` | 0 | |
+| Validate Stock on Save | `validate_stock_on_save` | 0 | |
+| Set Grand Total to Default Payment Method | `set_grand_total_to_default_mop` | 1 | |
+| Print Receipt on Order Complete | `print_receipt_on_order_complete` | 0 | |
+| Action on New Invoice | `action_on_new_invoice` | Always Ask | Always Ask, Save Changes and Load New Invoice, Discard Changes and Load New Invoice |
+| Apply Discount On | `apply_discount_on` | Grand Total | Grand Total, Net Total |
+| Print Format | `print_format` | POS Receipt | POS Receipt, Standard |
+| Print Heading | `select_print_heading` | empty (the document's own title) | Print Heading names |
+| Terms and Conditions | `tc_name` | empty (none) | Enabled Terms and Conditions titles |
+
 ### Default naming series (ERPNext's defaults)
 
 | Document | Pattern | Example |
@@ -294,13 +280,13 @@ exist "can be disruptive"; Currency: a Currency record "does not convert histori
 | UoM | Nos, Unit, Box, Carton, Pack, Pair, Set, Dozen (Must be Whole Number on); Kg, Gram, Litre, Millilitre, Meter (off) |
 | Price List | "Standard Selling", enabled |
 | Mode of Payment | Cash (Cash), Credit Card (Bank), Wire Transfer (Bank) |
-| POS Profile | "Main Counter": warehouse Stores, price list Standard Selling, Cash as default payment and allowed in returns, default profile |
 | Naming series | The table in section 3 |
 | Letter Head | One default letter head holding the store name |
 | Stock Settings | Default Item Group "Products", Default Stock UOM "Nos", Default Warehouse "Stores", Default Valuation Method FIFO |
 
-No tax is seeded. Sales are tax-free until a Sales Taxes and Charges Template is created and chosen on
-the POS Profile.
+POS Settings needs no seed: every key has its default (section 3), and the Default Mode of Payment is
+Cash. No tax is seeded. Sales are tax-free until a Sales Taxes and Charges Template is created and made
+the Default.
 
 **SET-R4 Rounding.** `flt(value, precision)` implements both methods. Banker's Rounding sends a
 midpoint to the nearest even digit (2.345 to 2.34, 2.355 to 2.36). Commercial Rounding sends a midpoint
@@ -328,8 +314,9 @@ has more than one pattern, its form shows a Series dropdown. "Update Series" set
 a chosen key; the next document takes current + 1. Setting it lower than a number already used is
 refused, because the name would collide. (Naming Series, sections 1 and 3.)
 
-**SET-R8 Mode of Payment.** A disabled mode cannot be chosen on a POS Profile or at checkout. A mode
-used on any invoice can be disabled but not deleted. Type classifies the mode; the app uses it for one
+**SET-R8 Mode of Payment.** Every enabled mode is offered at checkout and for a refund. A disabled
+mode is not offered and cannot be chosen as the Default Mode of Payment. A mode used on any invoice or
+session can be disabled but not deleted. Type classifies the mode; the app uses it for one
 thing only: change is given from, and cash counts apply to, modes of Type Cash. (Mode of Payment:
 "The Type describes the method".)
 
@@ -342,6 +329,8 @@ thing only: change is given from, and cash counts apply to, modes of Type Cash. 
 - An Actual row cannot be marked as included in the basic rate. A previous-row row can be included
   only if the row it references is included too.
 - Only one template is the default. Setting a new default clears the old one.
+- The default template is the one the Cash Register applies to a new sale. A template that is both
+  Default and Disabled is not applied, so the sale is tax-free.
 - A disabled template cannot be selected but stays on old invoices.
 
 Worked examples on a Net Total of 1,000 (Types in Tax Template):
@@ -372,20 +361,25 @@ of the matching tax row. Assignment to items and item groups is in `02-stock.md`
 Worked example: standard row 8%; items 699 at 8%, 149 with a 4% template, 99 with a 0% template. Tax
 is 55.92 + 5.96 + 0.00 = 61.88 on a net of 947.
 
-**SET-R13 Price List.** A disabled list cannot be chosen on a POS Profile. At least one list stays
-enabled. **Price Not UOM Dependent**: when on, a price stored for the stock unit is multiplied by the
+**SET-R13 Price List.** The Default Price List in Selling Settings is the one the Cash Register sells
+from, so it must exist and stay enabled: disabling or deleting it is refused until another list is the
+default. That also keeps at least one list enabled. Selling Settings keeps the list by name, so renaming
+the default list renames it there too. Only enabled lists can be chosen as the default.
+**Price Not UOM Dependent**: when on, a price stored for the stock unit is multiplied by the
 conversion factor for other units (1 Box = 10 Kilos, 10 per Kilo, so a Box is 100). When off, a unit
 with no price of its own shows the stock-unit price unchanged (the Box shows 10), so each selling unit
 should get its own Item Price. The lookup order is STK-R10 in `02-stock.md`. (Price Lists.)
 
-**SET-R14 POS Profile.**
-- Warehouse must not be a group warehouse.
-- If the payment table is empty, Cash is used. Otherwise exactly one row is the default. Only modes
-  in the table are offered at checkout; only rows with Allow in Returns are offered on a return.
-- Exactly one enabled profile is the default; it is preselected when a session is opened.
-- A profile with an open POS Opening Entry cannot be edited or disabled until the session is closed.
-- Item Groups: when the table has rows, the item selector shows only items in those groups and their
-  sub-groups.
+**SET-R14 POS Settings.** ERPNext's POS Profile, reduced to the one register of a one-owner store.
+- The register sells from the Default Warehouse of Stock Settings (a non-group warehouse, `02-stock.md`)
+  at the Default Price List of Selling Settings, with the default Sales Taxes and Charges Template and
+  the default Letter Head. Each sale copies these when it starts, so a later change affects only new
+  sales; settings can therefore be edited while a session is open.
+- Payment: every enabled Mode of Payment is offered, for sales and for refunds. The Default Mode of
+  Payment is pre-filled at checkout; if it is missing or disabled, the first enabled mode of Type Cash
+  is used ("the default will be cash if nothing is set").
+- Configurations, Print Format, Print Heading and Terms and Conditions keep the POS Profile's labels and
+  meaning.
 - Apply Discount On: **Net Total** spreads the discount over the items before tax; **Grand Total**
   takes it off the after-tax total. (The POS Profile page describes these the other way round. The
   Apply Discounts page is the consistent one and is the one followed.)
@@ -450,7 +444,7 @@ A list of grouped cards, as an ERPNext workspace:
 | Group | Links |
 |---|---|
 | Store | Store Profile, System Settings, Global Defaults, Currency |
-| Selling | POS Profile, Mode of Payment, Price List, Selling Settings |
+| Selling | POS Settings, Mode of Payment, Price List, Selling Settings |
 | Taxes | Tax, Sales Taxes and Charges Template, Item Tax Template |
 | Stock | Stock Settings (see `02-stock.md`) |
 | Printing | Print Settings, Letter Head, Print Heading, Terms and Conditions (see `05-invoices-and-receipts.md`) |
@@ -459,13 +453,15 @@ A list of grouped cards, as an ERPNext workspace:
 Compact and Medium: the list fills the screen and a link pushes the page. Expanded: the list is the
 left pane and the chosen page fills the right pane.
 
-### Settings pages (Store Profile, System Settings, Global Defaults, Selling Settings, Currency)
+### Settings pages (Store Profile, System Settings, Global Defaults, Selling Settings, POS Settings, Currency)
 
 One form each, sections with a heading, a Save `FilledButton`. Locked fields show a lock icon and a
 one-line reason. System Settings shows a live preview line: today's date and `1234567.891` in the
-chosen formats.
+chosen formats. POS Settings has three sections in the POS Profile's order: Payment Methods (Default
+Mode of Payment); Configurations (the eight switches, Action on New Invoice and Apply Discount On);
+Print Settings (Print Format, Print Heading and Terms and Conditions, the last two with a "None" entry).
 
-### Masters (Mode of Payment, Tax, Price List, templates, POS Profile)
+### Masters (Mode of Payment, Tax, Price List, templates)
 
 List view with a search bar and an "Add" `FloatingActionButton`, then a form.
 
@@ -474,9 +470,6 @@ List view with a search bar and an "Add" `FloatingActionButton`, then a form.
   the Type uses), Reference Row # (only for previous-row types), and the included-in-basic-rate switch.
   A "Try it" panel under the table takes a net amount and a quantity and shows each row's Amount and
   running Total, so a compound template can be checked before use.
-- **POS Profile form.** Sections in ERPNext's order: Warehouse; Payment Methods (child table with
-  Default and Allow in Returns); Configurations (the nine switches and Action on New Invoice as a
-  `DropdownMenu`); Item Groups; Print Settings; Price List, Taxes and Charges, Apply Discount On.
 
 ### Naming Series
 
@@ -505,7 +498,7 @@ the validation problems in a dialog and keeps the form contents.
 | SET-B4 | Naming Series screen (SET-R6, R7) | A test document takes the next number; Update Series moves it |
 | SET-B5 | Mode of Payment list and form (SET-R8) | Modes can be added, disabled |
 | SET-B6 | Tax, Sales Taxes and Charges Template with the "Try it" panel, Item Tax Template (SET-R9 to R12) | The panel reproduces the worked examples |
-| SET-B7 | POS Profile form, Selling Settings (SET-R14) | A second profile can be created and made default |
+| SET-B7 | POS Settings, Selling Settings, the Default Price List guard (SET-R13, R14) | The register's options save; the Default Price List cannot be disabled |
 | SET-B8 | Data Import and Export (SET-R16) | 200 items imported from a CSV; a bad row blocks the import with a clear message |
 | SET-B9 | Backup and Restore (SET-R17, R18) | Back up, wipe app data, reinstall, restore, data is back |
 
@@ -535,9 +528,9 @@ Database and manual checks:
 |---|---|
 | SET-A12 Finish the wizard | Every record in SET-R3 exists; `setup_complete` is 1 |
 | SET-A13 Submit any document, then open Store Profile | Default Currency and Currency Precision are locked |
-| SET-A14 Disable the only enabled Price List | Refused |
+| SET-A14 Disable or delete the Default Price List, also while another list is enabled | Refused |
 | SET-A15 Make a second template default | The first is no longer default |
-| SET-A16 Edit a POS Profile during an open session | Refused with the reason |
+| SET-A16 Rename the Default Price List | Selling Settings holds the new name |
 | SET-A17 Import a CSV with one unknown Item Group | Nothing imported; warning names the row and column |
 | SET-A18 Take five backups with Number of Backups = 3 | Three files remain, the newest three |
 | SET-A19 Restore a file that is not a POS backup | Refused; current data untouched |
@@ -548,6 +541,7 @@ Database and manual checks:
 | Not built | Add it when |
 |---|---|
 | Users, roles, permissions, login, app lock | A second person starts using the device and needs restricted access |
+| POS Profile: several register setups, payment modes per register, Allow in Returns, Item Groups per register | A second counter or device starts selling and needs its own warehouse, prices or payment modes |
 | Multi-currency, Currency Exchange | The store prices or accepts payment in a second currency |
 | Fiscal Year and the `.FY.` naming token | Numbering must follow a non-calendar tax year |
 | Tax Category, Tax Rule | Customers are added and tax depends on who is buying |

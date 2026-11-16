@@ -75,7 +75,7 @@ profit figure on the dashboard) is derived from it.
 | Item: Customer Details, Grant Commission | none | Dropped | Customers and sales persons excluded |
 | Item: manufacturing, inspection, website, hub, alternative item, weight, retain sample | none | Dropped | Outside the five areas |
 | Item Group: tree, Item Tax template | Same | Kept | |
-| Item Group: default price list, warehouse, accounts, supplier, website | none | Dropped | The POS Profile supplies price list and warehouse |
+| Item Group: default price list, warehouse, accounts, supplier, website | none | Dropped | Selling Settings supplies the price list and Stock Settings the warehouse |
 | UoM: name, Must be Whole Number | Same | Kept | |
 | UoM Conversion Factor (global list) | none | Dropped | Conversions are entered on the item |
 | Brand: name, description | Same | Kept | |
@@ -393,7 +393,7 @@ CREATE TABLE bin (
 | Item Naming By | `item_naming_by` | Item Code (or Naming Series) |
 | Default Item Group | `item_group` | Products |
 | Default Stock UOM | `stock_uom` | Nos |
-| Default Warehouse | `default_warehouse` | Stores |
+| Default Warehouse | `default_warehouse` | Stores (a non-group, enabled warehouse; the Cash Register sells from it, SET-R14) |
 | Default Valuation Method | `valuation_method` | FIFO (or Moving Average) |
 | Show Barcode Field | `show_barcode_field` | 1 |
 | Auto insert Price List rate if missing | `auto_insert_price_list_rate_if_missing` | 1 |
@@ -410,7 +410,10 @@ CREATE TABLE bin (
 
 **STK-R1 Warehouse.** Warehouses form a tree ("Warehouse > Room > Row > Shelf > Bin"). A group
 warehouse holds no stock and cannot be chosen on a transaction. A warehouse can become a group only
-while it has no ledger entries. A warehouse with ledger entries can be disabled, not deleted. Stock
+while it has no ledger entries. A warehouse with ledger entries can be disabled, not deleted. The
+Default Warehouse of Stock Settings is the Cash Register's: it cannot be made a group, disabled or
+deleted while it is the default, and renaming it renames it in Stock Settings, which keeps it by name
+(as SET-R13 does for the Default Price List). Stock
 balance is kept "for every distinct combination of Item and Warehouse". (Warehouse.)
 
 **STK-R2 Item Group.** A tree rooted at "All Item Groups". Names are unique across the whole tree. A
@@ -465,7 +468,7 @@ Different Units of Measure.)
    item detail panel then says which unit the price was stored for, so the mismatch is visible.
 3. If none and "Use prices from Default Price List as fallback" is on: repeat 1 and 2 on the default
    price list.
-4. Otherwise no price; the rate is 0 and must be typed if the POS Profile allows editing the rate.
+4. Otherwise no price; the rate is 0 and must be typed if POS Settings allows editing the rate.
 
 Two Item Prices for the same item, price list, unit and batch must not have overlapping validity.
 (Item Price; Price Lists; Selling Settings.)

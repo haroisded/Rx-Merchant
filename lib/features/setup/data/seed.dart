@@ -42,7 +42,7 @@ extension SetupSeed on AppDatabase {
         isGroup: const Value(1),
       ),
     );
-    final stores = await into(warehouse).insert(
+    await into(warehouse).insert(
       WarehouseCompanion.insert(name: 'Stores', parentId: Value(allWarehouses)),
     );
 
@@ -67,34 +67,17 @@ extension SetupSeed on AppDatabase {
       await into(uom).insert(UomCompanion.insert(name: name));
     }
 
-    final standardSelling = await into(priceList)
+    await into(priceList)
         .insert(PriceListCompanion.insert(name: 'Standard Selling'));
 
-    final cash = await into(modeOfPayment).insert(
-      ModeOfPaymentCompanion.insert(name: 'Cash', type: const Value('Cash')),
-    );
-    for (final name in ['Credit Card', 'Wire Transfer']) {
-      await into(modeOfPayment).insert(
-        ModeOfPaymentCompanion.insert(name: name, type: const Value('Bank')),
-      );
+    for (final (name, type) in const [
+      ('Cash', 'Cash'),
+      ('Credit Card', 'Bank'),
+      ('Wire Transfer', 'Bank'),
+    ]) {
+      await into(modeOfPayment)
+          .insert(ModeOfPaymentCompanion.insert(name: name, type: Value(type)));
     }
-
-    final mainCounter = await into(posProfile).insert(
-      PosProfileCompanion.insert(
-        name: 'Main Counter',
-        isDefault: const Value(1),
-        warehouseId: stores,
-        priceListId: standardSelling,
-      ),
-    );
-    await into(posProfilePayment).insert(
-      PosProfilePaymentCompanion.insert(
-        posProfileId: mainCounter,
-        modeOfPaymentId: cash,
-        isDefault: const Value(1),
-        allowInReturns: const Value(1),
-      ),
-    );
 
     for (final MapEntry(key: doctype, value: pattern)
         in defaultNamingSeries.entries) {

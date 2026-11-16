@@ -114,9 +114,9 @@
     "semantic_hash": ""
   },
   "lib/features/setup/ui/wizard_screen.dart": {
-    "mtime": 1794819918.4650643,
-    "seen": 1794821140.6123242,
-    "ast_hash": "9dd8b27b56836c57b14fde0b6ee065e8",
+    "mtime": 1794822487.7122495,
+    "seen": 1794822779.0892186,
+    "ast_hash": "4f44cff7e6ce13f2bcd786d97a5f3a3e",
     "semantic_hash": ""
   },
   "lib/features/stock/data/batch_table.dart": {
@@ -144,9 +144,9 @@
     "semantic_hash": ""
   },
   "test/app_test.dart": {
-    "mtime": 1794818843.7775743,
-    "seen": 1794821140.6123242,
-    "ast_hash": "17944ab50f882217996a1c74fd1c41ed",
+    "mtime": 1794822509.6590245,
+    "seen": 1794822779.0892186,
+    "ast_hash": "ad7b8e64169bd20e2d6e49ddc97dfbda",
     "semantic_hash": ""
   },
   "test/core/db/schema_test.dart": {
@@ -282,9 +282,9 @@
     "semantic_hash": ""
   },
   "lib/features/setup/data/backup.dart": {
-    "mtime": 1794818736.2362678,
-    "seen": 1794821140.6123242,
-    "ast_hash": "d067b69054f98b8e6026f78a4b3ad5c1",
+    "mtime": 1794822490.9198682,
+    "seen": 1794822779.0892186,
+    "ast_hash": "f634e49e7c91766933776e5807fb982a",
     "semantic_hash": ""
   },
   "lib/features/setup/data/country_info.dart": {
@@ -330,9 +330,9 @@
     "semantic_hash": ""
   },
   "lib/features/setup/ui/data_pages.dart": {
-    "mtime": 1794820912.7762222,
-    "seen": 1794821140.6123242,
-    "ast_hash": "1c95dfec64de8f9bade0821064e80e78",
+    "mtime": 1794822476.3254066,
+    "seen": 1794822779.0892186,
+    "ast_hash": "4429ac942abb0473c3edf9ea620ac13e",
     "semantic_hash": ""
   },
   "lib/features/setup/ui/form_kit.dart": {
@@ -384,9 +384,9 @@
     "semantic_hash": ""
   },
   "test/features/setup/data/import_backup_test.dart": {
-    "mtime": 1794818736.39657,
-    "seen": 1794821140.6123242,
-    "ast_hash": "e2b8b0296a29c20281b14440d4140651",
+    "mtime": 1794822553.3507798,
+    "seen": 1794822779.0892186,
+    "ast_hash": "4d92ad9a3a85122452e9337bb0fee2d7",
     "semantic_hash": ""
   },
   "test/features/setup/data/setup_db_test.dart": {

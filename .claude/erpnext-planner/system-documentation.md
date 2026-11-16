@@ -8,7 +8,7 @@
 | System | Rx Merchant, an offline Android point-of-sale app |
 | System version | 1.0.0+1 (`pubspec.yaml`) |
 | Date of issue | 2026-11-16 |
-| Status | Issued. Describes the system at the end of the Setup plan (R2): build steps SET-B1 to SET-B9, which are milestones M1, M4 and M9, on top of milestone M0. |
+| Status | Issued. Describes the system at the end of the Setup plan (R2): build steps SET-B1 to SET-B9, which are milestones M1, M4 and M9, on top of milestone M0, after the POS Profile was removed (issue 3). |
 | Issuing organization | The Rx Merchant project (one owner, who is also the developer) |
 | Prepared by | Claude (AI assistant), for the project owner |
 | Approval | Pending the project owner's review |
@@ -20,6 +20,7 @@
 |---|---|---|
 | 1 | 2026-11-15 | First issue. Covers milestone M0: project setup, database schema version 1, settings access, rounding and formatting, naming series, theme, adaptive shell, wizard gate, shared widgets. |
 | 2 | 2026-11-16 | Covers the Setup plan (R2), SET-B1 to B9: first-run wizard and seed, the Setup destination, settings pages, Currency, Price List, Naming Series, Mode of Payment, taxes, POS Profile, Data Import and Export, Backup and Restore, and "Restore from backup" on the wizard's first step. Sections 1, 3 to 6 and 8 to 13 updated; section 6.9 rewritten; section 7 changed only in 7.1, 7.2 and 7.6. |
+| 3 | 2026-11-16 | POS Profile removed: the app serves one owner with one register. Tables `pos_profile`, `pos_profile_payment` and `pos_profile_item_group` and the `pos_profile_id` columns of `pos_opening_entry`, `pos_closing_entry` and `sales_invoice` deleted from schema version 1 in place (no migration, by the owner's decision). The register's options moved to a new **POS Settings** page (`singles`); its warehouse, price list, taxes and letter head are the store defaults. The Default Price List of Selling Settings must stay enabled and follows a rename. Plans 00, 01, 02, 03 and 05 updated to match. Sections 0, 2.2, 3, 4, 5.3, 5.6, 5.7, 6.3, 6.9, 6.10, 7, 8.1, 9, 10, 11, 12 and 13 updated. |
 
 ### How this document follows ISO/IEC/IEEE 15289
 
@@ -101,9 +102,9 @@ At this issue the store can be set up completely. A first-run wizard creates the
 | `flt` | The rounding function every calculated value passes through before it is stored. Named after the same function in ERPNext's framework. |
 | Link field | A form field that picks one master record. |
 | Store Profile | The single record describing the store. It replaces ERPNext's Company. |
-| POS Profile | The configuration of the cash register: warehouse, price list, taxes, payment methods. |
+| POS Settings | The options of the one cash register (ERPNext keeps them on a POS Profile, which this app does not have): Default Mode of Payment, the POS configuration switches, Apply Discount On, Print Format, Print Heading, Terms and Conditions. |
 | Wizard gate | The rule that only the first-run wizard is reachable until setup is complete. |
-| Seed records | The records the wizard creates in one transaction (SET-R3): currency, warehouses, item groups, units, price list, payment modes, POS Profile, naming series, letter head and settings. |
+| Seed records | The records the wizard creates in one transaction (SET-R3): currency, warehouses, item groups, units, price list, payment modes, naming series, letter head and settings. |
 | Refusal | A save, delete or restore the app declines with a stated reason, such as "used elsewhere, disable it instead" (section 6.9). |
 | Sales Taxes and Charges Template | The ordered tax rows a sale copies (SET-R9, R10). |
 | Item Tax Template | Per-item overrides of a tax's rate, or Not Applicable (SET-R12). |
@@ -138,7 +139,7 @@ One person: the store owner. The owner sets the system up, maintains items and s
 ### 3.3 Intended operation (when complete)
 
 1. **First run.** A wizard collects the store name, country, currency and formats, then creates the default records.
-2. **Setup.** The owner defines payment methods, taxes, price lists and the POS Profile.
+2. **Setup.** The owner defines payment methods, taxes, price lists and the POS Settings of the register.
 3. **Stock.** The owner creates items and receives stock through Stock Entries and Stock Reconciliations.
 4. **Selling.** The owner opens a cash-register session, sells to walk-in buyers who pay in full, and closes the session.
 5. **Invoices.** Each sale is a Sales Invoice that can be printed, returned or cancelled.
@@ -152,7 +153,7 @@ Steps 1 and 2 of the flow exist:
 2. On a fresh install it shows the first-run wizard. Nothing else is reachable. On its first step **Restore from backup** brings in another device's data instead, and the app opens on the restored store.
 3. The owner picks the language, country and currency (the format preview shows how dates and numbers will look) and names the store.
 4. On the last step the owner taps **Open Cash Register** or **Add your first item**. The app writes every seed record and marks setup complete in one transaction, then lands on the chosen destination.
-5. In **Setup** the owner adjusts the store and formats, defines payment modes, taxes, tax templates, price lists and the POS Profile, edits naming series, imports or exports items, prices and barcodes, and backs up or restores the data.
+5. In **Setup** the owner adjusts the store and formats, defines payment modes, taxes, tax templates, price lists and POS Settings, edits naming series, imports or exports items, prices and barcodes, and backs up or restores the data.
 6. Register, Invoices, Stock and Dashboard still show "This screen arrives in a later milestone."
 
 ### 3.5 What the system deliberately leaves out
@@ -170,6 +171,7 @@ Taken from R1, section 2. Each exclusion applies to every screen and table.
 | Staff | No users, roles or login. |
 | Purchasing | No suppliers or purchase documents. Stock arrives through a Stock Entry of type Material Receipt. |
 | Fiscal year | Naming series and reports use the calendar year. |
+| POS Profile | One owner, one device, one register. The register sells from Stock Settings' Default Warehouse at Selling Settings' Default Price List, with the default tax template and default letter head; its other options are on POS Settings. Every enabled Mode of Payment is offered. |
 
 ---
 
@@ -188,7 +190,7 @@ Taken from R1, section 2. Each exclusion applies to every screen and table.
 | C-7 | Three hops at most: screen, provider, query or pure function. No repository interfaces, use-case classes or mapper layers. | Code structure (section 5) | Met |
 | C-8 | Numeric columns are `REAL`. Every calculated value is rounded by `flt` before it is stored. | Schema; `lib/core/numbers/flt.dart` | Met. The only calculation so far, the tax "Try it" panel, rounds every row with `flt`; it stores nothing. |
 | C-9 | Foreign keys are enforced | `PRAGMA foreign_keys = ON` at every open | Met, verified |
-| C-10 | Schema version 1 contains every table of every feature plan | 48 tables, 14 indexes | Met, verified |
+| C-10 | Schema version 1 contains every table of every feature plan | 45 tables, 14 indexes | Met, verified |
 | C-11 | ERPNext's labels and status names are used as is | Status values in the schema; localisation keys | Met for what exists |
 
 ### 4.2 Functional requirements implemented
@@ -197,16 +199,16 @@ Taken from R1, section 2. Each exclusion applies to every screen and table.
 |---|---|---|---|
 | SET-R1 | Until setup is complete the app shows only the first-run wizard. Finishing it writes all seed data in one transaction. Afterwards the wizard is unreachable. | `redirect` in `lib/router.dart`; `completeSetup` in `lib/features/setup/data/seed.dart` | `test/app_test.dart`, group "wizard gate (SET-R1)"; `setup_db_test.dart` |
 | SET-R2 | Default Currency and Currency Precision lock once any document is submitted; the form shows why | `anySubmittedDocument` in `setup_queries.dart`; `lockReason` in `settings_pages.dart` | `setup_db_test.dart` (SET-A13) |
-| SET-R3 | The wizard seeds currency, warehouse tree, item groups, 13 UoMs, Standard Selling, three payment modes, the Main Counter POS Profile, seven naming series, a letter head and Stock Settings | `completeSetup` | `setup_db_test.dart` (SET-A12) |
+| SET-R3 | The wizard seeds currency, warehouse tree, item groups, 13 UoMs, Standard Selling, three payment modes, seven naming series, a letter head and Stock Settings; POS Settings needs no seed | `completeSetup` | `setup_db_test.dart` (SET-A12) |
 | SET-R4 | Rounding follows the Rounding Method setting: Banker's Rounding (default) sends a midpoint to the nearest even digit; Commercial Rounding sends it away from zero. Binary float error must not change the result. | `flt` and `RoundingMethod` in `lib/core/numbers/flt.dart` | `test/core/numbers/flt_test.dart` |
 | SET-R5 | Numbers, currency, dates and times are shown, and typed, in the formats chosen in System Settings. Stored values never change. | `lib/core/numbers/format.dart` (`parseNumber` for typing), `Formats` and `formatsProvider` | `test/core/numbers/format_test.dart`; System Settings preview on the emulator |
 | SET-R6 | A naming series pattern resolves date parts from the posting date and keeps one counter per resolved prefix. A failed transaction does not consume a number. | `parseSeries` and `nextName` in `lib/core/naming/naming_series.dart` | `test/core/naming/naming_series_test.dart` |
 | SET-R7 | The first pattern of a document is its default; Update Series sets a counter and refuses a number below one already used | `saveNamingSeries`, `highestUsedNumber`, `updateSeries`; `naming_series_page.dart` | `setup_db_test.dart` |
-| SET-R8 | A disabled Mode of Payment cannot be chosen; one in use can be disabled but not deleted | Foreign keys through `deleteMaster`; `_refuseDisabled` | `setup_db_test.dart` |
+| SET-R8 | A disabled Mode of Payment cannot be chosen as the Default Mode of Payment; one in use can be disabled but not deleted | POS Settings lists enabled modes only; foreign keys through `deleteMaster` | `setup_db_test.dart` |
 | SET-R9 | Tax rows: order, Reference Row # rules, Actual and On Item Quantity, included-in-rate rules, one default template | `validateTaxRows`, `tryTaxes`, `removeTaxRow` in `logic/tax_template.dart`; `saveSalesTaxesTemplate` | `tax_template_test.dart` (SET-A8 to A11); `setup_db_test.dart` (SET-A15) |
 | SET-R12 | An Item Tax Template row overrides the matching tax's rate; Not Applicable removes the tax | `effectiveRate`; `saveItemTaxTemplate` | `tax_template_test.dart` (worked example 61.88) |
-| SET-R13 | A disabled Price List cannot be chosen; at least one stays enabled | `savePriceList`, `deleteMaster`, `_refuseDisabled` | `setup_db_test.dart` (SET-A14) |
-| SET-R14 | POS Profile: non-group warehouse; exactly one default payment when there are any; exactly one enabled default profile; no edit while its session is open | `savePosProfile`, `deletePosProfile` | `setup_db_test.dart` (SET-A16 and two more) |
+| SET-R13 | The Default Price List of Selling Settings (the register's) exists and stays enabled, which keeps at least one enabled; renaming it renames it in Selling Settings; only enabled lists can be the default | `savePriceList`, `_checkPriceLists` (also run by `deleteMaster`); `SellingSettingsPage` | `setup_db_test.dart` (SET-A14, SET-A16) |
+| SET-R14 | POS Settings: Default Mode of Payment (Cash), the eight configuration switches, Action on New Invoice, Apply Discount On, Print Format, Print Heading, Terms and Conditions | `PosSettings` in `singles.dart`; `PosSettingsPage` in `settings_pages.dart` | `singles_test.dart` (defaults, blank "None"); saving goes through `SinglesForm`, tested in `app_test.dart` |
 | SET-R15 | Monthly Sales Target on Store Profile; it blocks nothing | `StoreProfilePage` in `settings_pages.dart` (money field) | Field seen on the emulator; saving goes through `SinglesForm`, tested in `app_test.dart`. The dashboard use comes with M7. |
 | SET-R16 | Data Import of Item, Item Price, Item Barcode: template, every row checked first, problems by row and column, one transaction, a result log; Data Export of the same columns | `logic/data_import.dart`, `data/data_import_db.dart`, `ui/data_pages.dart` | `data_import_test.dart`; `import_backup_test.dart` (SET-A17, 200 items) |
 | SET-R17 | Backup by `VACUUM INTO`, named `{abbr}-backup-{YYYYMMDD-HHMMSS}.sqlite`, newest Number of Backups kept, Export outside the app | `takeBackup`, `listBackups` in `data/backup.dart`; `BackupsPage` | `import_backup_test.dart` (SET-A18); emulator. The automatic backup on POS Closing waits for M5. |
@@ -234,14 +236,14 @@ Taken from R1, section 2. Each exclusion applies to every screen and table.
 | SET-A11 | "Try it" on 1,000: 25; 80; 1.60; 21.60; 10 | Pass |
 | SET-A12 | After the wizard every SET-R3 record exists and `setup_complete` is 1 | Pass |
 | SET-A13 | A submitted document locks Default Currency and Currency Precision | Pass |
-| SET-A14 | Disabling the only enabled Price List is refused | Pass |
+| SET-A14 | Disabling or deleting the Default Price List is refused, also while another list is enabled | Pass |
 | SET-A15 | A second default template clears the first | Pass |
-| SET-A16 | Editing a POS Profile during an open session is refused | Pass |
+| SET-A16 | Renaming the Default Price List leaves Selling Settings holding the new name | Pass |
 | SET-A17 | A CSV with one unknown Item Group imports nothing and names the row and column | Pass |
 | SET-A18 | Five backups with Number of Backups = 3 leave the newest three | Pass |
 | SET-A19 | Restoring a file that is not a backup is refused; data untouched | Pass |
 | SET-A20 | Wizard and every Setup page on a phone and a tablet in both orientations | Pass on emulators (section 10.5) |
-| SET-B1 to B9 runnable results | Wizard lands on the shell; formats change the preview; Try it reproduces the worked examples; a second profile can be made default; 200 items import; back up, wipe, restore brings the data back | Pass (sections 10.2, 10.5) |
+| SET-B1 to B9 runnable results | Wizard lands on the shell; formats change the preview; Try it reproduces the worked examples; POS Settings saves and the Default Price List cannot be disabled; 200 items import; back up, wipe, restore brings the data back | Pass (sections 10.2, 10.5) |
 
 ### 4.4 Requirements not yet implemented
 
@@ -251,7 +253,7 @@ Taken from R1, section 2. Each exclusion applies to every screen and table.
 | M1 Setup A | First-run wizard, Store Profile, System Settings, Global Defaults, Currency, Price List, Naming Series | **Done** |
 | M2 Stock A | Warehouse, Item Group, UoM, Brand, Item, Item Price, Stock Settings | Not started |
 | M3 Stock B | Stock ledger engine, Stock Entry, Stock Reconciliation, core stock reports | Not started |
-| M4 Setup B | Mode of Payment, taxes, POS Profile, Selling Settings | **Done** |
+| M4 Setup B | Mode of Payment, taxes, POS Settings, Selling Settings | **Done** |
 | M5 Cash Register | Sessions, POS screen, totals engine, payment, submit | Not started |
 | M6 Invoices | List, detail, print formats, PDF, thermal printing, returns, cancel | Not started |
 | M7 Dashboard | Cards, charts, sales goal, reports | Not started |
@@ -334,7 +336,7 @@ lib/
       status_chip.dart          document status indicator
       report_table.dart         report table and CSV export
   features/
-    setup/data/setup.drift      14 tables
+    setup/data/setup.drift      11 tables
     setup/data/country_info.dart  bundled country data
     setup/data/seed.dart        completeSetup: the wizard's seed transaction
     setup/data/setup_queries.dart reads and writes of the Setup pages, locks, naming admin
@@ -346,10 +348,9 @@ lib/
     setup/ui/wizard_screen.dart first-run wizard
     setup/ui/setup_screen.dart  Setup workspace and page routing
     setup/ui/form_kit.dart      form page, problems dialog, field grid, master list
-    setup/ui/settings_pages.dart Store Profile, System Settings, Global Defaults, Selling Settings
+    setup/ui/settings_pages.dart Store Profile, System Settings, Global Defaults, Selling Settings, POS Settings
     setup/ui/simple_masters.dart Currency, Mode of Payment, Tax, Price List
     setup/ui/tax_template_pages.dart Sales Taxes and Charges Template, Item Tax Template
-    setup/ui/pos_profile_page.dart POS Profile
     setup/ui/naming_series_page.dart Naming Series
     setup/ui/data_pages.dart    Data Import, Data Export, Backups
     stock/data/stock.drift      22 tables, 9 indexes
@@ -358,15 +359,15 @@ lib/
     pos/data/pos.drift          8 tables, 5 indexes
     invoices/data/invoices.drift 3 tables
   l10n/
-    app_en.arb                  227 messages, English
+    app_en.arb                  216 messages, English
     app_localizations*.dart     generated by gen-l10n
 assets/
   country_info.json             250 countries (R11)
-test/                           140 tests (section 10.2)
+test/                           141 tests (section 10.2)
 android/                        Android host project
 ```
 
-Size at this issue: 6,499 lines of hand-written Dart under `lib/` (5,254 of them in the Setup feature), 644 lines of schema, 2,021 lines of tests. The generated database code is unchanged.
+Size at this issue: 6,025 lines of hand-written Dart under `lib/` (4,738 of them in the Setup feature), 597 lines of schema, 2,027 lines of tests. The generated database code was regenerated for the smaller schema.
 
 ### 5.4 Technology
 
@@ -435,7 +436,7 @@ If the settings cannot be read, `/loading` shows "The database could not be open
 | `/stock` | Stock placeholder | Branch 3 |
 | `/dashboard` | Dashboard placeholder | Branch 4 |
 | `/setup` | Setup workspace | Branch 5 |
-| `/setup/:page` | A Setup page, or a master's list (`page` is a slug such as `pos-profile`) | Expanded: the workspace stays on the left and the move does not animate |
+| `/setup/:page` | A Setup page, or a master's list (`page` is a slug such as `pos-settings`) | Expanded: the workspace stays on the left and the move does not animate |
 | `/setup/:page/:id` | A master's form; `id` is the record id or `new` | Back returns to the list |
 
 The five destinations are branches of one `StatefulShellRoute.indexedStack`, so each keeps its own navigation state when the owner switches between them.
@@ -444,11 +445,11 @@ The five destinations are branches of one `StatefulShellRoute.indexedStack`, so 
 
 | # | Decision | Reason | Cost |
 |---|---|---|---|
-| D-1 | Tables are written as SQL in `.drift` files, copied from the plans | The plans define the schema as SQL; copying avoids transcription errors across 48 tables | Flag columns are `int` 0/1 in Dart, not `bool` |
-| D-2 | All 48 tables are created in schema version 1 | Later milestones add behaviour without a schema change | Empty tables exist from the first run |
+| D-1 | Tables are written as SQL in `.drift` files, copied from the plans | The plans define the schema as SQL; copying avoids transcription errors across 45 tables | Flag columns are `int` 0/1 in Dart, not `bool` |
+| D-2 | All 45 tables are created in schema version 1 | Later milestones add behaviour without a schema change | Empty tables exist from the first run |
 | D-3 | The `batch` table is declared in Dart, not in `stock.drift` | A drift-file table named `batch` generates a getter that collides with drift's own `batch()` method | One table lives in a different file; `drift_dev` prints one warning (P-2) |
 | D-4 | `series.current` is quoted in SQL; its row class is named `SeriesRow` | `CURRENT` is an SQL keyword; drift's default class name was `Sery` | None |
-| D-5 | `setup.drift` and `stock.drift` import each other | Their tables reference each other; `drift_dev` accepts the cycle | None found |
+| D-5 | `stock.drift` imports `setup.drift`; `setup.drift` imports nothing | Until issue 3 they imported each other because `pos_profile` pointed at stock and invoice tables; with it gone the cycle ended | None |
 | D-6 | `SystemSettings.roundingMethod` returns the stored text; `RoundingMethod.fromSetting` converts it | Keeps settings access free of a dependency on the numbers code | One conversion at each use |
 | D-7 | Date and time formatting is pinned to the `en_US` locale | Stored date text must stay ASCII digits whatever the app language | Displayed dates never use native digits |
 | D-8 | A `/loading` route is shown while settings are read | Without it a set-up store would flash the wizard at every launch | One extra route |
@@ -470,6 +471,10 @@ The five destinations are branches of one `StatefulShellRoute.indexedStack`, so 
 | D-24 | The database file is drift_flutter's default, `rx_merchant.sqlite` in the app documents directory; `backup.dart` reads the same path | No change to `AppDatabase` | The two must stay in step |
 | D-25 | Data Import also applies three stock rules: an Item Price from Standard Selling Rate (STK-R5), the EAN check digit (STK-R8), no overlapping price validity (STK-R10) | An import must not write data the stock plan forbids | Beyond SET-R16's list of checks |
 | D-26 | A typed number must have groups of the format's size; a format without decimals takes the other mark as decimal point | So "7.5" in `#.###` is refused instead of read as 75 | Typing "1,5" in `#,###.##` is refused rather than guessed |
+| D-27 | No POS Profile. The register's warehouse, price list, taxes and letter head are the store defaults (Stock Settings, Selling Settings, the default tax template, the default Letter Head); its own options are a `singles` page, POS Settings, with ERPNext's POS Profile field names as keys | One owner with one register has no profile to choose; a list of one record, a default-profile rule and a session lock were overhead | A second register would need the profile back (R2 §8) |
+| D-28 | All enabled Modes of Payment are offered for sales and refunds; one Default Mode of Payment. "Allow in Returns" and the Item Groups filter are dropped | Owner's decision; both exist to tell registers apart | A refund can go to any enabled mode |
+| D-29 | Schema version 1 was edited in place, without a migration | Owner's decision; nothing had been sold yet | Databases and backups made before issue 3 do not match the schema (P-13) |
+| D-30 | The Default Price List is kept by name in Selling Settings; `savePriceList` carries a rename across, and `_checkPriceLists` refuses a save or delete that leaves it missing or disabled | It replaces the foreign key the POS Profile had to its price list | The check reads Selling Settings on every price list save and delete |
 
 ---
 
@@ -509,12 +514,14 @@ extension SinglesAccess on AppDatabase {
 - `watchSingle` emits the same map again whenever the `singles` table changes.
 - `writeSingle` upserts each entry in one batch. A `bool` is stored as `'1'` or `'0'`. `null` clears the key, so its default applies again. Any other value is stored as its text.
 
-Six classes give typed access with defaults: `StoreProfile`, `SystemSettings`, `GlobalDefaults`, `SellingSettings`, `StockSettings`, `PrintSettings`. Each wraps the map, names its doctype in a `doctype` constant, and has one getter per key. A missing key returns the default, so adding a setting needs no schema change. The keys and defaults are listed in section 7.6.
+Seven classes give typed access with defaults: `StoreProfile`, `SystemSettings`, `GlobalDefaults`, `SellingSettings`, `PosSettings`, `StockSettings`, `PrintSettings`. Each wraps the map, names its doctype in a `doctype` constant, and has one getter per key. A missing key returns the default, so adding a setting needs no schema change. The keys and defaults are listed in section 7.6.
 
 Two defaults are derived rather than fixed:
 
 - `StoreProfile.abbr` defaults to the initials of the store name, also when the stored value is blank.
 - `PrintSettings.rawCharsPerLine` defaults to 48 for 80mm paper and 32 for 58mm paper.
+
+`PosSettings.selectPrintHeading` and `tcName` read a blank value (the form's "None") as null.
 
 ### 6.4 Providers: `lib/core/db/providers.dart`
 
@@ -627,12 +634,12 @@ extension NamingSeries on AppDatabase {
 |---|---|
 | `country_info.dart` | `CountryInfo` (name, code, currency, symbol, fraction, fraction units, smallest fraction, date and number format, `currencyPrecision`, `toCurrency()`); `loadCountryInfo()` decodes the 57 KB asset directly (Flutter's `loadString` would hand it to another isolate). |
 | `seed.dart` | `completeSetup(language, country, currencyOf, storeName, abbr)`: every SET-R3 record and the settings keys, then `setup_complete`, in one transaction. `defaultNamingSeries` holds the seven default patterns. |
-| `setup_queries.dart` | `anySubmittedDocument` (SET-R2), `sessionOpen`; `upsert`, `deleteMaster`; saves for Currency, Mode of Payment, Tax, Price List, both tax templates and POS Profile, each with its rule; `posProfileLines`, `itemTaxTemplateRows`, `salesTaxesTemplateRows`; `saveNamingSeries`, `highestUsedNumber`, `updateSeries`; `addCurrency`. Updates set `modified_at`. |
+| `setup_queries.dart` | `anySubmittedDocument` (SET-R2), `sessionOpen`; `upsert`, `deleteMaster`; saves for Currency, Mode of Payment, Tax, Price List and both tax templates, each with its rule; `itemTaxTemplateRows`, `salesTaxesTemplateRows`; `saveNamingSeries`, `highestUsedNumber`, `updateSeries`; `addCurrency`. Updates set `modified_at`. |
 | `refusal.dart` | `Refusal` codes and `RefusedException`; `refuseOnConstraint` turns SQLite UNIQUE / PRIMARY KEY failures (2067, 1555) into `duplicateName` and FOREIGN KEY failures (787) into `referenced`, also when drift wraps them in `DriftRemoteException`. |
 | `data_import_db.dart` | `importLookups`, `runImport` (one transaction; returns a log), `exportRows` (template header and one row per record). |
 | `backup.dart` | `databasePath`, `backupDirectory`, `listBackups`, `takeBackup` (`VACUUM INTO`, then prune), `checkRestorable`, `restoreDatabase` (the safety backup is skipped when setup was never finished: a fresh install holds nothing to keep; optional `target` and `backupDir` for tests). |
 
-Post-conditions guard the rules that span records: after a Price List save or any delete, at least one Price List is enabled; after a POS Profile save or delete, exactly one enabled profile is the default. A failure rolls the transaction back.
+A post-condition guards the rule that spans records: after a Price List save or any master delete, the Default Price List named in Selling Settings exists and is enabled (`Refusal.defaultPriceList`). A Price List save that renames the default list first writes the new name into Selling Settings. A failure rolls the transaction back.
 
 **Logic (`logic/`), pure Dart.**
 
@@ -654,16 +661,15 @@ Post-conditions guard the rules that span records: after a Price List save or an
 | `wizard_screen.dart` | Language (with **Restore from backup** below the list), Region (country and currency pickers, format preview; the device's country preselected), Store (abbreviation suggested), Done. Compact: one step per screen; wider: a 560dp card. |
 | `setup_screen.dart` | `setupPage(slug, id)` and `SetupScreen` (a `ListDetailPane` of `SetupHome` and the page). `SetupHome` lists six groups; pages owned by other plans are shown disabled. |
 | `form_kit.dart` | `FormPage`, `SectionHeading`, `FieldGrid`, `LockNote`, `MasterList`, `showProblems`, `confirm`, `attempt` (runs a save and shows a refusal or any other error), `refusalText`. |
-| `settings_pages.dart` | `SinglesForm` and its field spec; Store Profile, System Settings (live preview), Global Defaults, Selling Settings; `countryInfoProvider`, `submittedProvider`. |
+| `settings_pages.dart` | `SinglesForm` and its field spec; Store Profile, System Settings (live preview), Global Defaults, Selling Settings, POS Settings (Payment Methods, Configurations, Print Settings; choices of enabled modes, print headings and enabled terms read first); `countryInfoProvider`, `submittedProvider`. |
 | `simple_masters.dart` | Currency (live amount preview), `NamedMasterForm`; Mode of Payment, Tax, Price List lists and forms. |
 | `tax_template_pages.dart` | Sales Taxes and Charges Template (rows, row editor, Try it), Item Tax Template; `NumberField`. |
-| `pos_profile_page.dart` | POS Profile list and form, payment row editor. |
 | `naming_series_page.dart` | Patterns per document, next-name example, Update Series. |
 | `data_pages.dart` | Data Import, Data Export, Backups; `pickBackupCopy` (Android file picker, then a private copy) and `restoreAndReopen` (restore, then reopen the database whatever happened), shared by the Backups page and the wizard. |
 
 ### 6.10 Localisation: `lib/l10n/`
 
-`app_en.arb` holds 227 English messages: the shell and widget labels of issue 1 and about 200 Setup labels, field names (ERPNext's words), refusal and problem messages. `languageName` holds each language's own name for the language lists. `l10n.yaml` sets `nullable-getter: false`, so `AppLocalizations.of(context)` needs no null check. English is the only locale.
+`app_en.arb` holds 216 English messages: the shell and widget labels of issue 1 and about 200 Setup labels, field names (ERPNext's words), refusal and problem messages. `languageName` holds each language's own name for the language lists. `l10n.yaml` sets `nullable-getter: false`, so `AppLocalizations.of(context)` needs no null check. English is the only locale.
 
 ---
 
@@ -694,12 +700,12 @@ Post-conditions guard the rules that span records: after a Price List save or an
 
 | File | Tables | Indexes |
 |---|---|---|
-| `lib/features/setup/data/setup.drift` | 14 | 0 |
+| `lib/features/setup/data/setup.drift` | 11 | 0 |
 | `lib/features/stock/data/stock.drift` | 22 | 9 |
 | `lib/features/stock/data/batch_table.dart` | 1 (`batch`) | 0 |
 | `lib/features/pos/data/pos.drift` | 8 | 5 |
 | `lib/features/invoices/data/invoices.drift` | 3 | 0 |
-| **Total** | **48** | **14** |
+| **Total** | **45** | **14** |
 
 These files are the authoritative definition. The catalogue below summarises them and names the key columns; it does not repeat every column.
 
@@ -707,7 +713,7 @@ These files are the authoritative definition. The catalogue below summarises the
 
 **ts** marks a table with `created_at` and `modified_at`.
 
-#### Setup (14)
+#### Setup (11)
 
 | Table | Purpose | Keys and references |
 |---|---|---|
@@ -722,9 +728,6 @@ These files are the authoritative definition. The catalogue below summarises the
 | `item_tax_template` ts | Per-item tax rate overrides | U `title` |
 | `item_tax_template_row` | One override: tax and rate | `template_id` → `item_tax_template`, `tax_id` → `tax`; U (`template_id`, `tax_id`) |
 | `price_list` ts | Selling price lists | U `name` |
-| `pos_profile` ts | Cash register configuration: warehouse, price list, taxes, discount rules, print settings | U `name`; → `warehouse`, `price_list`, `sales_taxes_template`, `letter_head`, `print_heading`, `terms_and_conditions`; `apply_discount_on` is `Grand Total` or `Net Total` |
-| `pos_profile_payment` | Payment methods allowed on a profile | → `pos_profile`, `mode_of_payment`; U (`pos_profile_id`, `mode_of_payment_id`) |
-| `pos_profile_item_group` | Item groups shown on a profile | PK (`pos_profile_id`, `item_group_id`) |
 
 #### Stock (23)
 
@@ -758,11 +761,11 @@ These files are the authoritative definition. The catalogue below summarises the
 
 | Table | Purpose | Keys and references |
 |---|---|---|
-| `pos_opening_entry` ts | A cash register session | U `name`; `docstatus`; `status` is `Draft`, `Open`, `Closed` or `Cancelled`; → `pos_profile` |
+| `pos_opening_entry` ts | A cash register session | U `name`; `docstatus`; `status` is `Draft`, `Open`, `Closed` or `Cancelled`; at most one `Open` |
 | `pos_opening_entry_detail` | Opening amount per payment method | → `pos_opening_entry`, `mode_of_payment`; U (`pos_opening_entry_id`, `mode_of_payment_id`) |
-| `pos_closing_entry` ts | The close of a session, with totals | U `name`; `docstatus`; → `pos_opening_entry`, `pos_profile` |
+| `pos_closing_entry` ts | The close of a session, with totals | U `name`; `docstatus`; → `pos_opening_entry` |
 | `pos_closing_entry_detail` | Expected and counted amount per payment method | → `pos_closing_entry`, `mode_of_payment`; U (`pos_closing_entry_id`, `mode_of_payment_id`) |
-| `sales_invoice` ts | A sale or a return, with totals, discount, rounding and print settings | U `name`; `docstatus`; `status` is `Draft`, `Paid`, `Return`, `Credit Note Issued` or `Cancelled`; → `pos_profile`, `pos_opening_entry`, `warehouse`, `price_list`, `sales_taxes_template`, `letter_head`, `print_heading`, `terms_and_conditions`; `return_against_id` → `sales_invoice` |
+| `sales_invoice` ts | A sale or a return, with totals, discount, rounding and print settings | U `name`; `docstatus`; `status` is `Draft`, `Paid`, `Return`, `Credit Note Issued` or `Cancelled`; → `pos_opening_entry`, `warehouse`, `price_list`, `sales_taxes_template`, `letter_head`, `print_heading`, `terms_and_conditions`; `return_against_id` → `sales_invoice` |
 | `sales_invoice_item` | Item rows of an invoice | → `sales_invoice`, `item`, `uom`, `item_tax_template`, `warehouse`; `sales_invoice_item_id` → `sales_invoice_item` (the row a return row refers to) |
 | `sales_invoice_tax` | Tax rows of an invoice | → `sales_invoice`, `tax` |
 | `sales_invoice_payment` | Amount paid per payment method | → `sales_invoice`, `mode_of_payment` |
@@ -836,10 +839,29 @@ Stored in `singles` under the doctype shown. A key that is absent takes the defa
 
 | Key | Default |
 |---|---|
-| `selling_price_list` | `Standard Selling` |
+| `selling_price_list` | `Standard Selling` (the register's price list; must name an enabled list) |
 | `fallback_to_default_price_list` | 0 |
 | `editable_price_list_rate` | 0 |
 | `validate_selling_price` | 0 |
+
+**POS Settings**
+
+| Key | Default |
+|---|---|
+| `default_mode_of_payment` | `Cash` |
+| `hide_images` | 0 |
+| `hide_unavailable_items` | 0 |
+| `allow_rate_change` | 0 |
+| `auto_add_item_to_cart` | 0 |
+| `allow_discount_change` | 0 |
+| `validate_stock_on_save` | 0 |
+| `set_grand_total_to_default_mop` | 1 |
+| `print_receipt_on_order_complete` | 0 |
+| `action_on_new_invoice` | `Always Ask` |
+| `apply_discount_on` | `Grand Total` |
+| `print_format` | `POS Receipt` |
+| `select_print_heading` | none (blank reads as none) |
+| `tc_name` | none (blank reads as none) |
 
 **Stock Settings**
 
@@ -881,7 +903,7 @@ Stored in `singles` under the doctype shown. A key that is absent takes the defa
 
 ### 7.7 Migration policy
 
-The schema is at version 1 and no data exists outside test devices. No migration code and no schema snapshot exist yet. Before any change to a table after the app holds real data: export a schema snapshot with `dart run drift_dev make-migrations`, raise `schemaVersion`, write the step, and run the generated migration tests.
+The schema is at version 1 and no data exists outside test devices. No migration code and no schema snapshot exist yet. Issue 3 changed version 1 in place, which this policy allows while no real data exists; databases from before it must be cleared (P-13). Before any change to a table after the app holds real data: export a schema snapshot with `dart run drift_dev make-migrations`, raise `schemaVersion`, write the step, and run the generated migration tests.
 
 ---
 
@@ -930,7 +952,7 @@ Each destination shows an outlined icon, and a filled one when selected.
 | Group | Pages |
 |---|---|
 | Store | Store Profile, System Settings, Global Defaults, Currency |
-| Selling | POS Profile, Mode of Payment, Price List, Selling Settings |
+| Selling | POS Settings, Mode of Payment, Price List, Selling Settings |
 | Taxes | Tax, Sales Taxes and Charges Template, Item Tax Template |
 | Stock | Stock Settings (disabled: later milestone) |
 | Printing | Print Settings, Letter Head, Print Heading, Terms and Conditions (disabled: later milestone) |
@@ -1006,7 +1028,7 @@ Run from the repository root.
 | 1. Fetch packages | `flutter pub get` | Packages resolved; localisation code generated |
 | 2. Generate database code | `dart run build_runner build` | `lib/core/db/app_database.g.dart` written; one warning (P-2) |
 | 3. Check | `flutter analyze` | `No issues found!` |
-| 4. Test | `flutter test` | `All tests passed!` (140) |
+| 4. Test | `flutter test` | `All tests passed!` (141) |
 | 5. Build | `flutter build apk --release` | `build/app/outputs/flutter-apk/app-release.apk` |
 | 6. Install | `adb install -r build/app/outputs/flutter-apk/app-release.apk` | `Success` |
 
@@ -1044,8 +1066,9 @@ The release build is signed with the debug key, as the Flutter template sets it.
 | `a425ed9` | 2026-11-15 00:54 +08:00 | First Commit (the `flutter create` template) |
 | `fafec23` | 2026-11-15 01:12 +08:00 | Added Claude Directory (plans and agent skills) |
 | `97bfd33` | 2026-11-15 09:49 +08:00 | Milestone M0 and its session report |
+| `d5b4836` | 2026-11-16 18:00 +08:00 | The Setup plan (issue 2) and its session report |
 
-On the date of issue, all of the Setup plan is in the working tree and **not yet committed**. The project owner commits. The session report for this issue (R10) lists every added, changed and deleted file.
+On the date of issue, the POS Profile removal (issue 3) is in the working tree and **not yet committed**. The project owner commits. The session report for this issue (R10) lists every added, changed and deleted file.
 
 ---
 
@@ -1056,13 +1079,13 @@ On the date of issue, all of the Setup plan is in the working tree and **not yet
 | Check | Result |
 |---|---|
 | Static analysis, `flutter analyze` | No issues |
-| Formatting, `dart format` | All 56 files formatted |
+| Formatting, `dart format` | All 55 files formatted |
 | Fixes, `dart fix --dry-run` | Nothing to fix |
-| Automated tests, `flutter test` | 140 of 140 pass |
-| Release build | Builds; 75.3 MB APK |
+| Automated tests, `flutter test` | 141 of 141 pass |
+| Release build | Builds; 75.0 MB APK |
 | Release manifest | No `INTERNET` permission |
-| Phone emulator, 360dp wide | Wizard, Setup pages, backup / wipe / restore round trip |
-| Tablet emulator | Wizard card; Setup in one pane (portrait) and two panes (landscape); side-sheet row editor |
+| Phone emulator, 360dp wide | Issue 3: fresh install, wizard, POS Settings saves, Default Price List refusal. Issue 2: wizard, Setup pages, backup / wipe / restore round trip |
+| Tablet emulator | Issue 2 only: wizard card; Setup in one pane (portrait) and two panes (landscape); side-sheet row editor. Not repeated at issue 3 |
 | Real device | **Not tested** |
 
 All checks were run on 2026-11-16, after the last code change. Issue 1's checks (launcher label, 411dp phone, `aapt2` badging) were not repeated.
@@ -1071,9 +1094,9 @@ All checks were run on 2026-11-16, after the last code change. Issue 1's checks 
 
 | File | Tests | Covers |
 |---|---|---|
-| `test/app_test.dart` | 13 | Wizard gate: fresh install shows only the wizard, with Restore from backup; Language, Region (device country preselected), Store (abbreviation suggested), Done lands on the Cash Register; a set-up store never sees the wizard. Shell: bottom bar with five destinations in order; boundaries at 599, 600, 839 and 840dp; switching destinations; rotation. Setup: workspace then pushed page on compact (later-milestone links disabled); workspace beside the page on expanded; a settings page saves to `singles`. |
-| `test/core/db/schema_test.dart` | 4 | Exactly the 48 tables; the 14 indexes; foreign keys on; a child row with a missing parent is refused. |
-| `test/core/db/singles_test.dart` | 13 | Defaults of all six settings pages; derived defaults, including a blank abbreviation; write then read; one row per key; clearing a key; the stream emits after a write; the same field under two doctypes stays separate. |
+| `test/app_test.dart` | 14 | Wizard gate: fresh install shows only the wizard, with Restore from backup; Language, Region (device country preselected), Store (abbreviation suggested), Done lands on the Cash Register; a set-up store never sees the wizard. Shell: bottom bar with five destinations in order; boundaries at 599, 600, 839 and 840dp; switching destinations; rotation. Setup: workspace then pushed page on compact (later-milestone links disabled); workspace beside the page on expanded; a settings page saves to `singles`; POS Settings does not save back a stored mode that is no longer offered. |
+| `test/core/db/schema_test.dart` | 4 | Exactly the 45 tables; the 14 indexes; foreign keys on; a child row with a missing parent is refused. |
+| `test/core/db/singles_test.dart` | 15 | Defaults of all seven settings pages; derived defaults, including a blank abbreviation; POS Settings' blank "None" read as none; write then read; one row per key; clearing a key; the stream emits after a write; the same field under two doctypes stays separate. |
 | `test/core/numbers/flt_test.dart` | 13 | SET-A1 to A3; negative midpoints; whole-number midpoints; zero; integers; nine decimals; the setting-to-method mapping. |
 | `test/core/numbers/format_test.dart` | 17 | SET-A4; all six number formats; precision; padding; negative values; a negative value that rounds to zero; currency symbol placement; all date and time formats; storage text round trip; `parseNumber` round trip, plain typing, mistyped decimal marks, non-numbers. |
 | `test/core/naming/naming_series_test.dart` | 11 | SET-A5 to A7; date parts; hashes without a dot; suffix; a counter past its digit count; a failed transaction does not consume a number. |
@@ -1084,9 +1107,9 @@ All checks were run on 2026-11-16, after the last code change. Issue 1's checks 
 | `test/core/widgets/report_table_test.dart` | 5 | CSV header and rows; quoting; empty cells; headers, cells and export action; sideways scroll. |
 | `test/features/setup/logic/tax_template_test.dart` | 13 | SET-A8 to A11; included-reference rule; missing tax; SET-R12 worked example (61.88); row removal renumbering; stored type values. |
 | `test/features/setup/logic/data_import_test.dart` | 9 | Header matching; blank rows; SET-A17 problem position; insert and update checks; barcode ownership; EAN / UPC; price validity overlap; `validBarcode`. |
-| `test/features/setup/data/setup_db_test.dart` | 11 | SET-A12; a failed wizard writes nothing; SET-A13 to A16; delete of a used master refused; duplicate name; default profile and payment rules; group warehouse; disabled choices; Update Series below a used number and the next name; naming series order. |
+| `test/features/setup/data/setup_db_test.dart` | 9 | SET-A12; a failed wizard writes nothing; SET-A13; SET-A14 (Default Price List cannot be disabled or deleted, even beside another enabled list; can be once another is the default); SET-A15; SET-A16 (a rename follows into Selling Settings); delete of a used master refused; duplicate name; Update Series below a used number and the next name; naming series order. |
 | `test/features/setup/data/import_backup_test.dart` | 7 | 200 items imported with price and barcode, exported, updated; SET-A17 at database level; Item Price and Item Barcode insert and update; SET-A18; SET-A19; restore onto a fresh install takes no safety backup, onto a set-up store one; Number of Backups below 1. |
-| **Total** | **140** | |
+| **Total** | **141** | |
 
 Database tests run against an in-memory SQLite database with the real schema. Widget tests run the real widgets inside the app's theme and localisation. No test uses a mock.
 
@@ -1099,7 +1122,8 @@ Database tests run against an in-memory SQLite database with the real schema. Wi
 | SET-R5, SET-A4 | `format_test.dart` |
 | SET-R6, SET-A5 to A7 | `naming_series_test.dart` |
 | SET-R1, R3, A12 | `setup_db_test.dart`; `app_test.dart` wizard walk-through |
-| SET-R2, A13; R7; R8; R13, A14; R9, A15; R14, A16 | `setup_db_test.dart` |
+| SET-R2, A13; R7; R8; R13, A14, A16; R9, A15 | `setup_db_test.dart` |
+| SET-R14 | `singles_test.dart`; `app_test.dart` (a settings page saves to `singles`) |
 | SET-R9, A8 to A11; R12 | `tax_template_test.dart` |
 | SET-R16, A17 | `data_import_test.dart`, `import_backup_test.dart` |
 | SET-R17, A18; R18, A19 | `import_backup_test.dart`; emulator round trip (10.5) |
@@ -1110,7 +1134,7 @@ Database tests run against an in-memory SQLite database with the real schema. Wi
 
 ### 10.4 Build verification
 
-- `flutter build apk --release` completed and wrote `app-release.apk`, 75.3 MB (68.9 MB at issue 1).
+- `flutter build apk --release` completed and wrote `app-release.apk`, 75.0 MB (75.3 MB at issue 2, 68.9 MB at issue 1).
 - The merged release manifest contains `android.permission.INTERNET` zero times. Its `uses-permission` entries are unchanged from issue 1: `ACCESS_NETWORK_STATE`, `CAMERA`, `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`.
 
 ### 10.5 Device verification
@@ -1127,6 +1151,14 @@ Emulators only, started with `-gpu swiftshader_indirect` (P-1). Issue 2 checks:
 
 Logcat showed no Flutter error on either device. Four defects found in these checks were fixed before issue (section 10.6).
 
+Issue 3 checks, phone only, after a cold boot, the old app uninstalled and the issue 3 APK installed:
+
+| Device | Window | Observed |
+|---|---|---|
+| `Medium_Phone_API_36.1` | 360dp wide | Wizard: United States, USD, store "Test Store"; the last step says sales are tax-free "until a Sales Taxes and Charges Template is made the Default". Setup › Selling lists POS Settings, Mode of Payment, Price List, Selling Settings. POS Settings shows Payment Methods (Default Mode of Payment: Cash), Configurations (eight switches, Set Grand Total to Default Payment Method on, Always Ask, Grand Total), Print Settings (POS Receipt, None, None); a changed switch saves ("Saved"). Price List › Standard Selling switched off: Save refused with the Default Price List message. Logcat: 0 Flutter errors. On first open the top of POS Settings drew as garbled lines until a scroll repainted it, the emulator fault P-1. |
+
+The tablet emulator was not run at issue 3. A first emulator session in software GL mode crashed ("UpdateLayeredWindowIndirect failed … A device attached to the system is not functioning"); the checks above ran on a restarted emulator.
+
 ### 10.6 Code review
 
 | Check | Tool | Result |
@@ -1135,7 +1167,7 @@ Logcat showed no Flutter error on either device. Four defects found in these che
 | Unused code | `flutter analyze`, `dart fix --dry-run` | No issues; nothing to fix |
 | Unused public declarations | Script over `lib/` | No dead code found. Every public declaration with no caller elsewhere in `lib/` is foundation code awaiting its feature milestone, and is covered by tests, directly or through the widget that uses it. |
 | Unused dependencies | Script over `pubspec.yaml` | Six packages declared for later milestones (section 5.4); kept by design |
-| Import cycles | Script over `lib/` | None between Dart files. `setup.drift` and `stock.drift` import each other (D-5). |
+| Import cycles | Script over `lib/` | None between Dart files. `setup.drift` and `stock.drift` imported each other until issue 3 (D-5). |
 | Over-engineering | Manual audit of all hand-written code | Nothing worth cutting. One unused constant, `AppSpacing.xs`, kept as part of the spacing scale. |
 | Formatting | `dart format` | One test file reformatted |
 
@@ -1157,6 +1189,18 @@ Issue 2. The project names "flutter review" and Ponytail. No tool by that name e
 
 Left as they are, with reasons: link fields as dropdowns (D-20, P-11); stored option values untranslated (P-11); `FieldGrid` on pane width (D-21); the import log lists imported records only; the extra stock checks in Data Import (D-25); judgement-call code smells (three similar master pages, page slugs listed twice, short names).
 
+Issue 3. Same process: `flutter analyze`, `dart fix`, a Ponytail review of the diff ("lean already", net −617 hand-written lines), and the code-review skill with a standards reviewer and a spec reviewer against `d5b4836`. No hard violations; fixes made with the smallest change at the cause:
+
+| Finding | Fix |
+|---|---|
+| Every master delete ran the Default Price List check, so deleting a Tax could be refused for a price list reason | `deleteMaster` runs it only for `price_list` |
+| A stored choice no longer offered (a Mode of Payment or Terms disabled since) showed blank and was written back on Save | `SinglesForm` reads such a value as blank; one widget test |
+| A blank Default Mode of Payment read as blank, against its comment | Blank reads as Cash |
+| SET-A14's delete case beside another enabled list was not tested; SET-A16's test had no label | Added; labelled |
+| `c` and `_text` named vaguely | `choices`, `_optionalText` |
+
+Left as they are, with reasons: the POS Settings choices are queried inside a UI provider, as the Selling Settings page already does; the `check()` helper exists on one page only; option strings appear in the page and in `PosSettings` comments; the choices provider is a `FutureProvider` (only one Setup page is open at a time, so the choices cannot go stale under it).
+
 ---
 
 ## 11. User documentation
@@ -1170,7 +1214,7 @@ What the store owner can do with this build.
 1. **Language.** English is the only language. Tap **Next**. Moving from another device? Tap **Restore from backup** and pick a backup file instead; the app opens on that store and skips the other steps.
 2. **Region.** Your device's country is filled in. Tap **Country** to search for another. The currency follows the country; tap **Currency** to change it. The preview shows how dates and amounts will look. Tap **Next**.
 3. **Your store.** Type the store name. The abbreviation is suggested from its initials; it names your backup files. Tap **Next**.
-4. **All set.** Tap **Open Cash Register** or **Add your first item**. The app creates the store's starting records: the currency, the "Stores" warehouse, item groups, units, the "Standard Selling" price list, the Cash, Credit Card and Wire Transfer payment modes, and the "Main Counter" POS Profile. Sales are tax-free until a tax template is chosen on the POS Profile.
+4. **All set.** Tap **Open Cash Register** or **Add your first item**. The app creates the store's starting records: the currency, the "Stores" warehouse, item groups, units, the "Standard Selling" price list, and the Cash, Credit Card and Wire Transfer payment modes. Sales are tax-free until a tax template is made the Default.
 
 **Navigation.** The app shows five destinations. On a phone they are in a bar at the bottom. On a tablet they are in a rail at the side; in landscape the rail also shows labels.
 
@@ -1190,8 +1234,10 @@ What the store owner can do with this build.
 | Change date, time or number formats, rounding, how many backups to keep | System Settings; the preview shows the result before you save |
 | Hide the currency symbol | Global Defaults |
 | Change the symbol or its side | Currency |
-| Add a payment mode such as GCash | Mode of Payment, then add it to the POS Profile's Payment Methods |
-| Charge VAT | Tax: add "VAT". Sales Taxes and Charges Template: add a template with a row "On Net Total", tax VAT, rate 12; check it in **Try it**. POS Profile: choose the template under Taxes and Charges. |
+| Add a payment mode such as GCash | Mode of Payment. Every enabled mode is offered at the register; disable one to hide it |
+| Choose the mode pre-filled at checkout, and how the register behaves | POS Settings |
+| Change the price list the register sells at | Selling Settings: Default Price List. The default list cannot be disabled or deleted until another is the default |
+| Charge VAT | Tax: add "VAT". Sales Taxes and Charges Template: add a template with a row "On Net Total", tax VAT, rate 12; check it in **Try it**; tick **Default**. The register applies the default template. |
 | Exempt some items from a tax | Item Tax Template: Not Applicable for that tax (assigning it to items comes with the Stock milestone) |
 | Change how invoices are numbered | Naming Series; Update Series moves the counter |
 | Load many items | Data Import: Download Template, fill it in a spreadsheet, Choose File, Start Import. Problems are listed by row and column; nothing is imported until all are fixed. |
@@ -1228,12 +1274,13 @@ Selling, invoices, stock movements and the dashboard are not available yet.
 | P-10 | Leaving a form with unsaved changes discards them without asking. | Edits can be lost by a stray Back. | Open. |
 | P-11 | Two deviations from R1 §7.1 and §4: Setup link fields are dropdowns without "Create new" (D-20); stored option values show in English as stored. | Owner must create a master from its own page first; a second language would leave those values untranslated. | Accepted for now. |
 | P-12 | The automatic backup on POS Closing submit (SET-R17) is not wired. | Backups are taken only on demand. | Waits for M5; `takeBackup()` is ready. |
+| P-13 | Schema version 1 was edited in place at issue 3 (D-29). A database or backup made before issue 3 still has the POS Profile tables and a NOT NULL `pos_profile_id` in `pos_opening_entry`, `pos_closing_entry` and `sales_invoice`. `checkRestorable` accepts such a backup, because its schema version is 1. | Setup works on it; the first session or sale (M5) would fail. | Open. Clear the app's data on every device that ran an earlier build, and do not restore backups taken before issue 3. |
 
 ### 12.2 Limits of this issue
 
 - English is the only language.
 - Backups kept only on the device are lost with it; Export copies them elsewhere.
-- No migration path exists yet (section 7.7).
+- No migration path exists yet (section 7.7); issue 3 changed version 1 without one (P-13).
 
 ### 12.3 Not built yet
 
@@ -1249,4 +1296,4 @@ Beyond the milestones in section 4.4, these foundation pieces were left for the 
 
 ## 13. Summary
 
-Rx Merchant is an offline Android point-of-sale app for one store owner, modelled on ERPNext. At this issue, milestone M0 and the whole Setup plan are complete: a first-run wizard that seeds the store in one transaction; the Setup destination with Store Profile, System Settings, Global Defaults, Selling Settings, Currency, Mode of Payment, Tax, Price List, Sales Taxes and Charges Template with its "Try it" panel, Item Tax Template, POS Profile and Naming Series; Data Import and Export of items, prices and barcodes; and Backup and Restore, also from the wizard's first step on a new device. The schema is unchanged. 140 automated tests pass, analysis is clean, the release build carries no internet permission, and the wizard, Setup pages and a backup-wipe-restore round trip were checked on phone and tablet emulators. The work is not yet committed and no real device has been tested. Selling, invoices, stock and the dashboard come next (M2, M3, M5 to M8).
+Rx Merchant is an offline Android point-of-sale app for one store owner, modelled on ERPNext. At this issue, milestone M0 and the whole Setup plan are complete: a first-run wizard that seeds the store in one transaction; the Setup destination with Store Profile, System Settings, Global Defaults, Selling Settings, Currency, Mode of Payment, Tax, Price List, Sales Taxes and Charges Template with its "Try it" panel, Item Tax Template, POS Settings and Naming Series; Data Import and Export of items, prices and barcodes; and Backup and Restore, also from the wizard's first step on a new device. Issue 3 removed ERPNext's POS Profile, because one owner runs one register: its three tables and the `pos_profile_id` columns are gone from schema version 1 (edited in place, so older databases and backups must not be used, P-13); the register's options are on POS Settings, and its warehouse, price list, taxes and letter head are the store defaults. 141 automated tests pass, analysis is clean, the release build carries no internet permission, and the wizard, POS Settings and the Default Price List refusal were checked on a phone emulator (the tablet checks date from issue 2). The work is not yet committed and no real device has been tested. Selling, invoices, stock and the dashboard come next (M2, M3, M5 to M8).

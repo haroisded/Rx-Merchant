@@ -6,7 +6,6 @@ import '../../../core/widgets/spacing.dart';
 import '../../../l10n/app_localizations.dart';
 import 'data_pages.dart';
 import 'naming_series_page.dart';
-import 'pos_profile_page.dart';
 import 'settings_pages.dart';
 import 'simple_masters.dart';
 import 'tax_template_pages.dart';
@@ -22,7 +21,7 @@ Widget? setupPage(String slug, String? id) {
     'system-settings' => const SystemSettingsPage(),
     'global-defaults' => const GlobalDefaultsPage(),
     'currency' => const CurrencyPage(),
-    'pos-profile' => PosProfilePage(path: path, id: id),
+    'pos-settings' => const PosSettingsPage(),
     'mode-of-payment' => ModeOfPaymentPage(path: path, id: id),
     'price-list' => PriceListPage(path: path, id: id),
     'selling-settings' => const SellingSettingsPage(),
@@ -83,7 +82,7 @@ class SetupHome extends StatelessWidget {
       (
         l.groupSelling,
         [
-          ('pos-profile', l.posProfile),
+          ('pos-settings', l.posSettings),
           ('mode-of-payment', l.modeOfPayment),
           ('price-list', l.priceList),
           ('selling-settings', l.sellingSettings),

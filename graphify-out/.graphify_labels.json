@@ -19,7 +19,7 @@
   "17": "data_import.dart",
   "18": "settings_pages.dart",
   "19": "tax_template_pages.dart",
-  "20": "pos_profile_page.dart",
+  "20": "refusal.dart",
   "21": "simple_masters.dart",
   "22": "country_info.dart",
   "23": "data_pages.dart",
@@ -28,10 +28,8 @@
   "26": "tax_template.dart",
   "27": "wizard_screen.dart",
   "28": "naming_series_page.dart",
-  "29": "child_table.dart",
   "30": "backup.dart",
   "31": "data_import_db.dart",
-  "32": "list_detail_pane.dart",
   "33": "State",
   "34": "ConsumerState",
   "35": "appDatabaseProvider",
@@ -45,7 +43,6 @@
   "43": "singles_test.dart",
   "44": "data_import_test.dart",
   "45": "package:drift/drift.dart",
-  "46": "l10n/app_localizations.dart",
   "47": "build",
   "48": "barcode.dart"
 }

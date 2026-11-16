@@ -120,6 +120,51 @@ class SellingSettings {
   bool get validateSellingPrice => _flag(v, 'validate_selling_price', false);
 }
 
+/// How the Cash Register behaves: what ERPNext keeps on a POS Profile, for
+/// the one register of a one-owner store (01-setup, SET-R14). Keys are
+/// ERPNext's POS Profile field names.
+class PosSettings {
+  const PosSettings(this.v);
+  static const doctype = 'POS Settings';
+  final Map<String, String> v;
+
+  /// Pre-filled at checkout; unset or blank means Cash, as in ERPNext. A
+  /// mode disabled since is replaced at checkout by the first enabled mode
+  /// of Type Cash (SET-R14).
+  String get defaultModeOfPayment =>
+      _optionalText(v, 'default_mode_of_payment') ?? 'Cash';
+  bool get hideImages => _flag(v, 'hide_images', false);
+  bool get hideUnavailableItems => _flag(v, 'hide_unavailable_items', false);
+  bool get allowRateChange => _flag(v, 'allow_rate_change', false);
+  bool get autoAddItemToCart => _flag(v, 'auto_add_item_to_cart', false);
+  bool get allowDiscountChange => _flag(v, 'allow_discount_change', false);
+  bool get validateStockOnSave => _flag(v, 'validate_stock_on_save', false);
+  bool get setGrandTotalToDefaultMop =>
+      _flag(v, 'set_grand_total_to_default_mop', true);
+  bool get printReceiptOnOrderComplete =>
+      _flag(v, 'print_receipt_on_order_complete', false);
+
+  /// 'Always Ask', 'Save Changes and Load New Invoice' or
+  /// 'Discard Changes and Load New Invoice'.
+  String get actionOnNewInvoice => v['action_on_new_invoice'] ?? 'Always Ask';
+
+  /// 'Grand Total' or 'Net Total'.
+  String get applyDiscountOn => v['apply_discount_on'] ?? 'Grand Total';
+
+  /// 'POS Receipt' or 'Standard'.
+  String get printFormat => v['print_format'] ?? 'POS Receipt';
+
+  /// Print Heading name; null for the document's own title.
+  String? get selectPrintHeading => _optionalText(v, 'select_print_heading');
+
+  /// Terms and Conditions title; null for none.
+  String? get tcName => _optionalText(v, 'tc_name');
+}
+
+/// A stored text, or null when unset or saved blank ("None").
+String? _optionalText(Map<String, String> v, String key) =>
+    (v[key] ?? '').isEmpty ? null : v[key];
+
 /// Keys and defaults: 02-stock.md, "Stock Settings (in `singles`)".
 class StockSettings {
   const StockSettings(this.v);

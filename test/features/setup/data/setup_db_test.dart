@@ -66,15 +66,12 @@ void main() {
       'Credit Card',
       'Wire Transfer',
     ]);
-    expect(await names('pos_profile'), ['Main Counter']);
     expect(
       await names('naming_series_option', 'pattern'),
       contains('ACC-SINV-.YYYY.-'),
     );
     expect(await names('letter_head'), ['Rx Corner Store']);
 
-    final payment = await db.select(db.posProfilePayment).getSingle();
-    expect((payment.isDefault, payment.allowInReturns), (1, 1));
     final dozen = await (db.select(
       db.uom,
     )..where((u) => u.name.equals('Dozen'))).getSingle();
@@ -129,7 +126,7 @@ void main() {
   });
 
   test(
-    'SET-A14 the only enabled Price List cannot be disabled or deleted',
+    'SET-A14 the Default Price List cannot be disabled or deleted',
     () async {
       final db = await seeded();
       final list = await db.select(db.priceList).getSingle();
@@ -137,17 +134,47 @@ void main() {
         db.savePriceList(
           list.toCompanion(true).copyWith(enabled: const Value(0)),
         ),
-        refused(Refusal.lastEnabledPriceList),
+        refused(Refusal.defaultPriceList),
+      );
+      await expectLater(
+        db.deleteMaster(db.priceList, list.id),
+        refused(Refusal.defaultPriceList),
       );
       expect((await db.select(db.priceList).getSingle()).enabled, 1);
 
-      final second = await db.savePriceList(
-        PriceListCompanion.insert(name: 'Promo'),
+      // Another enabled list is not enough while this one is the default.
+      await db.savePriceList(PriceListCompanion.insert(name: 'Promo'));
+      await expectLater(
+        db.savePriceList(
+          list.toCompanion(true).copyWith(enabled: const Value(0)),
+        ),
+        refused(Refusal.defaultPriceList),
       );
+      await expectLater(
+        db.deleteMaster(db.priceList, list.id),
+        refused(Refusal.defaultPriceList),
+      );
+      await db.writeSingle(SellingSettings.doctype, {
+        'selling_price_list': 'Promo',
+      });
       await db.savePriceList(
         list.toCompanion(true).copyWith(enabled: const Value(0)),
       );
-      expect(second, greaterThan(list.id));
+    },
+  );
+
+  test(
+    'SET-A16 renaming the Default Price List follows in Selling Settings',
+    () async {
+      final db = await seeded();
+      final list = await db.select(db.priceList).getSingle();
+      await db.savePriceList(
+        list.toCompanion(true).copyWith(name: const Value('Retail')),
+      );
+      final selling = SellingSettings(
+        await db.readSingle(SellingSettings.doctype),
+      );
+      expect(selling.sellingPriceList, 'Retail');
     },
   );
 
@@ -178,6 +205,15 @@ void main() {
     final cash = await (db.select(
       db.modeOfPayment,
     )..where((m) => m.name.equals('Cash'))).getSingle();
+    // Cash used as the opening amount of a session.
+    await db.customStatement(
+      "INSERT INTO pos_opening_entry (id, docstatus, status, period_start_datetime) "
+      "VALUES (1, 1, 'Open', '2026-11-16 08:00:00')",
+    );
+    await db.customStatement(
+      'INSERT INTO pos_opening_entry_detail (pos_opening_entry_id, mode_of_payment_id) '
+      'VALUES (1, ${cash.id})',
+    );
     await expectLater(
       db.deleteMaster(db.modeOfPayment, cash.id),
       refused(Refusal.referenced),
@@ -189,96 +225,6 @@ void main() {
     await expectLater(
       db.saveModeOfPayment(ModeOfPaymentCompanion.insert(name: 'Cash')),
       refused(Refusal.duplicateName),
-    );
-  });
-
-  group('POS Profile (SET-R14)', () {
-    late AppDatabase db;
-    late PosProfileData main;
-    late List<PosProfilePaymentCompanion> payments;
-    setUp(() async {
-      db = await seeded();
-      main = await db.select(db.posProfile).getSingle();
-      payments = [
-        for (final p in await db.select(db.posProfilePayment).get())
-          p.toCompanion(true),
-      ];
-    });
-
-    test('SET-A16 editing during an open session is refused', () async {
-      await db.customStatement(
-        "INSERT INTO pos_opening_entry (docstatus, status, pos_profile_id, period_start_datetime) "
-        "VALUES (1, 'Open', ${main.id}, '2026-11-16 08:00:00')",
-      );
-      await expectLater(
-        db.savePosProfile(main.toCompanion(true), payments, {}),
-        refused(Refusal.profileSessionOpen),
-      );
-      await expectLater(
-        db.deletePosProfile(main.id),
-        refused(Refusal.profileSessionOpen),
-      );
-    });
-
-    test('a second profile can be made default; one default stays', () async {
-      final second = await db.savePosProfile(
-        PosProfileCompanion.insert(
-          name: 'Back Counter',
-          warehouseId: main.warehouseId,
-          priceListId: main.priceListId,
-          isDefault: const Value(1),
-        ),
-        [],
-        {},
-      );
-      final defaults = await (db.select(
-        db.posProfile,
-      )..where((p) => p.isDefault.equals(1))).get();
-      expect(defaults.map((p) => p.id), [second]);
-      await expectLater(
-        db.savePosProfile(
-          (await (db.select(
-                db.posProfile,
-              )..where((p) => p.id.equals(second))).getSingle())
-              .toCompanion(true)
-              .copyWith(isDefault: const Value(0)),
-          [],
-          {},
-        ),
-        refused(Refusal.oneDefaultProfile),
-      );
-    });
-
-    test(
-      'group warehouse, payment defaults and disabled choices are refused',
-      () async {
-        final group = await (db.select(
-          db.warehouse,
-        )..where((w) => w.isGroup.equals(1))).getSingle();
-        await expectLater(
-          db.savePosProfile(
-            main.toCompanion(true).copyWith(warehouseId: Value(group.id)),
-            payments,
-            {},
-          ),
-          refused(Refusal.groupWarehouse),
-        );
-        await expectLater(
-          db.savePosProfile(main.toCompanion(true), [
-            payments.single.copyWith(isDefault: const Value(0)),
-          ], {}),
-          refused(Refusal.oneDefaultPayment),
-        );
-        await db.saveModeOfPayment(
-          (await db.select(db.modeOfPayment).get()).first
-              .toCompanion(true)
-              .copyWith(enabled: const Value(0)),
-        );
-        await expectLater(
-          db.savePosProfile(main.toCompanion(true), payments, {}),
-          refused(Refusal.disabledChoice),
-        );
-      },
     );
   });
 

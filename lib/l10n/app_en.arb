@@ -152,7 +152,7 @@
   "laterMilestone": "Arrives with a later milestone.",
   "refusedDuplicateName": "A record with this name already exists.",
   "refusedReferenced": "This record is used elsewhere. Disable it instead of deleting it.",
-  "refusedLastEnabledPriceList": "At least one Price List must stay enabled.",
+  "refusedDefaultPriceList": "This is the Default Price List in Selling Settings, which the Cash Register sells from. It must stay enabled. Choose another Default Price List first.",
   "refusedSeriesBelowUsed": "Number {number} is already used in this series. Set {number} or higher.",
   "@refusedSeriesBelowUsed": {
     "placeholders": {
@@ -161,11 +161,6 @@
       }
     }
   },
-  "refusedProfileSessionOpen": "This POS Profile has an open POS session. Close the session first.",
-  "refusedGroupWarehouse": "A group warehouse holds no stock. Choose a warehouse inside it.",
-  "refusedOneDefaultPayment": "Exactly one payment method must be the default.",
-  "refusedOneDefaultProfile": "Exactly one enabled POS Profile must be the default. Make another profile the default first.",
-  "refusedDisabledChoice": "A disabled Price List, template or Mode of Payment cannot be chosen.",
   "refusedNotABackup": "This file is not a backup of this app. Nothing was changed.",
   "refusedBackupTooNew": "This backup comes from a newer version of the app. Update the app first.",
   "refusedSessionOpen": "Close the open POS session before restoring.",
@@ -173,7 +168,7 @@
   "wizardRegion": "Region",
   "wizardStore": "Your store",
   "wizardDone": "All set",
-  "wizardDoneBody": "{store} is ready to sell. Sales are tax-free until a Sales Taxes and Charges Template is chosen on the POS Profile.",
+  "wizardDoneBody": "{store} is ready to sell. Sales are tax-free until a Sales Taxes and Charges Template is made the Default.",
   "@wizardDoneBody": {
     "placeholders": {
       "store": {
@@ -204,7 +199,7 @@
   "systemSettings": "System Settings",
   "globalDefaults": "Global Defaults",
   "currency": "Currency",
-  "posProfile": "POS Profile",
+  "posSettings": "POS Settings",
   "modeOfPayment": "Mode of Payment",
   "priceList": "Price List",
   "sellingSettings": "Selling Settings",
@@ -277,10 +272,8 @@
   "taxRates": "Tax Rates",
   "notApplicable": "Not Applicable",
   "itemTaxTemplateHelp": "A rate here replaces the rate of the same tax for the items using this template. Not Applicable removes the tax; a rate of 0 keeps the item taxable at zero.",
-  "warehouse": "Warehouse",
   "paymentMethods": "Payment Methods",
-  "allowInReturns": "Allow in Returns",
-  "noPaymentMethodsHint": "With no payment methods, Cash is used.",
+  "defaultModeOfPayment": "Default Mode of Payment",
   "configurations": "Configurations",
   "hideImages": "Hide images",
   "hideUnavailableItems": "Hide unavailable Items",
@@ -291,11 +284,7 @@
   "setGrandTotalToDefaultMop": "Set Grand Total to Default Payment Method",
   "printReceiptOnOrderComplete": "Print Receipt on Order Complete",
   "actionOnNewInvoice": "Action on New Invoice",
-  "itemGroups": "Item Groups",
-  "itemGroupsHint": "Only items in the chosen groups and their sub-groups are shown. None chosen shows every item.",
   "printFormat": "Print Format",
-  "pricingAndTaxes": "Price List and Taxes",
-  "taxesAndCharges": "Taxes and Charges",
   "applyDiscountOn": "Apply Discount On",
   "documentType": "Document",
   "seriesList": "Series List",

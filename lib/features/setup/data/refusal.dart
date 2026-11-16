@@ -14,26 +14,12 @@ enum Refusal {
   /// (00-overview 6.2, SET-R8).
   referenced,
 
-  /// SET-R13: at least one Price List stays enabled.
-  lastEnabledPriceList,
+  /// SET-R13: the Default Price List of Selling Settings is the Cash
+  /// Register's; it must exist and stay enabled.
+  defaultPriceList,
 
   /// SET-R7: [RefusedException.detail] is the highest number already used.
   seriesBelowUsed,
-
-  /// SET-R14: the profile has an open POS Opening Entry.
-  profileSessionOpen,
-
-  /// SET-R14: a group warehouse holds no stock.
-  groupWarehouse,
-
-  /// SET-R14: with payment rows, exactly one is the default.
-  oneDefaultPayment,
-
-  /// SET-R14: exactly one enabled profile is the default.
-  oneDefaultProfile,
-
-  /// A disabled Mode of Payment, Price List or template was chosen.
-  disabledChoice,
 
   /// SET-R18: the file is not a backup of this app.
   notABackup,

@@ -146,6 +146,33 @@ void main() {
       );
       expect(GlobalDefaults(stored!).hideCurrencySymbol, isTrue);
     });
+
+    testWidgets('POS Settings does not save back a mode no longer offered', (
+      tester,
+    ) async {
+      await pumpApp(tester, width: 400);
+      final db = ProviderScope.containerOf(
+        tester.element(find.byType(MaterialApp)),
+      ).read(appDatabaseProvider);
+      // No Mode of Payment exists, so the stored default is not offered.
+      await tester.runAsync(
+        () => db.writeSingle(PosSettings.doctype, {
+          'default_mode_of_payment': 'GCash',
+        }),
+      );
+      await openSetup(tester);
+      await tester.tap(find.text('POS Settings'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Saved'), findsOneWidget);
+      final stored = await tester.runAsync(
+        () => db.readSingle(PosSettings.doctype),
+      );
+      expect(stored!['default_mode_of_payment'], '');
+      expect(PosSettings(stored).defaultModeOfPayment, 'Cash');
+    });
   });
 
   group('adaptive shell', () {

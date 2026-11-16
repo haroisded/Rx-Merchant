@@ -63,6 +63,31 @@ void main() {
       expect(s.validateSellingPrice, isFalse);
     });
 
+    test('POS Settings', () async {
+      final s = PosSettings(await db.readSingle(PosSettings.doctype));
+      expect(s.defaultModeOfPayment, 'Cash');
+      expect([
+        s.hideImages,
+        s.hideUnavailableItems,
+        s.allowRateChange,
+        s.autoAddItemToCart,
+        s.allowDiscountChange,
+        s.validateStockOnSave,
+        s.printReceiptOnOrderComplete,
+      ], everyElement(isFalse));
+      expect(s.setGrandTotalToDefaultMop, isTrue);
+      expect(s.actionOnNewInvoice, 'Always Ask');
+      expect(s.applyDiscountOn, 'Grand Total');
+      expect(s.printFormat, 'POS Receipt');
+      expect(s.selectPrintHeading, isNull);
+      expect(s.tcName, isNull);
+    });
+
+    test('POS Settings "None" saved blank reads as null', () {
+      const s = PosSettings({'select_print_heading': '', 'tc_name': ''});
+      expect((s.selectPrintHeading, s.tcName), (null, null));
+    });
+
     test('Stock Settings', () async {
       final s = StockSettings(await db.readSingle(StockSettings.doctype));
       expect(s.itemNamingBy, 'Item Code');

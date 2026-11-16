@@ -47,13 +47,18 @@ store-listing, signing or release work in these plans.
 | Customers | No Customer master, no customer field on a sale. Every sale is to an anonymous walk-in buyer and is paid in full at checkout. Removed with it: credit sales, partial payment, receivables, loyalty points, customer-specific prices, Tax Category, Territory, Customer Group. |
 | Sales Person | No sales team, commission or target allocation. |
 | Chart of Accounts / Accounts Handling | No ledgers. Every "Account", "Account Head", "Write Off", "Income Account", "Expense Account" and "Difference Account" field is removed. Sales tax is still calculated; a small `tax` master replaces the Account Head as the thing a tax row points to. |
-| Staff / Employees | No users, roles, permissions or login. "Applicable for Users" on the POS Profile is removed. |
+| Staff / Employees | No users, roles, permissions or login. |
 
-Two more consequences of those exclusions:
+Three more consequences of those exclusions:
 
 - **No purchasing documents.** Suppliers, Purchase Orders, Purchase Receipts and Material Requests are
   not in the included list. Stock arrives through a Stock Entry of type Material Receipt.
 - **No Fiscal Year.** It exists for accounting periods. Naming series and reports use the calendar year.
+- **No POS Profile.** A POS Profile gives each counter or user its own setup. One owner on one device has
+  one cash register, so there is nothing to choose between. Its settings live where ERPNext keeps them
+  without a profile: the warehouse in Stock Settings, the price list in Selling Settings, the taxes in the
+  default Sales Taxes and Charges Template, the letter head in the default Letter Head, and the register's
+  own options in one **POS Settings** page.
 
 ## 3. How "nearly 1:1 with ERPNext" is applied
 
@@ -174,8 +179,8 @@ be disabled but not deleted.
 ### 6.5 Settings ("Single" documents)
 
 ERPNext keeps one-record settings pages (System Settings, Stock Settings…) as key-value rows. The app
-does the same in one `singles` table with six groups: Store Profile, System Settings, Global Defaults,
-Selling Settings, Stock Settings, Print Settings. Each has a typed Dart accessor that supplies the
+does the same in one `singles` table with seven groups: Store Profile, System Settings, Global Defaults,
+Selling Settings, POS Settings, Stock Settings, Print Settings. Each has a typed Dart accessor that supplies the
 default when a key is missing, so adding a setting needs no migration.
 
 ### 6.6 Database conventions
@@ -244,7 +249,7 @@ Each table is defined once, in the file named here.
 
 | File | Tables |
 |---|---|
-| `01-setup.md` | `singles`, `currency`, `naming_series_option`, `series`, `mode_of_payment`, `tax`, `sales_taxes_template`, `sales_taxes_template_row`, `item_tax_template`, `item_tax_template_row`, `price_list`, `pos_profile`, `pos_profile_payment`, `pos_profile_item_group` |
+| `01-setup.md` | `singles`, `currency`, `naming_series_option`, `series`, `mode_of_payment`, `tax`, `sales_taxes_template`, `sales_taxes_template_row`, `item_tax_template`, `item_tax_template_row`, `price_list` |
 | `02-stock.md` | `warehouse`, `item_group`, `uom`, `brand`, `item`, `item_barcode`, `item_uom`, `item_reorder`, `item_tax`, `item_attribute`, `item_attribute_value`, `item_variant_attribute`, `item_price`, `batch`, `serial_no`, `stock_entry`, `stock_entry_item`, `stock_entry_additional_cost`, `stock_reconciliation`, `stock_reconciliation_item`, `serial_and_batch_entry`, `stock_ledger_entry`, `bin` |
 | `03-cash-register.md` | `pos_opening_entry`, `pos_opening_entry_detail`, `pos_closing_entry`, `pos_closing_entry_detail`, `sales_invoice`, `sales_invoice_item`, `sales_invoice_tax`, `sales_invoice_payment` |
 | `04-sales-dashboard.md` | none (read-only queries) |
@@ -261,7 +266,7 @@ Each milestone ends with an app that runs and does something complete. Step code
 | M1 Setup A | First-run wizard, Store Profile, System Settings, Global Defaults, Currency, Price List, Naming Series | SET-B1 to B4 |
 | M2 Stock A | Warehouse, Item Group, UoM, Brand, Item with barcodes and UoMs, Item Price, Stock Settings | STK-B1 to B4 |
 | M3 Stock B | Stock ledger engine, Stock Entry, Stock Reconciliation, core stock reports | STK-B5 to B9 |
-| M4 Setup B | Mode of Payment, taxes, POS Profile, Selling Settings | SET-B5 to B7 |
+| M4 Setup B | Mode of Payment, taxes, POS Settings, Selling Settings | SET-B5 to B7 |
 | M5 Cash Register | Sessions, POS screen, totals engine, payment, submit | POS-B1 to B8 |
 | M6 Invoices | List, detail, print formats, PDF, thermal printing, returns, cancel | INV-B1 to B9 |
 | M7 Dashboard | Cards, charts, sales goal, reports | DSH-B1 to B5 |
@@ -302,6 +307,7 @@ Done when: the app starts on a phone and a tablet emulator, shows the wizard gat
 | ERPNext term | In this app |
 |---|---|
 | Company | Store Profile |
+| POS Profile | Not kept; the one register's options are on POS Settings |
 | DocType | A kind of record: a master (Item), a document (Sales Invoice) or a settings page |
 | Child table | Rows that belong to one parent record (the items of an invoice) |
 | Submit | Make a document final so it affects stock and reports |
