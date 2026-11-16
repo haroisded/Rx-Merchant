@@ -4,6 +4,8 @@ import 'package:material_ui/material_ui.dart';
 
 import 'core/db/providers.dart';
 import 'core/widgets/adaptive_shell.dart';
+import 'core/widgets/window_size.dart';
+import 'features/setup/ui/setup_screen.dart';
 import 'features/setup/ui/wizard_screen.dart';
 import 'l10n/app_localizations.dart';
 
@@ -19,7 +21,7 @@ final _destinations = <(String, String Function(AppLocalizations))>[
   ('/invoices', (l) => l.navInvoices),
   ('/stock', (l) => l.navStock),
   ('/dashboard', (l) => l.navDashboard),
-  ('/setup', (l) => l.navSetup),
+  (setupPath, (l) => l.navSetup),
 ];
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -41,7 +43,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       final target = switch (setupComplete.value) {
         null => _loading,
         false => _wizard,
-        true => at == _wizard || at == _loading ? _home : at,
+        // The wizard's Done step names where to land in `?next=`.
+        true when at == _wizard => state.uri.queryParameters['next'] ?? _home,
+        true => at == _loading ? _home : at,
       };
       return target == at ? null : target;
     },
@@ -54,12 +58,15 @@ final routerProvider = Provider<GoRouter>((ref) {
           for (final (path, title) in _destinations)
             StatefulShellBranch(
               routes: [
-                GoRoute(
-                  path: path,
-                  builder: (context, _) => _PlaceholderScreen(
-                    title: title(AppLocalizations.of(context)),
+                if (path == setupPath)
+                  _setupRoute()
+                else
+                  GoRoute(
+                    path: path,
+                    builder: (context, _) => _PlaceholderScreen(
+                      title: title(AppLocalizations.of(context)),
+                    ),
                   ),
-                ),
               ],
             ),
         ],
@@ -72,6 +79,33 @@ final routerProvider = Provider<GoRouter>((ref) {
   });
   return router;
 });
+
+/// `/setup`, `/setup/:page` and `/setup/:page/:id` (`id` is `new` for a new
+/// record). On an expanded window the workspace list stays put beside the
+/// page, so moving between them does not animate.
+GoRoute _setupRoute() {
+  Page<void> page(BuildContext context, GoRouterState state) {
+    final child = SetupScreen(
+      page: state.pathParameters['page'],
+      id: state.pathParameters['id'],
+    );
+    return WindowSize.of(context) == WindowSize.expanded
+        ? NoTransitionPage(key: state.pageKey, child: child)
+        : MaterialPage(key: state.pageKey, child: child);
+  }
+
+  return GoRoute(
+    path: setupPath,
+    pageBuilder: page,
+    routes: [
+      GoRoute(
+        path: ':page',
+        pageBuilder: page,
+        routes: [GoRoute(path: ':id', pageBuilder: page)],
+      ),
+    ],
+  );
+}
 
 /// Shown for the moment it takes to read System Settings; blank unless the
 /// database cannot be opened.

@@ -1,0 +1,490 @@
+RX MERCHANT - SESSION REPORT
+============================
+
+Written:      2026-11-16 17:26 (+08:00)
+Branch:       main
+Based on:     97bfd33 "RX MERCHANT - SESSION REPORT"
+Committed:    nothing. Every change below is in the working tree, for you to commit.
+Covers:       the whole session: Plans/01-setup.md, build steps SET-B1 to SET-B9
+              (milestones M1, M4 and M9 of the overview), then the wrap-up the
+              CLAUDE file asks for (code review, Ponytail fixes, this report,
+              the system documentation).
+
+
+1. SUGGESTED COMMIT MESSAGE
+---------------------------
+
+Build 01-setup: wizard, settings, taxes, POS Profile, import, backup
+
+- Replace the placeholder wizard with Language, Region, Store, Done; one
+  seed transaction writes every SET-R3 record (SET-R1, R3)
+- Add the Setup destination: grouped workspace, list-detail on tablets
+- Add Store Profile, System Settings, Global Defaults, Selling Settings and
+  Currency forms; formats apply app-wide; currency decisions lock after a
+  submitted document (SET-R2, R4, R5)
+- Add Mode of Payment, Tax, Price List, Sales Taxes and Charges Template
+  (with the "Try it" panel), Item Tax Template and POS Profile (SET-R8 to R14)
+- Add Naming Series with Update Series (SET-R6, R7)
+- Add Data Import / Export for Item, Item Price, Item Barcode (SET-R16)
+- Add Backup and Restore of the SQLite file (SET-R17, R18)
+- Bundle country data from Frappe's country_info.json (MIT)
+- Add "Restore from backup" to the wizard's first step
+- Add 47 tests (93 -> 140)
+
+If you prefer two commits, split off "docs and tooling":
+.claude/erpnext-planner/system-documentation.md, .claude/commits/ and
+graphify-out/.
+
+
+2. RESULT IN SHORT
+------------------
+
+All nine build steps of 01-setup.md are done. On a fresh install the app
+walks through the wizard, seeds the store and lands on the shell. Every
+Setup page that 01-setup owns opens and saves on a phone and a tablet.
+
+  flutter analyze               No issues found
+  dart fix --dry-run            Nothing to fix
+  dart format (check)           0 files changed
+  flutter test                  140 of 140 pass
+  flutter build apk --release   builds, 75.3 MB
+  release manifest              INTERNET permission absent
+
+Not done, stated plainly:
+  - No real device was used. Emulators only.
+  - The auto-backup on POS Closing submit (SET-R17) is not wired: POS
+    Closing does not exist yet. takeBackup() is ready for milestone M5.
+  - Stock Settings, Print Settings, Letter Head, Print Heading and Terms and
+    Conditions are listed on Setup but disabled: 02-stock.md and
+    05-invoices-and-receipts.md own them.
+
+
+3. WHAT WAS BUILT
+-----------------
+
+SET-B1 - First-run wizard and seed
+  assets/country_info.json: 250 countries from Frappe's
+  frappe/geo/country_info.json (MIT), trimmed to currency, symbol, fraction,
+  fraction units, smallest fraction, date and number format. Number formats
+  outside the six the app supports were mapped to the nearest one.
+  Wizard: Language, Region (Country and Currency pickers with a format
+  preview; the device's country is preselected), Store (name; abbreviation
+  suggested from the initials), Done ("Open Cash Register", "Add your first
+  item"). Phone: one step per screen. Tablet: centred 560dp card.
+  completeSetup() writes, in one transaction: the Currency, warehouse tree
+  (All Warehouses > Stores), item groups, 13 UoMs, Standard Selling, three
+  Modes of Payment, the "Main Counter" POS Profile with Cash, the seven
+  naming series, a default Letter Head, Stock Settings defaults, Selling
+  Settings, Store Profile and System Settings, then setup_complete = 1.
+  Files: lib/features/setup/data/{country_info,seed}.dart,
+  lib/features/setup/ui/wizard_screen.dart, lib/router.dart (?next= landing).
+
+SET-B2 - Store Profile, System Settings, Global Defaults; formats app-wide
+  One settings form, SinglesForm, drives all four settings pages from a list
+  of fields. System Settings shows a live preview (today and 1234567.891).
+  Default Currency and Currency Precision lock once any document is
+  submitted, with a lock icon and the reason.
+  Formats (number, money, date, time) come from one provider, so changing a
+  setting changes every screen. parseNumber reads typed numbers in the
+  chosen Number Format.
+  Files: lib/core/numbers/{format,formats}.dart, lib/core/db/providers.dart,
+  lib/features/setup/ui/settings_pages.dart,
+  lib/features/setup/data/setup_queries.dart (anySubmittedDocument).
+
+SET-B3 - Currency and Price List
+  The store currency's form with a live amount preview. Price List list and
+  form; the last enabled list cannot be disabled or deleted.
+  File: lib/features/setup/ui/simple_masters.dart.
+
+SET-B4 - Naming Series
+  Pick a document, reorder or add series (the first is the default), see the
+  next name. Update Series refuses a number below one already used by any
+  document or item name.
+  File: lib/features/setup/ui/naming_series_page.dart.
+
+SET-B5 - Mode of Payment
+  List and form (Name, Type, Enabled). A mode in use cannot be deleted: the
+  database's foreign keys refuse it and the app says "disable it instead".
+
+SET-B6 - Tax, Sales Taxes and Charges Template, Item Tax Template
+  Pure logic in lib/features/setup/logic/tax_template.dart: the SET-R9 row
+  checks, the "Try it" calculation, the SET-R12 item rate override, and
+  renumbering of Reference Row # when a row is deleted. The template form has
+  the row editor (bottom sheet on phones, side sheet on tablets) and the
+  "Try it" panel. Making a template the default clears the old default.
+  File: lib/features/setup/ui/tax_template_pages.dart.
+
+SET-B7 - POS Profile and Selling Settings
+  The form in ERPNext's section order: warehouse (non-group only), payment
+  methods (Default, Allow in Returns), the eight switches and Action on New
+  Invoice, item groups, print settings, price list, taxes, Apply Discount On.
+  Save refuses: a group warehouse, not exactly one default payment, disabled
+  choices, an edit while the profile's session is open, and anything that
+  would leave the enabled profiles without exactly one default.
+  File: lib/features/setup/ui/pos_profile_page.dart.
+
+SET-B8 - Data Import and Data Export
+  Item, Item Price and Item Barcode, Insert or Update. Download Template,
+  Choose File (CSV), map unknown headers by hand, then every row is checked
+  before anything is written: missing mandatory value, duplicate name,
+  record not found, unknown link, bad number / date / value. Problems are
+  listed by row and column; nothing is imported until all are fixed. The
+  import runs in one transaction and lists what it created or updated.
+  Export writes the same columns, so an export can be edited and imported
+  back as an update.
+  Files: lib/features/setup/logic/data_import.dart,
+  lib/features/setup/data/data_import_db.dart,
+  lib/features/setup/ui/data_pages.dart.
+
+SET-B9 - Backup and Restore
+  Back up now: VACUUM INTO {abbr}-backup-{YYYYMMDD-HHMMSS}.sqlite in the
+  app's backup folder; only the newest Number of Backups files are kept.
+  Export saves a backup anywhere through Android's save dialog. Restore picks
+  a file, checks it is a SQLite file with `singles` and a schema version no
+  newer than the app's, refuses while a POS session is open, backs up the
+  current data, replaces the file and reopens the database.
+  File: lib/features/setup/data/backup.dart.
+
+Shared pieces
+  form_kit.dart: problems dialog, refusal messages, confirm dialog, form page
+  with Save/Delete, two-column field grid from 600dp, master list with
+  search, Add and an empty state. refusal.dart: refusal codes the UI turns
+  into translated text; UNIQUE and FOREIGN KEY failures become "name already
+  exists" and "used elsewhere, disable instead".
+  setup_screen.dart: the Setup workspace and the page for each route.
+  About 200 new messages in lib/l10n/app_en.arb.
+
+
+4. WRAP-UP WORK
+---------------
+
+4.1 Codebase navigation (Graphify)
+  "graphify update ." rebuilt the code graph: 876 nodes, 1,220 edges, 51
+  communities (was 337 / 392 / 17). Graphify kept a copy of the previous
+  graph in graphify-out/2026-11-16/.
+
+4.2 Code review: section 6.
+
+4.3 Final verification: section 5.
+
+4.4 System documentation
+  .claude/erpnext-planner/system-documentation.md updated to issue 2,
+  same ISO/IEC/IEEE 15289 structure.
+
+
+5. VERIFICATION EVIDENCE
+------------------------
+
+All run on 2026-11-16, after the last code change.
+
+  $ dart format --output=none --set-exit-if-changed lib test
+  Formatted 56 files (0 changed)
+
+  $ flutter analyze
+  No issues found!
+
+  $ dart fix --dry-run
+  Nothing to fix!
+
+  $ flutter test
+  140 tests passed, 0 failed
+
+  Tests per file:
+    13  test/app_test.dart                              (was 10)
+     4  test/core/db/schema_test.dart
+    13  test/core/db/singles_test.dart
+    11  test/core/naming/naming_series_test.dart
+    13  test/core/numbers/flt_test.dart
+    17  test/core/numbers/format_test.dart              (was 13)
+     5  test/core/widgets/child_table_test.dart
+     7  test/core/widgets/link_field_test.dart
+     5  test/core/widgets/list_detail_pane_test.dart
+     5  test/core/widgets/report_table_test.dart
+     7  test/core/widgets/status_chip_test.dart
+     7  test/features/setup/data/import_backup_test.dart   new
+    11  test/features/setup/data/setup_db_test.dart        new
+     9  test/features/setup/logic/data_import_test.dart    new
+    13  test/features/setup/logic/tax_template_test.dart   new
+   140  total
+
+  $ flutter build apk --release
+  Built build\app\outputs\flutter-apk\app-release.apk (75.3MB)
+  Merged release manifest: INTERNET 0 occurrences; uses-permission:
+  ACCESS_NETWORK_STATE, CAMERA, DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+  (unchanged from M0).
+
+  Acceptance checks of 01-setup.md:
+    SET-A1 to A7     pass (M0 tests, still green)
+    SET-A8 to A11    pass  tax_template_test.dart
+    SET-A12          pass  setup_db_test.dart (and a failed wizard writes nothing)
+    SET-A13          pass  setup_db_test.dart
+    SET-A14          pass  setup_db_test.dart
+    SET-A15          pass  setup_db_test.dart
+    SET-A16          pass  setup_db_test.dart
+    SET-A17          pass  data_import_test.dart, import_backup_test.dart
+    SET-A18          pass  import_backup_test.dart
+    SET-A19          pass  import_backup_test.dart
+    SET-A20          manual pass on emulators, below
+    SET-B8 "200 items imported"   pass  import_backup_test.dart
+
+  Emulator, phone (Medium_Phone_API_36.1, 360dp wide, software GL):
+    - Fresh install: wizard, country search, store step, "Add your first
+      item" lands on Stock. Relaunch skips the wizard.
+    - Setup workspace, System Settings (date format change shows in the
+      preview, Save shows "Saved"), Tax, Sales Taxes and Charges Template
+      (row editor bottom sheet, Try it: 12% of 1,000.00 = 120.00), POS
+      Profile (seeded values loaded, template chosen and saved), Backups.
+    - SET-B9 round trip: Back up now; Export to Downloads (454,656 bytes);
+      clear app data; new wizard with another store name; Restore from the
+      exported file. The live database then held store "Rx Corner Store",
+      template "VAT 12", POS Profile linked to it; a safety backup
+      TS-backup-20261116-090206.sqlite was taken first. Store Profile opened
+      normally on the reopened database.
+    - logcat: 0 Flutter errors.
+  Emulator, tablet (Medium_Tablet, software GL):
+    - Portrait (800dp, Medium): wizard card, rail without labels, POS
+      Profile form in two columns.
+    - Landscape (1280dp, Expanded): rail with labels; Setup workspace on the
+      left, page on the right, selected link highlighted; payment row editor
+      opens as a side sheet.
+    - logcat: 0 Flutter errors.
+  Afterwards: both emulators closed, tablet rotation lock released.
+
+
+6. CODE REVIEW RESULTS
+----------------------
+
+The CLAUDE file asks for a review and then Ponytail fixes. The repository
+has no "flutter review" tool, so the review was: flutter analyze, dart fix,
+and the code-review skill, which ran two independent reviewers on the
+working tree against 97bfd33: one for standards (00-overview sections 5-7
+plus a code-smell checklist), one against 01-setup.md.
+
+6.1 Problems found and fixed (Ponytail: smallest fix at the root)
+  Spec reviewer:
+   1. Currency form saved Smallest Currency Fraction Value as 1 instead of
+      0.01 in stores using "#.###,##" (25 countries). Fixed: the field shows
+      the value in the Number Format, so it reads back unchanged.
+   2. In "#.###" stores, typing 7.5 saved 75. Fixed in parseNumber: a group
+      must have the format's size, so 7.5 is refused, and a format without
+      decimals accepts the other mark (7,5) as the decimal point. 1 new test.
+   3. Deleting a tax row left later Reference Row # pointing at the wrong
+      row. Fixed with removeTaxRow(), which renumbers; 1 new test.
+   4. Backups page offered 1-20 while System Settings allows more. Fixed.
+   5. Errors other than refusals were not shown: the wizard buttons could
+      stay disabled, and a failed restore could leave the database closed.
+      Fixed: attempt() shows any error; restore always reopens the database.
+   6. A blank Abbreviation was kept, so backups were named "-backup-...".
+      Fixed in StoreProfile.abbr (falls back to initials); 1 new assertion.
+   7. ".FY." was accepted in a naming series. Fixed: refused with a message.
+   8. The Update Series test did not check the next name. Added.
+  Standards reviewer:
+   9. modified_at was not set on three updates (Item Price update, cleared
+      default template, cleared default profile). Fixed.
+  10. Screens queried the database directly (POS Profile and Item Tax
+      Template loading, Currency insert on Store Profile). Moved into query
+      methods; the Currency mapping now lives once on CountryInfo, used by
+      the wizard seed and Store Profile.
+  11. countryInfoProvider sat in data/. Moved to ui/.
+  12. Raw error text was shown untranslated. Now goes through a message.
+
+6.2 Reported and left as they are, on purpose
+  - Setup forms use DropdownMenu for links; 00-overview 7.1 names a
+    SearchAnchor with "Create new". The lists are short, so a dropdown shows
+    every choice at once. LinkField is used where lists are long (country,
+    currency). Change if you want "Create new" from inside a form.
+  - Stored option values (charge types, Mode of Payment types, Rounding
+    Method, record type names) are shown as stored, in English. They are
+    ERPNext's own words; translate them when a second language ships.
+  - FieldGrid switches to two columns on the pane width, not the window
+    width, so a form inside the tablet's right pane lays out correctly.
+  - The import log lists the imported records, not the Item Prices created
+    from Standard Selling Rate or the barcode rows.
+  - Data Import also applies three stock rules (Item Price from Standard
+    Selling Rate STK-R5, EAN check digit STK-R8, no overlapping price
+    validity STK-R10). Not in SET-R16's list; kept so imports cannot write
+    data the stock plan forbids.
+  - Judgement-call smells: three similar master pages, page slugs listed in
+    two places in setup_screen.dart, short names such as Col. Not changed.
+
+6.3 Found by the emulator pass and fixed
+  - Wizard card filled the whole tablet height. Fixed.
+  - POS Profile Price List could show blank when its list had not loaded
+    yet (a dropdown keeps the first entries it sees). All choices now load
+    before the form; the same guard was added to the Mode of Payment, Tax
+    and Price List forms.
+  - The Setup workspace showed a Back arrow beside a page on tablets. Removed.
+  - The Try it table pushed the Total column off a 360dp screen. Tightened.
+  - country_info.json (57 KB) never loaded in widget tests: Flutter decodes
+    assets over 50 KB on another isolate. Now decoded directly.
+
+
+7. DECISIONS MADE ON YOUR BEHALF
+--------------------------------
+
+  1. Built the whole of 01-setup.md (B1-B9), not only milestone M1.
+     Cost: M4 and M9 pieces exist before the stock and register plans.
+  2. Country data copied from Frappe (MIT) rather than written by hand.
+     Unsupported number formats mapped: "#,###.###", "#, ###.##" and
+     "#'###.##" to "#,###.##"; "# ###,##" to "#.###,##".
+     Cost: 11 countries show a near format until edited.
+  3. Currency Precision is set from the currency at setup: 0 for the yen,
+     3 for the dinars, otherwise 2. Cost: none found.
+  4. Wizard preselects the device's country. Cost: one line.
+  5. The wizard writes the seed when Done's button is pressed, and the
+     router reads "?next=" to land on Stock or the Cash Register.
+  6. One SinglesForm for all settings pages; one NamedMasterForm for Mode of
+     Payment, Tax and Price List. Cost: a field type the form lacks needs
+     adding there.
+  7. Deletes rely on SQLite's foreign keys instead of per-table "is it used"
+     queries. Cost: the message cannot name the record that uses it.
+  8. sqlite3 added as a direct dependency (it was already pulled in by
+     drift), to open a backup read-only before a restore.
+  9. The database path is drift_flutter's default
+     (app documents/rx_merchant.sqlite); backup.dart reads the same path.
+ 10. CSV numbers use a dot for decimals and dates YYYY-MM-DD, whatever the
+     display formats; stated on the import page.
+ 11. Two backups in the same second: the second replaces the first.
+
+
+8. KNOWN PROBLEMS AND OPEN ITEMS
+--------------------------------
+
+  1. No real device was used for any check.
+  2. Auto-backup on POS Closing (SET-R17) waits for milestone M5.
+  3. (Resolved in the follow-up, section 12: the wizard's first step now
+     offers "Restore from backup".)
+  4. Leaving a form with unsaved changes discards them without asking.
+  5. The release APK is still signed with the debug key (M0, unchanged).
+  6. The emulator rendering fault from M0 was avoided by using software GL
+     (-gpu swiftshader_indirect); it was not investigated further.
+  7. modified_at: item_barcode and item_tax have no such column; nothing to
+     set there.
+
+
+9. NOT BUILT YET
+----------------
+
+  Milestones M2, M3 (stock), M5 (cash register), M6 (invoices), M7
+  (dashboard), M8 (variants, batches, serials).
+  From 01-setup, waiting on those: the POS Closing backup hook, the Stock
+  Settings page (02), Print Settings, Letter Head, Print Heading and Terms
+  and Conditions pages (05).
+
+
+10. FILES
+---------
+
+Modified (tracked)
+  lib/app.dart                               locale from System Settings
+  lib/core/db/providers.dart                 singleProvider, storeCurrency, formats
+  lib/core/db/singles.dart                   blank abbreviation -> initials
+  lib/core/numbers/format.dart               parseNumber
+  lib/features/setup/ui/wizard_screen.dart   real wizard (was placeholder)
+  lib/l10n/app_en.arb                        about 200 messages added
+  lib/l10n/app_localizations*.dart           generated
+  lib/router.dart                            Setup routes, ?next= landing
+  pubspec.yaml / pubspec.lock                asset, sqlite3
+  test/app_test.dart                         wizard and Setup tests
+  test/core/db/singles_test.dart             blank abbreviation
+  test/core/numbers/format_test.dart         parseNumber
+
+Added - app
+  assets/country_info.json
+  lib/core/numbers/formats.dart
+  lib/features/setup/data/backup.dart
+  lib/features/setup/data/country_info.dart
+  lib/features/setup/data/data_import_db.dart
+  lib/features/setup/data/refusal.dart
+  lib/features/setup/data/seed.dart
+  lib/features/setup/data/setup_queries.dart
+  lib/features/setup/logic/data_import.dart
+  lib/features/setup/logic/tax_template.dart
+  lib/features/setup/ui/data_pages.dart
+  lib/features/setup/ui/form_kit.dart
+  lib/features/setup/ui/naming_series_page.dart
+  lib/features/setup/ui/pos_profile_page.dart
+  lib/features/setup/ui/settings_pages.dart
+  lib/features/setup/ui/setup_screen.dart
+  lib/features/setup/ui/simple_masters.dart
+  lib/features/setup/ui/tax_template_pages.dart
+  lib/features/stock/logic/barcode.dart
+
+Added - tests
+  test/features/setup/data/import_backup_test.dart
+  test/features/setup/data/setup_db_test.dart
+  test/features/setup/logic/data_import_test.dart
+  test/features/setup/logic/tax_template_test.dart
+
+Documentation and tooling
+  .claude/commits/2026-11-16_17-26-13.txt    this report
+  .claude/erpnext-planner/system-documentation.md   updated
+  graphify-out/                              rebuilt; previous copy in 2026-11-16/
+
+Changed by you, not by me
+  .claude/erpnext-planner/current-user-prompt.txt   modified
+  CLAUDE.txt                                        deleted
+  CLAUDE.md                                         added
+
+
+11. BEFORE YOU COMMIT
+---------------------
+
+  - The schema did not change; schemaVersion is still 1.
+  - The .gitignore line ".claude\erpnext-planner" (backslash) from the last
+    report is unchanged: that folder is still tracked.
+  - graphify-out/2026-11-16/ is a backup Graphify made; delete it if you do
+    not want it in the repository.
+
+
+12. FOLLOW-UP: RESTORE FROM THE WIZARD (asked for after the report)
+-------------------------------------------------------------------
+
+Why
+  Setup, and with it the Backups page, is behind the wizard gate (SET-R1).
+  A new device had to finish the wizard with throwaway answers before it
+  could restore, and that detour left a junk safety backup of the
+  throwaway store. Restoring onto a new device is the main use of backups.
+
+What changed
+  - Wizard, step 1: "Moving from another device? Restore a backup instead
+    of setting up again." and a "Restore from backup" button. It picks the
+    file, restores it and reopens the database; with setup complete in the
+    restored data the router leaves the wizard by itself. No confirm
+    dialog: a fresh install has nothing to lose.
+  - restoreDatabase (data/backup.dart): the safety backup is taken only
+    when setup was finished; a never-set-up store holds nothing to keep.
+    One guard in the shared function covers both callers. Optional
+    target and backupDir parameters let the test run off-device.
+  - pickBackupCopy() and restoreAndReopen() (ui/data_pages.dart): the
+    Backups page's pick-copy-restore-reopen steps, now shared by the
+    Backups page and the wizard.
+  - Two messages added to app_en.arb (227 in all).
+  - Tests: restore onto a fresh install takes no safety backup and the
+    restored file holds setup_complete = 1; onto a set-up store it takes
+    one. The fresh-install wizard test checks the button is shown.
+    140 of 140 pass.
+
+Verified
+  dart format: 0 changed. flutter analyze: no issues. dart fix: nothing.
+  flutter build apk --release: builds, 75.3 MB; INTERNET 0 occurrences.
+  Phone emulator, after clearing app data: wizard step 1 shows the
+  button; it opens Android's file picker; picking the backup exported
+  earlier (RCS-backup-20261116-090006.sqlite) landed on the Cash
+  Register with no wizard. The live database held store "Rx Corner
+  Store", abbreviation RCS, template "VAT 12", POS Profile linked to it;
+  no backups folder was created (no junk copy). logcat: 0 Flutter errors.
+
+Review
+  Small change (about 70 lines): reviewed with flutter analyze, dart fix
+  and a read of the diff, not the two-reviewer pass of section 6. Nothing
+  found to fix.
+
+Documentation
+  system-documentation.md: P-9 closed; wizard, Restore, user guide, test
+  and message counts updated.
+
+Graph
+  "graphify update ." after the follow-up: 881 nodes, 1,228 edges, 49
+  communities.
+

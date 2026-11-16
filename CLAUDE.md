@@ -9,9 +9,9 @@ When Reporting information to me, be extremely concise
 and sacrifice grammar for the sake of concision
 
 # Code Review
-Once done coding - use [Fallow] for "Codebase Review".
-If [Fallow] responded with any "problems" regarding about 
-the "Codebase", use [Ponytail] to fix 
+Once done coding and reviewing through
+the use of flutter review, use [Ponytail] to fix 
+any problems reported
 
 # Finalization 
 
@@ -42,4 +42,5 @@ write it in the "B:\Development-Projects\rx_merchant\.claude\erpnext-planner\sys
 ( note ):
 markdown filepath: "B:\Development-Projects\rx_merchant\.claude\erpnext-planner\system-documentation.md"
 
-if the [markdown filepath] currently has contents, then just update the current file
+if the [markdown filepath] currently has contents, then just update 
+the current file if there were any changes

@@ -45,27 +45,106 @@ void main() {
     testWidgets('a fresh install shows only the wizard', (tester) async {
       await pumpApp(tester, width: 400, setupComplete: false);
 
-      expect(find.text('Finish setup'), findsOneWidget);
+      expect(find.text('Step 1 of 4'), findsOneWidget);
+      // A new device can restore instead of setting up (SET-R18).
+      expect(find.text('Restore from backup'), findsOneWidget);
       expect(find.byType(NavigationBar), findsNothing);
       expect(find.byType(NavigationRail), findsNothing);
     });
 
-    testWidgets('finishing setup opens the Cash Register', (tester) async {
-      await pumpApp(tester, width: 400, setupComplete: false);
+    testWidgets(
+      'SET-B1 Language, Region, Store, Done lands on the Cash Register',
+      (tester) async {
+        await pumpApp(tester, width: 400, setupComplete: false);
 
-      await tester.tap(find.text('Finish setup'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Next'));
+        await tester.pumpAndSettle();
+        // Region: the device's country (en_US in tests) is preselected.
+        expect(find.text('United States'), findsOneWidget);
+        expect(find.textContaining('USD'), findsOneWidget);
+        await tester.tap(find.text('Next'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Finish setup'), findsNothing);
-      expect(find.widgetWithText(AppBar, 'Cash Register'), findsOneWidget);
-      expect(find.byType(NavigationBar), findsOneWidget);
-    });
+        await tester.enterText(find.byType(TextField).first, 'Rx Corner Store');
+        await tester.pumpAndSettle();
+        expect(find.text('RCS'), findsOneWidget);
+        await tester.tap(find.text('Next'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Open Cash Register'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Step 4 of 4'), findsNothing);
+        expect(find.widgetWithText(AppBar, 'Cash Register'), findsOneWidget);
+        expect(find.byType(NavigationBar), findsOneWidget);
+      },
+    );
 
     testWidgets('a set-up store never sees the wizard', (tester) async {
       await pumpApp(tester, width: 400);
 
-      expect(find.text('Finish setup'), findsNothing);
+      expect(find.text('Step 1 of 4'), findsNothing);
       expect(find.widgetWithText(AppBar, 'Cash Register'), findsOneWidget);
+    });
+  });
+
+  group('Setup destination', () {
+    Future<void> openSetup(WidgetTester tester) async {
+      await tester.tap(find.text('Setup').last);
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('compact: the workspace, then a pushed page', (tester) async {
+      await pumpApp(tester, width: 400);
+      await openSetup(tester);
+      expect(find.text('Store Profile'), findsOneWidget);
+      // Pages owned by other plans are listed but not reachable yet.
+      await tester.scrollUntilVisible(find.text('Stock Settings'), 200);
+      expect(
+        tester
+            .widget<ListTile>(find.widgetWithText(ListTile, 'Stock Settings'))
+            .enabled,
+        isFalse,
+      );
+
+      await tester.scrollUntilVisible(find.text('Mode of Payment'), -200);
+      await tester.tap(find.text('Mode of Payment'));
+      await tester.pumpAndSettle();
+      expect(find.widgetWithText(AppBar, 'Mode of Payment'), findsOneWidget);
+      expect(find.text('Store Profile'), findsNothing);
+    });
+
+    testWidgets('expanded: the workspace stays beside the page', (
+      tester,
+    ) async {
+      await pumpApp(tester, width: 1280);
+      await openSetup(tester);
+      await tester.tap(find.text('Tax'));
+      await tester.pumpAndSettle();
+
+      expect(find.widgetWithText(AppBar, 'Tax'), findsOneWidget);
+      expect(find.text('Store Profile'), findsOneWidget);
+    });
+
+    testWidgets('a settings page saves to singles', (tester) async {
+      await pumpApp(tester, width: 400);
+      await openSetup(tester);
+      await tester.tap(find.text('Global Defaults'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Hide Currency Symbol'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Saved'), findsOneWidget);
+      final db = ProviderScope.containerOf(
+        tester.element(find.byType(MaterialApp)),
+      ).read(appDatabaseProvider);
+      final stored = await tester.runAsync(
+        () => db.readSingle(GlobalDefaults.doctype),
+      );
+      expect(GlobalDefaults(stored!).hideCurrencySymbol, isTrue);
     });
   });
 

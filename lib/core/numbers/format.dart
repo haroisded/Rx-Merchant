@@ -33,6 +33,31 @@ String formatNumber(num value, String numberFormat, int precision) {
   return '$sign${groups.join(groupSeparator)}$fraction';
 }
 
+/// Reads a number typed in a Number Format (SET-R5: formats affect typing
+/// too): `1.234,5` in `#.###,##` is 1234.5. A format without decimals takes
+/// the other mark as its decimal point, so `7,5` in `#.###` is 7.5.
+///
+/// Groups after the first must have the format's size, so a mistyped
+/// decimal mark is refused instead of read as a group separator: `7.5` in
+/// `#.###` is null, not 75. Null too when the text is not a finite number.
+double? parseNumber(String text, String numberFormat) {
+  final groupSeparator = numberFormat.length > 1 ? numberFormat[1] : ',';
+  final decimalSeparator =
+      RegExp(r'([.,])##$').firstMatch(numberFormat)?[1] ??
+      (groupSeparator == '.' ? ',' : '.');
+  final indian = numberFormat.startsWith('#,##,');
+  final t = text.trim();
+  final cut = t.lastIndexOf(decimalSeparator);
+  final groups = (cut < 0 ? t : t.substring(0, cut)).split(groupSeparator);
+  for (var i = 1; i < groups.length; i++) {
+    final size = indian && i < groups.length - 1 ? 2 : 3;
+    if (groups[i].length != size) return null;
+  }
+  final fraction = cut < 0 ? '' : '.${t.substring(cut + 1)}';
+  final value = double.tryParse('${groups.join()}$fraction');
+  return value != null && value.isFinite ? value : null;
+}
+
 /// [formatNumber] with the currency symbol placed as the Currency record says.
 /// [hideSymbol] is Global Defaults' "Hide Currency Symbol".
 String formatCurrency(

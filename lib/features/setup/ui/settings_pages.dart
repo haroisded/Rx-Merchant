@@ -1,0 +1,557 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
+
+import '../../../core/db/providers.dart';
+import '../../../core/db/singles.dart';
+import '../../../core/numbers/formats.dart';
+import '../../../core/widgets/spacing.dart';
+import '../../../l10n/app_localizations.dart';
+import '../data/country_info.dart';
+import '../data/setup_queries.dart';
+import 'form_kit.dart';
+
+enum FieldKind { text, money, wholeNumber, check, choice, info }
+
+/// One field of a settings page. [read] gives its current text from the
+/// stored values, applying the default (`singles.dart`); checks are '1'/'0'.
+class SingleField {
+  const SingleField(
+    this.key,
+    this.label, {
+    required this.read,
+    this.kind = FieldKind.text,
+    this.options = const [],
+    this.optionLabel,
+    this.mandatory = false,
+    this.lockReason,
+  });
+
+  final String key;
+  final String label;
+  final String Function(Map<String, String> stored) read;
+  final FieldKind kind;
+  final List<String> options;
+  final String Function(String option)? optionLabel;
+  final bool mandatory;
+
+  /// Non-null makes the field read-only, with this reason under it.
+  final String? lockReason;
+}
+
+/// A one-record settings page kept in `singles` (00-overview 6.5): sections
+/// of fields, Save, and an optional live [preview] of the edited values.
+class SinglesForm extends ConsumerStatefulWidget {
+  const SinglesForm({
+    super.key,
+    required this.doctype,
+    required this.title,
+    required this.sections,
+    this.preview,
+    this.beforeSave,
+  });
+
+  final String doctype;
+  final String title;
+  final List<(String, List<SingleField>)> sections;
+  final Widget Function(Map<String, String> values)? preview;
+
+  /// Runs inside Save, before the values are written.
+  final Future<void> Function(Map<String, String> values)? beforeSave;
+
+  @override
+  ConsumerState<SinglesForm> createState() => _SinglesFormState();
+}
+
+class _SinglesFormState extends ConsumerState<SinglesForm> {
+  final _formKey = GlobalKey<FormState>();
+  Map<String, String>? _values;
+
+  Iterable<SingleField> get _fields => widget.sections.expand((s) => s.$2);
+
+  @override
+  void initState() {
+    super.initState();
+    ref.read(appDatabaseProvider).readSingle(widget.doctype).then((stored) {
+      if (mounted) {
+        setState(
+          () => _values = {for (final f in _fields) f.key: f.read(stored)},
+        );
+      }
+    });
+  }
+
+  Future<void> _save() async {
+    final l = AppLocalizations.of(context);
+    if (!_formKey.currentState!.validate()) {
+      return showProblems(context, [l.formHasErrors]);
+    }
+    _formKey.currentState!.save();
+    final values = {
+      for (final f in _fields)
+        if (f.kind != FieldKind.info && f.lockReason == null)
+          f.key: _values![f.key]!,
+    };
+    final db = ref.read(appDatabaseProvider);
+    await attempt(context, () async {
+      await widget.beforeSave?.call(values);
+      await db.writeSingle(widget.doctype, values);
+    }, done: l.saved);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final values = _values;
+    if (values == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    return FormPage(
+      title: widget.title,
+      formKey: _formKey,
+      onSave: _save,
+      children: [
+        for (final (heading, fields) in widget.sections) ...[
+          SectionHeading(heading),
+          FieldGrid(children: [for (final f in fields) _field(f, values)]),
+        ],
+        if (widget.preview case final preview?) ...[
+          const SizedBox(height: AppSpacing.lg),
+          preview(values),
+        ],
+      ],
+    );
+  }
+
+  Widget _field(SingleField f, Map<String, String> values) {
+    final l = AppLocalizations.of(context);
+    final formats = ref.read(formatsProvider);
+    final locked = f.lockReason != null;
+    final label = f.mandatory ? '${f.label} *' : f.label;
+    final value = values[f.key]!;
+    void set(String v) => setState(() => values[f.key] = v);
+
+    final Widget field = switch (f.kind) {
+      FieldKind.info => InputDecorator(
+        decoration: InputDecoration(labelText: label),
+        child: Text(value),
+      ),
+      FieldKind.check => SwitchListTile(
+        title: Text(f.label),
+        value: value == '1',
+        onChanged: locked ? null : (on) => set(on ? '1' : '0'),
+      ),
+      FieldKind.choice => DropdownMenu<String>(
+        label: Text(label),
+        initialSelection: value,
+        enabled: !locked,
+        expandedInsets: EdgeInsets.zero,
+        // Long lists (countries) can be searched by typing.
+        enableFilter: f.options.length > 20,
+        requestFocusOnTap: f.options.length > 20,
+        menuHeight: 320,
+        onSelected: (v) => v == null ? null : set(v),
+        dropdownMenuEntries: [
+          for (final o in f.options)
+            DropdownMenuEntry(value: o, label: f.optionLabel?.call(o) ?? o),
+        ],
+      ),
+      FieldKind.text ||
+      FieldKind.money ||
+      FieldKind.wholeNumber => TextFormField(
+        initialValue: f.kind == FieldKind.money
+            ? formats.number(
+                double.tryParse(value) ?? 0,
+                formats.system.currencyPrecision,
+              )
+            : value,
+        readOnly: locked,
+        decoration: InputDecoration(labelText: label),
+        keyboardType: f.kind == FieldKind.text
+            ? null
+            : TextInputType.numberWithOptions(
+                decimal: f.kind == FieldKind.money,
+              ),
+        validator: (text) {
+          final t = text!.trim();
+          if (t.isEmpty) return f.mandatory ? l.mandatoryField : null;
+          return switch (f.kind) {
+            FieldKind.money when formats.parse(t) == null => l.notANumber,
+            FieldKind.wholeNumber when (int.tryParse(t) ?? 0) < 1 =>
+              l.notAWholeNumber,
+            _ => null,
+          };
+        },
+        onSaved: (text) => values[f.key] = switch (f.kind) {
+          FieldKind.money => '${formats.parse(text!) ?? 0}',
+          _ => text!.trim(),
+        },
+      ),
+    };
+    if (!locked) return field;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [field, LockNote(f.lockReason!)],
+    );
+  }
+}
+
+// ---- The four settings pages ------------------------------------------------
+
+/// The bundled countries, read once.
+final countryInfoProvider = FutureProvider<List<CountryInfo>>(
+  (ref) => loadCountryInfo(),
+);
+
+/// SET-R2: true once any document is submitted.
+final submittedProvider = FutureProvider.autoDispose<bool>(
+  (ref) => ref.watch(appDatabaseProvider).anySubmittedDocument(),
+);
+
+const dateFormats = [
+  'yyyy-mm-dd', 'dd-mm-yyyy', 'dd/mm/yyyy', 'dd.mm.yyyy', 'mm/dd/yyyy', //
+  'mm-dd-yyyy',
+];
+const numberFormats = [
+  '#,###.##', '#.###,##', '# ###.##', '#,##,###.##', '#,###', '#.###', //
+];
+const _weekdays = [
+  'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', //
+  'Sunday',
+];
+
+/// The shipped languages, each named in its own language.
+List<String> get languageCodes => [
+  for (final locale in AppLocalizations.supportedLocales) locale.languageCode,
+];
+String languageName(String code) =>
+    lookupAppLocalizations(Locale(code)).languageName;
+
+String _flag(bool on) => on ? '1' : '0';
+List<String> _range(int from, int to) => [
+  for (var i = from; i <= to; i++) '$i',
+];
+
+/// Waits for what a page's fields need, then builds it.
+Widget _when<T>(AsyncValue<T> value, Widget Function(T) build) =>
+    switch (value) {
+      AsyncData(:final value) => build(value),
+      AsyncError(:final error) => Scaffold(
+        body: Center(
+          child: Builder(
+            builder: (context) =>
+                Text(AppLocalizations.of(context).unexpectedError('$error')),
+          ),
+        ),
+      ),
+      _ => const Scaffold(body: Center(child: CircularProgressIndicator())),
+    };
+
+class StoreProfilePage extends ConsumerWidget {
+  const StoreProfilePage({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+    final db = ref.watch(appDatabaseProvider);
+    return _when(ref.watch(countryInfoProvider), (countries) {
+      return _when(ref.watch(submittedProvider), (locked) {
+        final currencies = {for (final c in countries) ?c.currency: c};
+        return SinglesForm(
+          doctype: StoreProfile.doctype,
+          title: l.storeProfile,
+          sections: [
+            (
+              l.sectionStore,
+              [
+                SingleField(
+                  'store_name',
+                  l.storeName,
+                  mandatory: true,
+                  read: (v) => StoreProfile(v).storeName,
+                ),
+                SingleField(
+                  'abbr',
+                  l.abbreviation,
+                  read: (v) => StoreProfile(v).abbr,
+                ),
+                SingleField(
+                  'country',
+                  l.country,
+                  kind: FieldKind.choice,
+                  options: [for (final c in countries) c.name],
+                  read: (v) => StoreProfile(v).country ?? '',
+                ),
+                SingleField(
+                  'default_currency',
+                  l.defaultCurrency,
+                  kind: FieldKind.choice,
+                  options: currencies.keys.toList()..sort(),
+                  lockReason: locked ? l.lockedAfterSubmit : null,
+                  read: (v) => StoreProfile(v).defaultCurrency ?? '',
+                ),
+              ],
+            ),
+            (
+              l.sectionSalesGoal,
+              [
+                SingleField(
+                  'monthly_sales_target',
+                  l.monthlySalesTarget,
+                  kind: FieldKind.money,
+                  read: (v) => '${StoreProfile(v).monthlySalesTarget}',
+                ),
+              ],
+            ),
+          ],
+          // A newly chosen currency gets its Currency record from the
+          // bundled country data.
+          beforeSave: (values) async {
+            final source = currencies[values['default_currency']];
+            if (source != null) await db.addCurrency(source);
+          },
+        );
+      });
+    });
+  }
+}
+
+class SystemSettingsPage extends ConsumerWidget {
+  const SystemSettingsPage({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+    return _when(ref.watch(countryInfoProvider), (countries) {
+      return _when(ref.watch(submittedProvider), (locked) {
+        return SinglesForm(
+          doctype: SystemSettings.doctype,
+          title: l.systemSettings,
+          sections: [
+            (
+              l.sectionRegion,
+              [
+                SingleField(
+                  'country',
+                  l.country,
+                  kind: FieldKind.choice,
+                  options: [for (final c in countries) c.name],
+                  read: (v) => SystemSettings(v).country ?? '',
+                ),
+                SingleField(
+                  'language',
+                  l.language,
+                  kind: FieldKind.choice,
+                  options: languageCodes,
+                  optionLabel: languageName,
+                  read: (v) => SystemSettings(v).language,
+                ),
+                SingleField(
+                  'time_zone',
+                  l.timeZone,
+                  kind: FieldKind.info,
+                  read: (_) => DateTime.now().timeZoneName,
+                ),
+                SingleField(
+                  'date_format',
+                  l.dateFormat,
+                  kind: FieldKind.choice,
+                  options: dateFormats,
+                  read: (v) => SystemSettings(v).dateFormat,
+                ),
+                SingleField(
+                  'time_format',
+                  l.timeFormat,
+                  kind: FieldKind.choice,
+                  options: const ['HH:mm:ss', 'HH:mm'],
+                  read: (v) => SystemSettings(v).timeFormat,
+                ),
+                SingleField(
+                  'number_format',
+                  l.numberFormat,
+                  kind: FieldKind.choice,
+                  options: numberFormats,
+                  read: (v) => SystemSettings(v).numberFormat,
+                ),
+                SingleField(
+                  'first_day_of_week',
+                  l.firstDayOfWeek,
+                  kind: FieldKind.choice,
+                  options: _weekdays,
+                  read: (v) => SystemSettings(v).firstDayOfWeek,
+                ),
+              ],
+            ),
+            (
+              l.sectionNumbers,
+              [
+                SingleField(
+                  'float_precision',
+                  l.floatPrecision,
+                  kind: FieldKind.choice,
+                  options: _range(2, 9),
+                  read: (v) => '${SystemSettings(v).floatPrecision}',
+                ),
+                SingleField(
+                  'currency_precision',
+                  l.currencyPrecision,
+                  kind: FieldKind.choice,
+                  options: _range(0, 9),
+                  lockReason: locked ? l.lockedAfterSubmit : null,
+                  read: (v) => '${SystemSettings(v).currencyPrecision}',
+                ),
+                SingleField(
+                  'rounding_method',
+                  l.roundingMethod,
+                  kind: FieldKind.choice,
+                  options: const ["Banker's Rounding", 'Commercial Rounding'],
+                  read: (v) => SystemSettings(v).roundingMethod,
+                ),
+              ],
+            ),
+            (
+              l.sectionBackups,
+              [
+                SingleField(
+                  'number_of_backups',
+                  l.numberOfBackups,
+                  kind: FieldKind.wholeNumber,
+                  read: (v) => '${SystemSettings(v).numberOfBackups}',
+                ),
+              ],
+            ),
+          ],
+          preview: (values) => _FormatPreview(values),
+        );
+      });
+    });
+  }
+}
+
+/// Today's date and 1234567.891 in the formats being edited (SET-R5).
+class _FormatPreview extends ConsumerWidget {
+  const _FormatPreview(this.values);
+
+  final Map<String, String> values;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final current = ref.watch(formatsProvider);
+    final f = Formats(
+      system: SystemSettings(values),
+      defaults: current.defaults,
+      currency: current.currency,
+    );
+    final now = DateTime.now();
+    return Card.filled(
+      child: ListTile(
+        title: Text(AppLocalizations.of(context).preview),
+        subtitle: Text(
+          '${f.date(now)}  ${f.time(now)}\n${f.number(1234567.891)}  ·  ${f.money(1234567.891)}',
+        ),
+      ),
+    );
+  }
+}
+
+class GlobalDefaultsPage extends ConsumerWidget {
+  const GlobalDefaultsPage({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+    final store = ref.watch(singleProvider(StoreProfile.doctype));
+    return _when(store, (store) {
+      return SinglesForm(
+        doctype: GlobalDefaults.doctype,
+        title: l.globalDefaults,
+        sections: [
+          (
+            l.sectionDefaults,
+            [
+              SingleField(
+                'default_currency',
+                l.defaultCurrency,
+                kind: FieldKind.info,
+                read: (_) => StoreProfile(store).defaultCurrency ?? '',
+              ),
+              SingleField(
+                'hide_currency_symbol',
+                l.hideCurrencySymbol,
+                kind: FieldKind.check,
+                read: (v) => _flag(GlobalDefaults(v).hideCurrencySymbol),
+              ),
+              SingleField(
+                'disable_rounded_total',
+                l.disableRoundedTotal,
+                kind: FieldKind.check,
+                read: (v) => _flag(GlobalDefaults(v).disableRoundedTotal),
+              ),
+              SingleField(
+                'disable_in_words',
+                l.disableInWords,
+                kind: FieldKind.check,
+                read: (v) => _flag(GlobalDefaults(v).disableInWords),
+              ),
+            ],
+          ),
+        ],
+      );
+    });
+  }
+}
+
+final _enabledPriceListsProvider = StreamProvider.autoDispose<List<String>>((
+  ref,
+) {
+  final db = ref.watch(appDatabaseProvider);
+  return (db.select(
+    db.priceList,
+  )..where((p) => p.enabled.equals(1))).map((p) => p.name).watch();
+});
+
+class SellingSettingsPage extends ConsumerWidget {
+  const SellingSettingsPage({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+    return _when(ref.watch(_enabledPriceListsProvider), (lists) {
+      return SinglesForm(
+        doctype: SellingSettings.doctype,
+        title: l.sellingSettings,
+        sections: [
+          (
+            l.sectionDefaults,
+            [
+              SingleField(
+                'selling_price_list',
+                l.defaultPriceList,
+                kind: FieldKind.choice,
+                options: lists,
+                read: (v) => SellingSettings(v).sellingPriceList,
+              ),
+              SingleField(
+                'fallback_to_default_price_list',
+                l.fallbackToDefaultPriceList,
+                kind: FieldKind.check,
+                read: (v) =>
+                    _flag(SellingSettings(v).fallbackToDefaultPriceList),
+              ),
+              SingleField(
+                'editable_price_list_rate',
+                l.editablePriceListRate,
+                kind: FieldKind.check,
+                read: (v) => _flag(SellingSettings(v).editablePriceListRate),
+              ),
+              SingleField(
+                'validate_selling_price',
+                l.validateSellingPrice,
+                kind: FieldKind.check,
+                read: (v) => _flag(SellingSettings(v).validateSellingPrice),
+              ),
+            ],
+          ),
+        ],
+      );
+    });
+  }
+}

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'core/db/providers.dart';
 import 'l10n/app_localizations.dart';
 import 'router.dart';
 
@@ -32,6 +33,11 @@ class App extends ConsumerWidget {
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
+      // System Settings' Language; the device language until it is read.
+      locale: switch (ref.watch(systemSettingsProvider).value?.language) {
+        final code? => Locale(code),
+        null => null,
+      },
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
     );

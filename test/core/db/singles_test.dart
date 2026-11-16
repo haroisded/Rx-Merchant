@@ -42,6 +42,10 @@ void main() {
         const StoreProfile({'store_name': 'Rx Merchant', 'abbr': 'RX'}).abbr,
         'RX',
       );
+      expect(
+        const StoreProfile({'store_name': 'Rx Merchant', 'abbr': ' '}).abbr,
+        'RM',
+      );
     });
 
     test('Global Defaults', () async {

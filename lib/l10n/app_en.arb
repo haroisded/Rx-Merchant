@@ -1,51 +1,418 @@
 {
   "@@locale": "en",
   "appTitle": "Rx Merchant",
-  "@appTitle": { "description": "Name of the app in the task switcher" },
-
+  "@appTitle": {
+    "description": "Name of the app in the task switcher"
+  },
   "navCashRegister": "Register",
-  "@navCashRegister": { "description": "Navigation destination 1: the POS screen. Kept short: a longer label wraps on a 360dp-wide bar" },
+  "@navCashRegister": {
+    "description": "Navigation destination 1: the POS screen. Kept short: a longer label wraps on a 360dp-wide bar"
+  },
   "titleCashRegister": "Cash Register",
-  "@titleCashRegister": { "description": "Title of the POS screen" },
+  "@titleCashRegister": {
+    "description": "Title of the POS screen"
+  },
   "navInvoices": "Invoices",
-  "@navInvoices": { "description": "Navigation destination 2: the Sales Invoice list" },
+  "@navInvoices": {
+    "description": "Navigation destination 2: the Sales Invoice list"
+  },
   "navStock": "Stock",
-  "@navStock": { "description": "Navigation destination 3: items, stock transactions, stock reports" },
+  "@navStock": {
+    "description": "Navigation destination 3: items, stock transactions, stock reports"
+  },
   "navDashboard": "Dashboard",
-  "@navDashboard": { "description": "Navigation destination 4: Sales Dashboard and sales reports" },
+  "@navDashboard": {
+    "description": "Navigation destination 4: Sales Dashboard and sales reports"
+  },
   "navSetup": "Setup",
-  "@navSetup": { "description": "Navigation destination 5: every settings page" },
-
+  "@navSetup": {
+    "description": "Navigation destination 5: every settings page"
+  },
   "comingSoon": "This screen arrives in a later milestone.",
-  "@comingSoon": { "description": "Body of a destination that has not been built yet" },
-
+  "@comingSoon": {
+    "description": "Body of a destination that has not been built yet"
+  },
   "wizardTitle": "Welcome",
-  "@wizardTitle": { "description": "Title of the first-run wizard" },
-  "wizardPlaceholder": "The first-run wizard arrives in milestone M1. Until then, finish setup here to reach the app.",
-  "@wizardPlaceholder": { "description": "Body of the wizard placeholder; removed with milestone M1" },
-  "wizardFinish": "Finish setup",
-  "@wizardFinish": { "description": "Button that marks setup as complete" },
-
+  "@wizardTitle": {
+    "description": "Title of the first-run wizard"
+  },
   "startupError": "The database could not be opened.",
-  "@startupError": { "description": "Shown when settings cannot be read at startup" },
-
+  "@startupError": {
+    "description": "Shown when settings cannot be read at startup"
+  },
   "createNew": "Create new",
-  "@createNew": { "description": "Last entry of a link field's list: create a new master record" },
+  "@createNew": {
+    "description": "Last entry of a link field's list: create a new master record"
+  },
   "addRow": "Add Row",
-  "@addRow": { "description": "Button under a child table" },
+  "@addRow": {
+    "description": "Button under a child table"
+  },
   "exportCsv": "Export CSV",
-  "@exportCsv": { "description": "Tooltip of a report's export action" },
-
+  "@exportCsv": {
+    "description": "Tooltip of a report's export action"
+  },
   "statusDraft": "Draft",
-  "@statusDraft": { "description": "Document status: docstatus 0" },
+  "@statusDraft": {
+    "description": "Document status: docstatus 0"
+  },
   "statusSubmitted": "Submitted",
-  "@statusSubmitted": { "description": "Document status: docstatus 1" },
+  "@statusSubmitted": {
+    "description": "Document status: docstatus 1"
+  },
   "statusPaid": "Paid",
-  "@statusPaid": { "description": "Sales Invoice status" },
+  "@statusPaid": {
+    "description": "Sales Invoice status"
+  },
   "statusReturn": "Return",
-  "@statusReturn": { "description": "Sales Invoice status: the invoice is a return" },
+  "@statusReturn": {
+    "description": "Sales Invoice status: the invoice is a return"
+  },
   "statusCreditNoteIssued": "Credit Note Issued",
-  "@statusCreditNoteIssued": { "description": "Sales Invoice status: a return exists against it" },
+  "@statusCreditNoteIssued": {
+    "description": "Sales Invoice status: a return exists against it"
+  },
   "statusCancelled": "Cancelled",
-  "@statusCancelled": { "description": "Document status: docstatus 2" }
+  "@statusCancelled": {
+    "description": "Document status: docstatus 2"
+  },
+  "languageName": "English",
+  "@languageName": {
+    "description": "The name of this file's language, in that language. Shown in the language lists"
+  },
+  "save": "Save",
+  "saved": "Saved",
+  "delete": "Delete",
+  "add": "Add",
+  "search": "Search",
+  "done": "Done",
+  "back": "Back",
+  "next": "Next",
+  "none": "None",
+  "export": "Export",
+  "emptyList": "Nothing here yet.",
+  "disabled": "Disabled",
+  "enabled": "Enabled",
+  "isDefault": "Default",
+  "name": "Name",
+  "title": "Title",
+  "type": "Type",
+  "description": "Description",
+  "preview": "Preview",
+  "problemsTitle": "Cannot save",
+  "formHasErrors": "Some fields need attention. Check the messages under them.",
+  "mandatoryField": "This field is mandatory.",
+  "notANumber": "Not a number.",
+  "notAWholeNumber": "Enter a whole number.",
+  "deleteTitle": "Delete?",
+  "deleteBody": "Delete {name}? This cannot be undone.",
+  "@deleteBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "newRecord": "New {doctype}",
+  "@newRecord": {
+    "placeholders": {
+      "doctype": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldMissing": "{field} is mandatory.",
+  "@fieldMissing": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "rowProblem": "Row {row}: {problem}",
+  "@rowProblem": {
+    "placeholders": {
+      "row": {
+        "type": "int"
+      },
+      "problem": {
+        "type": "String"
+      }
+    }
+  },
+  "rowNumber": "Row {number}",
+  "@rowNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "lockedAfterSubmit": "Locked: documents have been submitted in this currency.",
+  "laterMilestone": "Arrives with a later milestone.",
+  "refusedDuplicateName": "A record with this name already exists.",
+  "refusedReferenced": "This record is used elsewhere. Disable it instead of deleting it.",
+  "refusedLastEnabledPriceList": "At least one Price List must stay enabled.",
+  "refusedSeriesBelowUsed": "Number {number} is already used in this series. Set {number} or higher.",
+  "@refusedSeriesBelowUsed": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "refusedProfileSessionOpen": "This POS Profile has an open POS session. Close the session first.",
+  "refusedGroupWarehouse": "A group warehouse holds no stock. Choose a warehouse inside it.",
+  "refusedOneDefaultPayment": "Exactly one payment method must be the default.",
+  "refusedOneDefaultProfile": "Exactly one enabled POS Profile must be the default. Make another profile the default first.",
+  "refusedDisabledChoice": "A disabled Price List, template or Mode of Payment cannot be chosen.",
+  "refusedNotABackup": "This file is not a backup of this app. Nothing was changed.",
+  "refusedBackupTooNew": "This backup comes from a newer version of the app. Update the app first.",
+  "refusedSessionOpen": "Close the open POS session before restoring.",
+  "wizardLanguage": "Language",
+  "wizardRegion": "Region",
+  "wizardStore": "Your store",
+  "wizardDone": "All set",
+  "wizardDoneBody": "{store} is ready to sell. Sales are tax-free until a Sales Taxes and Charges Template is chosen on the POS Profile.",
+  "@wizardDoneBody": {
+    "placeholders": {
+      "store": {
+        "type": "String"
+      }
+    }
+  },
+  "stepOf": "Step {step} of {total}",
+  "@stepOf": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "openCashRegister": "Open Cash Register",
+  "addFirstItem": "Add your first item",
+  "groupStore": "Store",
+  "groupSelling": "Selling",
+  "groupTaxes": "Taxes",
+  "groupStock": "Stock",
+  "groupPrinting": "Printing",
+  "groupData": "Data",
+  "storeProfile": "Store Profile",
+  "systemSettings": "System Settings",
+  "globalDefaults": "Global Defaults",
+  "currency": "Currency",
+  "posProfile": "POS Profile",
+  "modeOfPayment": "Mode of Payment",
+  "priceList": "Price List",
+  "sellingSettings": "Selling Settings",
+  "tax": "Tax",
+  "salesTaxesTemplate": "Sales Taxes and Charges Template",
+  "itemTaxTemplate": "Item Tax Template",
+  "stockSettings": "Stock Settings",
+  "printSettings": "Print Settings",
+  "letterHead": "Letter Head",
+  "printHeading": "Print Heading",
+  "termsAndConditions": "Terms and Conditions",
+  "namingSeries": "Naming Series",
+  "dataImport": "Data Import",
+  "dataExport": "Data Export",
+  "backups": "Backups",
+  "sectionStore": "Store",
+  "sectionSalesGoal": "Sales Goal",
+  "sectionRegion": "Region",
+  "sectionNumbers": "Numbers",
+  "sectionBackups": "Backups",
+  "sectionDefaults": "Defaults",
+  "storeName": "Store Name",
+  "abbreviation": "Abbreviation",
+  "country": "Country",
+  "defaultCurrency": "Default Currency",
+  "monthlySalesTarget": "Monthly Sales Target",
+  "language": "Language",
+  "timeZone": "Time Zone",
+  "dateFormat": "Date Format",
+  "timeFormat": "Time Format",
+  "numberFormat": "Number Format",
+  "firstDayOfWeek": "First Day of the Week",
+  "floatPrecision": "Float Precision",
+  "currencyPrecision": "Currency Precision",
+  "roundingMethod": "Rounding Method",
+  "numberOfBackups": "Number of Backups",
+  "hideCurrencySymbol": "Hide Currency Symbol",
+  "disableRoundedTotal": "Disable Rounded Total",
+  "disableInWords": "Disable In Words",
+  "defaultPriceList": "Default Price List",
+  "fallbackToDefaultPriceList": "Use prices from Default Price List as fallback",
+  "editablePriceListRate": "Allow editing Price List rate in transactions",
+  "validateSellingPrice": "Validate selling price against purchase or valuation rate",
+  "currencyCode": "Currency",
+  "symbol": "Symbol",
+  "fraction": "Fraction",
+  "fractionUnits": "Fraction Units",
+  "smallestCurrencyFractionValue": "Smallest Currency Fraction Value",
+  "symbolOnRight": "Show Currency Symbol on Right Side",
+  "priceNotUomDependent": "Price Not UOM Dependent",
+  "salesTaxesAndCharges": "Sales Taxes and Charges",
+  "taxRate": "Tax Rate",
+  "taxAmount": "Tax Amount",
+  "amountPerUnit": "Amount per unit",
+  "referenceRow": "Reference Row #",
+  "includedInBasicRate": "Is this Tax included in Basic Rate?",
+  "tryIt": "Try it",
+  "tryItFixRows": "Fix the rows above to see the amounts.",
+  "netTotal": "Net Total",
+  "totalQuantity": "Total Quantity",
+  "amount": "Amount",
+  "total": "Total",
+  "taxRowMissingTax": "Tax is mandatory.",
+  "taxRowPreviousRowInFirstRow": "The first row cannot be On Previous Row Amount or On Previous Row Total.",
+  "taxRowMissingReferenceRow": "Reference Row # is mandatory for this type.",
+  "taxRowReferenceRowNotEarlier": "Reference Row # must point to an earlier row.",
+  "taxRowActualIncluded": "An Actual row cannot be included in the Basic Rate.",
+  "taxRowIncludedReferenceNotIncluded": "The referenced row must also be included in the Basic Rate.",
+  "taxRowDuplicateTax": "This tax is already in another row.",
+  "taxRates": "Tax Rates",
+  "notApplicable": "Not Applicable",
+  "itemTaxTemplateHelp": "A rate here replaces the rate of the same tax for the items using this template. Not Applicable removes the tax; a rate of 0 keeps the item taxable at zero.",
+  "warehouse": "Warehouse",
+  "paymentMethods": "Payment Methods",
+  "allowInReturns": "Allow in Returns",
+  "noPaymentMethodsHint": "With no payment methods, Cash is used.",
+  "configurations": "Configurations",
+  "hideImages": "Hide images",
+  "hideUnavailableItems": "Hide unavailable Items",
+  "allowRateChange": "Allow User to Edit Rate",
+  "autoAddItemToCart": "Automatically Add Filtered Item To Cart",
+  "allowDiscountChange": "Allow User to Edit Discount",
+  "validateStockOnSave": "Validate Stock on Save",
+  "setGrandTotalToDefaultMop": "Set Grand Total to Default Payment Method",
+  "printReceiptOnOrderComplete": "Print Receipt on Order Complete",
+  "actionOnNewInvoice": "Action on New Invoice",
+  "itemGroups": "Item Groups",
+  "itemGroupsHint": "Only items in the chosen groups and their sub-groups are shown. None chosen shows every item.",
+  "printFormat": "Print Format",
+  "pricingAndTaxes": "Price List and Taxes",
+  "taxesAndCharges": "Taxes and Charges",
+  "applyDiscountOn": "Apply Discount On",
+  "documentType": "Document",
+  "seriesList": "Series List",
+  "newPattern": "New series",
+  "namingSeriesHelp": "The first series is the default. .YYYY. .YY. .MM. .DD. become the posting date; ##### is the counter (five digits when left out).",
+  "namingSeriesNeedsOne": "A document needs at least one series.",
+  "nextNameExample": "Next name: {name}",
+  "@nextNameExample": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "updateSeries": "Update Series",
+  "prefix": "Prefix",
+  "currentValue": "Current Value",
+  "newCurrentValue": "New Current Value",
+  "recordType": "Document Type",
+  "insertNewRecords": "Insert New Records",
+  "updateExistingRecords": "Update Existing Records",
+  "mandatoryColumns": "Mandatory columns: {columns}",
+  "@mandatoryColumns": {
+    "placeholders": {
+      "columns": {
+        "type": "String"
+      }
+    }
+  },
+  "importNotes": "Numbers use a dot for decimals; dates are YYYY-MM-DD; Maintain Stock and Is Sales Item are 1 or 0. Opening stock is entered through Stock Reconciliation.",
+  "downloadTemplate": "Download Template",
+  "chooseFile": "Choose File",
+  "startImport": "Start Import",
+  "fileRows": "{file}: {count} rows",
+  "@fileRows": {
+    "placeholders": {
+      "file": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapColumn": "Column \"{header}\" is",
+  "@mapColumn": {
+    "placeholders": {
+      "header": {
+        "type": "String"
+      }
+    }
+  },
+  "doNotImport": "Do not import",
+  "importWarnings": "Problems ({count}). Nothing was imported; fix the file and choose it again.",
+  "@importWarnings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importLog": "Import log ({count})",
+  "@importLog": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "row": "Row",
+  "column": "Column",
+  "problem": "Problem",
+  "value": "Value",
+  "created": "Created",
+  "updated": "Updated",
+  "importMissing": "Missing mandatory value",
+  "importDuplicate": "Duplicate Name",
+  "importNotFound": "Record not found",
+  "importUnknownLink": "Does not exist",
+  "importBadValue": "Not an allowed value",
+  "importBadDate": "Not a valid date, or Valid Upto is before Valid From",
+  "importBadBarcode": "Not a valid barcode for this Barcode Type",
+  "importOverlappingPrice": "Overlaps another price for the same item, price list and unit",
+  "exportedRows": "{count} rows exported.",
+  "@exportedRows": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "backupWarning": "Backups kept only on this device are lost with the device. Export them to another place.",
+  "backUpNow": "Back up now",
+  "restoreFromFile": "Restore from file",
+  "backedUp": "Backup taken.",
+  "noBackups": "No backups yet.",
+  "sizeKb": "{size} KB",
+  "@sizeKb": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "restore": "Restore",
+  "restoreTitle": "Restore from a backup?",
+  "restoreBody": "The current data is backed up first and then replaced by the file you choose.",
+  "restored": "Restored.",
+  "namingSeriesNoFiscalYear": "There is no Fiscal Year: use .YYYY. instead of .FY.",
+  "unexpectedError": "Something went wrong: {detail}",
+  "@unexpectedError": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "wizardRestoreHint": "Moving from another device? Restore a backup instead of setting up again.",
+  "restoreFromBackup": "Restore from backup"
 }

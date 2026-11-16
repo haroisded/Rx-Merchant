@@ -7,8 +7,8 @@
 | Title | Rx Merchant: System Documentation |
 | System | Rx Merchant, an offline Android point-of-sale app |
 | System version | 1.0.0+1 (`pubspec.yaml`) |
-| Date of issue | 2026-11-15 |
-| Status | Issued. Describes the system at the end of milestone M0 (Foundation). |
+| Date of issue | 2026-11-16 |
+| Status | Issued. Describes the system at the end of the Setup plan (R2): build steps SET-B1 to SET-B9, which are milestones M1, M4 and M9, on top of milestone M0. |
 | Issuing organization | The Rx Merchant project (one owner, who is also the developer) |
 | Prepared by | Claude (AI assistant), for the project owner |
 | Approval | Pending the project owner's review |
@@ -19,6 +19,7 @@
 | Issue | Date | Change |
 |---|---|---|
 | 1 | 2026-11-15 | First issue. Covers milestone M0: project setup, database schema version 1, settings access, rounding and formatting, naming series, theme, adaptive shell, wizard gate, shared widgets. |
+| 2 | 2026-11-16 | Covers the Setup plan (R2), SET-B1 to B9: first-run wizard and seed, the Setup destination, settings pages, Currency, Price List, Naming Series, Mode of Payment, taxes, POS Profile, Data Import and Export, Backup and Restore, and "Restore from backup" on the wizard's first step. Sections 1, 3 to 6 and 8 to 13 updated; section 6.9 rewritten; section 7 changed only in 7.1, 7.2 and 7.6. |
 
 ### How this document follows ISO/IEC/IEEE 15289
 
@@ -58,13 +59,13 @@ It describes the current state only. Planned behaviour is listed in section 4.4 
 | Version | 1.0.0, build 1 |
 | Platform | Android only. Minimum SDK 24 (Android 7.0), target and compile SDK 36. |
 | Form factors | Phones and tablets, portrait and landscape |
-| Milestone state | M0 Foundation complete. M1 to M9 not started. |
+| Milestone state | M0 Foundation and the whole Setup plan (M1, M4, M9) complete. M2, M3 and M5 to M8 not started. |
 
 ### 1.2 What the system is
 
 An Android app for one store run by one owner. It works with no internet connection. When complete it will keep the item catalogue and stock, sell at a cash register, print receipts and invoices, and show a sales dashboard. Its screens, field names and rules follow ERPNext, reduced to what one store owner needs.
 
-At this issue the system is the foundation only: the app starts, creates its database, shows a first-run gate, and shows a navigation frame with five empty destinations. No business screen exists yet.
+At this issue the store can be set up completely. A first-run wizard creates the store and its default records; the Setup destination holds every settings page and master of the Setup plan; items can be imported from CSV; the data can be backed up and restored. The Register, Invoices, Stock and Dashboard destinations are still empty.
 
 ---
 
@@ -75,7 +76,7 @@ At this issue the system is the foundation only: the app starts, creates its dat
 | Ref | Document | Location |
 |---|---|---|
 | R1 | Overview and foundation plan (the M0 specification) | `.claude/erpnext-planner/Plans/00-overview-and-foundation.md` |
-| R2 | Setup plan (rules SET-R1 to R6, acceptance SET-A1 to A7) | `.claude/erpnext-planner/Plans/01-setup.md` |
+| R2 | Setup plan (rules SET-R1 to R18, build steps SET-B1 to B9, acceptance SET-A1 to A20) | `.claude/erpnext-planner/Plans/01-setup.md` |
 | R3 | Stock plan | `.claude/erpnext-planner/Plans/02-stock.md` |
 | R4 | Cash Register plan | `.claude/erpnext-planner/Plans/03-cash-register.md` |
 | R5 | Sales Dashboard plan | `.claude/erpnext-planner/Plans/04-sales-dashboard.md` |
@@ -83,7 +84,8 @@ At this issue the system is the foundation only: the app starts, creates its dat
 | R7 | ERPNext documentation, merged | `.claude/erpnext-planner/erpnext-docs-merged.md` |
 | R8 | ISO/IEC/IEEE 15289:2019, Content of life-cycle information items (documentation) | Published standard |
 | R9 | Material Design 3 guidelines (window size classes, navigation, sheets) | m3.material.io |
-| R10 | Session report for this issue | `.claude/commits/` |
+| R10 | Session reports: issue 1 `2026-11-15_09-47-00.txt`, issue 2 `2026-11-16_17-26-13.txt` | `.claude/commits/` |
+| R11 | Frappe `frappe/geo/country_info.json` (MIT licence), source of `assets/country_info.json` | github.com/frappe/frappe |
 
 ### 2.2 Glossary
 
@@ -101,6 +103,10 @@ At this issue the system is the foundation only: the app starts, creates its dat
 | Store Profile | The single record describing the store. It replaces ERPNext's Company. |
 | POS Profile | The configuration of the cash register: warehouse, price list, taxes, payment methods. |
 | Wizard gate | The rule that only the first-run wizard is reachable until setup is complete. |
+| Seed records | The records the wizard creates in one transaction (SET-R3): currency, warehouses, item groups, units, price list, payment modes, POS Profile, naming series, letter head and settings. |
+| Refusal | A save, delete or restore the app declines with a stated reason, such as "used elsewhere, disable it instead" (section 6.9). |
+| Sales Taxes and Charges Template | The ordered tax rows a sale copies (SET-R9, R10). |
+| Item Tax Template | Per-item overrides of a tax's rate, or Not Applicable (SET-R12). |
 | Window size class | Material 3's width bands: compact (under 600dp), medium (600 to 839dp), expanded (840dp and up). |
 | dp | Density-independent pixel, Android's unit of layout size. |
 | SLE | Stock Ledger Entry: one row per stock movement. |
@@ -126,6 +132,7 @@ One person: the store owner. The owner sets the system up, maintains items and s
 
 - One Android phone or tablet. The data lives on that device only.
 - No network. The release build does not hold the Android `INTERNET` permission, so it cannot open a connection even if a library tries.
+- Android's file picker and save dialog, for CSV import and export and for backups.
 - Peripherals planned for later milestones: the device camera for barcode scanning, and a receipt printer.
 
 ### 3.3 Intended operation (when complete)
@@ -139,12 +146,14 @@ One person: the store owner. The owner sets the system up, maintains items and s
 
 ### 3.4 Operation at this issue
 
-Only the first step of the flow exists, in placeholder form:
+Steps 1 and 2 of the flow exist:
 
 1. The app starts and reads System Settings.
-2. On a fresh install it shows the wizard placeholder. Nothing else is reachable.
-3. The owner taps **Finish setup**. The app records that setup is complete.
-4. The app shows the navigation frame with five destinations: Register, Invoices, Stock, Dashboard, Setup. Each shows the message "This screen arrives in a later milestone."
+2. On a fresh install it shows the first-run wizard. Nothing else is reachable. On its first step **Restore from backup** brings in another device's data instead, and the app opens on the restored store.
+3. The owner picks the language, country and currency (the format preview shows how dates and numbers will look) and names the store.
+4. On the last step the owner taps **Open Cash Register** or **Add your first item**. The app writes every seed record and marks setup complete in one transaction, then lands on the chosen destination.
+5. In **Setup** the owner adjusts the store and formats, defines payment modes, taxes, tax templates, price lists and the POS Profile, edits naming series, imports or exports items, prices and barcodes, and backs up or restores the data.
+6. Register, Invoices, Stock and Dashboard still show "This screen arrives in a later milestone."
 
 ### 3.5 What the system deliberately leaves out
 
@@ -175,9 +184,9 @@ Taken from R1, section 2. Each exclusion applies to every screen and table.
 | C-3 | SQLite is the only data store | `lib/core/db/app_database.dart` | Met |
 | C-4 | Phones and tablets from the first build, in three window size classes | `WindowSize`, `AdaptiveShell`, `ListDetailPane`, `showRowEditor` | Met, verified (sections 10.2, 10.5) |
 | C-5 | Material 3 only. Colours come from `ColorScheme` roles; the seed colour is the only literal. | `AppTheme` in `lib/app.dart` | Met |
-| C-6 | Every user-visible label goes through localisation | `lib/l10n/app_en.arb`, generated `AppLocalizations` | Met |
+| C-6 | Every user-visible label goes through localisation | `lib/l10n/app_en.arb`, generated `AppLocalizations` | Met for labels and messages. Stored option values (charge types, Mode of Payment types, Rounding Method) show as stored, in ERPNext's English (P-11). |
 | C-7 | Three hops at most: screen, provider, query or pure function. No repository interfaces, use-case classes or mapper layers. | Code structure (section 5) | Met |
-| C-8 | Numeric columns are `REAL`. Every calculated value is rounded by `flt` before it is stored. | Schema; `lib/core/numbers/flt.dart` | Schema and function met. No calculation code exists yet to apply it. |
+| C-8 | Numeric columns are `REAL`. Every calculated value is rounded by `flt` before it is stored. | Schema; `lib/core/numbers/flt.dart` | Met. The only calculation so far, the tax "Try it" panel, rounds every row with `flt`; it stores nothing. |
 | C-9 | Foreign keys are enforced | `PRAGMA foreign_keys = ON` at every open | Met, verified |
 | C-10 | Schema version 1 contains every table of every feature plan | 48 tables, 14 indexes | Met, verified |
 | C-11 | ERPNext's labels and status names are used as is | Status values in the schema; localisation keys | Met for what exists |
@@ -186,13 +195,26 @@ Taken from R1, section 2. Each exclusion applies to every screen and table.
 
 | ID | Requirement | Implementation | Verified by |
 |---|---|---|---|
-| SET-R1 | Until setup is complete the app shows only the first-run wizard. Afterwards the wizard is unreachable. | `redirect` in `lib/router.dart`, driven by `setup_complete` in System Settings | `test/app_test.dart`, group "wizard gate (SET-R1)" |
+| SET-R1 | Until setup is complete the app shows only the first-run wizard. Finishing it writes all seed data in one transaction. Afterwards the wizard is unreachable. | `redirect` in `lib/router.dart`; `completeSetup` in `lib/features/setup/data/seed.dart` | `test/app_test.dart`, group "wizard gate (SET-R1)"; `setup_db_test.dart` |
+| SET-R2 | Default Currency and Currency Precision lock once any document is submitted; the form shows why | `anySubmittedDocument` in `setup_queries.dart`; `lockReason` in `settings_pages.dart` | `setup_db_test.dart` (SET-A13) |
+| SET-R3 | The wizard seeds currency, warehouse tree, item groups, 13 UoMs, Standard Selling, three payment modes, the Main Counter POS Profile, seven naming series, a letter head and Stock Settings | `completeSetup` | `setup_db_test.dart` (SET-A12) |
 | SET-R4 | Rounding follows the Rounding Method setting: Banker's Rounding (default) sends a midpoint to the nearest even digit; Commercial Rounding sends it away from zero. Binary float error must not change the result. | `flt` and `RoundingMethod` in `lib/core/numbers/flt.dart` | `test/core/numbers/flt_test.dart` |
-| SET-R5 | Numbers, currency, dates and times are shown in the formats chosen in System Settings. Formats affect display only. | `lib/core/numbers/format.dart` | `test/core/numbers/format_test.dart` |
+| SET-R5 | Numbers, currency, dates and times are shown, and typed, in the formats chosen in System Settings. Stored values never change. | `lib/core/numbers/format.dart` (`parseNumber` for typing), `Formats` and `formatsProvider` | `test/core/numbers/format_test.dart`; System Settings preview on the emulator |
 | SET-R6 | A naming series pattern resolves date parts from the posting date and keeps one counter per resolved prefix. A failed transaction does not consume a number. | `parseSeries` and `nextName` in `lib/core/naming/naming_series.dart` | `test/core/naming/naming_series_test.dart` |
+| SET-R7 | The first pattern of a document is its default; Update Series sets a counter and refuses a number below one already used | `saveNamingSeries`, `highestUsedNumber`, `updateSeries`; `naming_series_page.dart` | `setup_db_test.dart` |
+| SET-R8 | A disabled Mode of Payment cannot be chosen; one in use can be disabled but not deleted | Foreign keys through `deleteMaster`; `_refuseDisabled` | `setup_db_test.dart` |
+| SET-R9 | Tax rows: order, Reference Row # rules, Actual and On Item Quantity, included-in-rate rules, one default template | `validateTaxRows`, `tryTaxes`, `removeTaxRow` in `logic/tax_template.dart`; `saveSalesTaxesTemplate` | `tax_template_test.dart` (SET-A8 to A11); `setup_db_test.dart` (SET-A15) |
+| SET-R12 | An Item Tax Template row overrides the matching tax's rate; Not Applicable removes the tax | `effectiveRate`; `saveItemTaxTemplate` | `tax_template_test.dart` (worked example 61.88) |
+| SET-R13 | A disabled Price List cannot be chosen; at least one stays enabled | `savePriceList`, `deleteMaster`, `_refuseDisabled` | `setup_db_test.dart` (SET-A14) |
+| SET-R14 | POS Profile: non-group warehouse; exactly one default payment when there are any; exactly one enabled default profile; no edit while its session is open | `savePosProfile`, `deletePosProfile` | `setup_db_test.dart` (SET-A16 and two more) |
+| SET-R15 | Monthly Sales Target on Store Profile; it blocks nothing | `StoreProfilePage` in `settings_pages.dart` (money field) | Field seen on the emulator; saving goes through `SinglesForm`, tested in `app_test.dart`. The dashboard use comes with M7. |
+| SET-R16 | Data Import of Item, Item Price, Item Barcode: template, every row checked first, problems by row and column, one transaction, a result log; Data Export of the same columns | `logic/data_import.dart`, `data/data_import_db.dart`, `ui/data_pages.dart` | `data_import_test.dart`; `import_backup_test.dart` (SET-A17, 200 items) |
+| SET-R17 | Backup by `VACUUM INTO`, named `{abbr}-backup-{YYYYMMDD-HHMMSS}.sqlite`, newest Number of Backups kept, Export outside the app | `takeBackup`, `listBackups` in `data/backup.dart`; `BackupsPage` | `import_backup_test.dart` (SET-A18); emulator. The automatic backup on POS Closing waits for M5. |
+| SET-R18 | Restore checks the file, refuses with an open session, backs up first (skipped when setup was never finished), replaces the database and reopens it; available on the Backups page and on the wizard's first step | `checkRestorable`, `restoreDatabase`; `pickBackupCopy`, `restoreAndReopen`; `BackupsPage`, `WizardScreen` | `import_backup_test.dart` (SET-A19, fresh-install restore); emulator round trips (section 10.5) |
 | R1 §6.5 | Settings pages are stored as key-value rows, with typed access and defaults | `lib/core/db/singles.dart` | `test/core/db/singles_test.dart` |
 | R1 §7.2, §7.3 | Navigation is a bottom bar on compact windows, a rail on medium windows, a rail with labels on expanded windows; five destinations in fixed order | `lib/core/widgets/adaptive_shell.dart` | `test/app_test.dart`, group "adaptive shell" |
 | R1 §7.1 | Shared form building blocks: list and detail panes, link field, child table with row editor, status chip, report table with CSV export | `lib/core/widgets/` | `test/core/widgets/` |
+| R2 §5 | Setup workspace of grouped cards; one pane on phones, list beside page on expanded windows | `ui/setup_screen.dart`, `_setupRoute` in `lib/router.dart` | `test/app_test.dart`, group "Setup destination" |
 
 ### 4.3 Acceptance criteria met
 
@@ -206,21 +228,35 @@ Taken from R1, section 2. Each exclusion applies to every screen and table.
 | SET-A6 | The same series in 2027 starts again at `ACC-SINV-2027-00001` | Pass |
 | SET-A7 | `INV12.####` gives `INV120001` | Pass |
 | M0 "done when" | The app starts on a phone and a tablet emulator, shows the wizard gate, and `flutter test` passes | Pass (section 10) |
+| SET-A8 | A previous-row type in row 1 is rejected | Pass |
+| SET-A9 | Reference Row # pointing at a later row is rejected | Pass |
+| SET-A10 | An Actual row marked as included in basic rate is rejected | Pass |
+| SET-A11 | "Try it" on 1,000: 25; 80; 1.60; 21.60; 10 | Pass |
+| SET-A12 | After the wizard every SET-R3 record exists and `setup_complete` is 1 | Pass |
+| SET-A13 | A submitted document locks Default Currency and Currency Precision | Pass |
+| SET-A14 | Disabling the only enabled Price List is refused | Pass |
+| SET-A15 | A second default template clears the first | Pass |
+| SET-A16 | Editing a POS Profile during an open session is refused | Pass |
+| SET-A17 | A CSV with one unknown Item Group imports nothing and names the row and column | Pass |
+| SET-A18 | Five backups with Number of Backups = 3 leave the newest three | Pass |
+| SET-A19 | Restoring a file that is not a backup is refused; data untouched | Pass |
+| SET-A20 | Wizard and every Setup page on a phone and a tablet in both orientations | Pass on emulators (section 10.5) |
+| SET-B1 to B9 runnable results | Wizard lands on the shell; formats change the preview; Try it reproduces the worked examples; a second profile can be made default; 200 items import; back up, wipe, restore brings the data back | Pass (sections 10.2, 10.5) |
 
 ### 4.4 Requirements not yet implemented
 
 | Milestone | Contents | State |
 |---|---|---|
 | M0 Foundation | Project, database, settings access, rounding, naming series, theme, adaptive shell | **Done** |
-| M1 Setup A | First-run wizard, Store Profile, System Settings, Global Defaults, Currency, Price List, Naming Series | Not started |
+| M1 Setup A | First-run wizard, Store Profile, System Settings, Global Defaults, Currency, Price List, Naming Series | **Done** |
 | M2 Stock A | Warehouse, Item Group, UoM, Brand, Item, Item Price, Stock Settings | Not started |
 | M3 Stock B | Stock ledger engine, Stock Entry, Stock Reconciliation, core stock reports | Not started |
-| M4 Setup B | Mode of Payment, taxes, POS Profile, Selling Settings | Not started |
+| M4 Setup B | Mode of Payment, taxes, POS Profile, Selling Settings | **Done** |
 | M5 Cash Register | Sessions, POS screen, totals engine, payment, submit | Not started |
 | M6 Invoices | List, detail, print formats, PDF, thermal printing, returns, cancel | Not started |
 | M7 Dashboard | Cards, charts, sales goal, reports | Not started |
 | M8 Stock C | Variants, batches, serial numbers | Not started |
-| M9 Setup C | Data import and export, backup and restore | Not started |
+| M9 Setup C | Data import and export, backup and restore | **Done**, except the backup on POS Closing, which needs M5 |
 
 ---
 
@@ -233,6 +269,8 @@ flowchart LR
     Owner([Store owner]) -->|touch| App[Rx Merchant app]
     App -->|read, write| DB[(SQLite file<br/>on the device)]
     App -->|CSV file| Share[Android share sheet]
+    App <-->|CSV, backup files| Files[Android file picker<br/>and save dialog]
+    Asset[[country_info.json<br/>bundled asset]] --> App
     App -.->|planned| Camera[Camera: barcode scan]
     App -.->|planned| Printer[Receipt printer]
 ```
@@ -249,17 +287,23 @@ flowchart TD
     App --> Router[router.dart<br/>routerProvider, setup gate]
     Router --> Shell[core/widgets/adaptive_shell.dart]
     Router --> Wizard[features/setup/ui/wizard_screen.dart]
+    Router --> SetupUi[features/setup/ui/setup_screen.dart<br/>and the Setup pages]
     Router --> Providers[core/db/providers.dart]
     Wizard --> Providers
+    SetupUi --> Providers
+    SetupUi --> Logic[features/setup/logic/<br/>tax_template, data_import]
+    SetupUi --> SetupData[features/setup/data/<br/>seed, setup_queries, data_import_db, backup]
+    Wizard --> SetupData
+    SetupData --> Database
     Providers --> Singles[core/db/singles.dart]
     Singles --> Database[core/db/app_database.dart]
     Naming[core/naming/naming_series.dart] --> Database
     Database --> Drift[[4 .drift files + batch_table.dart]]
-    Numbers[core/numbers/flt.dart, format.dart]
-    Widgets[core/widgets/: shared form widgets]
+    Providers --> Numbers[core/numbers/flt, format, formats]
+    SetupUi --> Widgets[core/widgets/: shared form widgets]
 ```
 
-`core/numbers` and the shared widgets have no caller in the app yet. They are the foundation the feature milestones build on, and each is covered by tests.
+A screen reads a provider or calls a query method on `AppDatabase` (a Dart extension in the feature's `data/` folder); validation and calculation live in `logic/`, which imports neither Flutter nor the database.
 
 ### 5.3 Folder map
 
@@ -273,10 +317,11 @@ lib/
       app_database.dart         AppDatabase (drift)
       app_database.g.dart       generated by drift_dev
       singles.dart              settings access and typed settings classes
-      providers.dart            appDatabaseProvider, systemSettingsProvider
+      providers.dart            database, settings, store currency, formats
     numbers/
       flt.dart                  rounding
-      format.dart               number, currency, date, time formatting
+      format.dart               number, currency, date, time formatting; typed-number parsing
+      formats.dart              Formats: the display formats in force
     naming/
       naming_series.dart        naming series resolver and counter
     widgets/
@@ -290,19 +335,38 @@ lib/
       report_table.dart         report table and CSV export
   features/
     setup/data/setup.drift      14 tables
-    setup/ui/wizard_screen.dart placeholder wizard
+    setup/data/country_info.dart  bundled country data
+    setup/data/seed.dart        completeSetup: the wizard's seed transaction
+    setup/data/setup_queries.dart reads and writes of the Setup pages, locks, naming admin
+    setup/data/refusal.dart     refusal codes; constraint failures become refusals
+    setup/data/data_import_db.dart import lookups, writer, export rows
+    setup/data/backup.dart      backup, list, restore checks, restore
+    setup/logic/tax_template.dart tax row checks, Try it, item rate, row removal
+    setup/logic/data_import.dart import columns, header matching, row checks
+    setup/ui/wizard_screen.dart first-run wizard
+    setup/ui/setup_screen.dart  Setup workspace and page routing
+    setup/ui/form_kit.dart      form page, problems dialog, field grid, master list
+    setup/ui/settings_pages.dart Store Profile, System Settings, Global Defaults, Selling Settings
+    setup/ui/simple_masters.dart Currency, Mode of Payment, Tax, Price List
+    setup/ui/tax_template_pages.dart Sales Taxes and Charges Template, Item Tax Template
+    setup/ui/pos_profile_page.dart POS Profile
+    setup/ui/naming_series_page.dart Naming Series
+    setup/ui/data_pages.dart    Data Import, Data Export, Backups
     stock/data/stock.drift      22 tables, 9 indexes
     stock/data/batch_table.dart the batch table, in Dart
+    stock/logic/barcode.dart    EAN / UPC barcode check
     pos/data/pos.drift          8 tables, 5 indexes
     invoices/data/invoices.drift 3 tables
   l10n/
-    app_en.arb                  21 messages, English
+    app_en.arb                  227 messages, English
     app_localizations*.dart     generated by gen-l10n
-test/                           93 tests (section 10.2)
+assets/
+  country_info.json             250 countries (R11)
+test/                           140 tests (section 10.2)
 android/                        Android host project
 ```
 
-Size at this issue: 1,131 lines of hand-written Dart under `lib/`, 614 lines of schema, 1,054 lines of tests. The generated database code is 56,713 lines.
+Size at this issue: 6,499 lines of hand-written Dart under `lib/` (5,254 of them in the Setup feature), 644 lines of schema, 2,021 lines of tests. The generated database code is unchanged.
 
 ### 5.4 Technology
 
@@ -311,17 +375,19 @@ Size at this issue: 1,131 lines of hand-written Dart under `lib/`, 614 lines of 
 | Framework | Flutter, stable channel | 3.50.0 |
 | Language | Dart | 3.14.0 |
 | UI toolkit | Material 3 from `package:material_ui` | 1.11.0 |
-| Database | SQLite through `drift`, opened by `drift_flutter` | drift 2.35.4, drift_flutter 0.3.1, sqlite3 3.9.1 |
+| Database | SQLite through `drift`, opened by `drift_flutter`; `sqlite3` also used directly to open a backup read-only | drift 2.35.4, drift_flutter 0.3.1, sqlite3 3.9.1 |
 | State | `flutter_riverpod` | 3.5.0 |
 | Routing | `go_router` | 18.1.4 |
 | Localisation | `flutter_localizations`, `intl`, gen-l10n | intl 0.20.3 |
 | CSV | `csv` | 8.0.0 |
 | File sharing | `share_plus`, `path_provider` | 13.3.1, 2.1.6 |
+| File picker and save dialog | `file_picker` | 13.3.3 |
+| Country data | `assets/country_info.json`, trimmed from R11 | 250 countries |
 | Code generation | `drift_dev`, `build_runner` | 2.35.3, 2.17.1 |
 | Lints | `flutter_lints` | 6.0.0 |
 | Android build | Gradle, Android Gradle Plugin, Kotlin, Java | 9.5.0, 9.3.1, 2.4.20, 17 |
 
-Declared for later milestones and not yet imported by any code: `mobile_scanner` 7.5.0 (barcode), `pdf` 3.13.1 and `printing` 5.15.1 (documents), `fl_chart` 1.3.1 (dashboard), `file_picker` 13.3.3 and `image_picker` 1.2.4 (import, images). `cupertino_icons` 2.0.0 is present only for its icon font.
+Declared for later milestones and not yet imported by any code: `mobile_scanner` 7.5.0 (barcode), `pdf` 3.13.1 and `printing` 5.15.1 (documents), `fl_chart` 1.3.1 (dashboard), `image_picker` 1.2.4 (images). `cupertino_icons` 2.0.0 is present only for its icon font.
 
 ### 5.5 Start-up and the setup gate
 
@@ -352,9 +418,9 @@ The router holds one value, `setupComplete`, with three states. Every navigation
 |---|---|
 | `null` (settings not read yet) | `/loading` |
 | `false` | `/wizard` |
-| `true` | The requested location; `/wizard` and `/loading` lead to `/pos` |
+| `true` | The requested location; `/loading` leads to `/pos`; `/wizard` leads to the location in its `?next=` parameter, or `/pos` |
 
-The value is a `ValueNotifier` passed to the router as `refreshListenable`, so the redirect runs again the moment the setting changes. Tapping **Finish setup** writes `setup_complete`; the settings stream emits; the router moves to `/pos` with no navigation call in the wizard.
+The value is a `ValueNotifier` passed to the router as `refreshListenable`, so the redirect runs again the moment the setting changes. On the wizard's last step, **Open Cash Register** and **Add your first item** first move to `/wizard?next=/pos` or `/wizard?next=/stock`, then run `completeSetup`. When it commits, the settings stream emits and the router leaves the wizard for the `next` location. A failed seed writes nothing and the wizard stays. **Restore from backup** on the first step takes the other way out: the restored data has `setup_complete` set, so when the reopened database's settings stream emits, the router leaves the wizard for `/pos`.
 
 If the settings cannot be read, `/loading` shows "The database could not be opened." and the error text.
 
@@ -363,12 +429,14 @@ If the settings cannot be read, `/loading` shows "The database could not be open
 | Path | Screen | Notes |
 |---|---|---|
 | `/loading` | Blank, or the start-up error | Shown only while settings are read |
-| `/wizard` | Wizard placeholder | Outside the navigation frame |
+| `/wizard` | First-run wizard | Outside the navigation frame; `?next=` names where to land |
 | `/pos` | Cash Register placeholder | Branch 1, the home location |
 | `/invoices` | Invoices placeholder | Branch 2 |
 | `/stock` | Stock placeholder | Branch 3 |
 | `/dashboard` | Dashboard placeholder | Branch 4 |
-| `/setup` | Setup placeholder | Branch 5 |
+| `/setup` | Setup workspace | Branch 5 |
+| `/setup/:page` | A Setup page, or a master's list (`page` is a slug such as `pos-profile`) | Expanded: the workspace stays on the left and the move does not animate |
+| `/setup/:page/:id` | A master's form; `id` is the record id or `new` | Back returns to the list |
 
 The five destinations are branches of one `StatefulShellRoute.indexedStack`, so each keeps its own navigation state when the owner switches between them.
 
@@ -389,6 +457,19 @@ The five destinations are branches of one `StatefulShellRoute.indexedStack`, so 
 | D-11 | Generated localisation files are excluded from analysis | The generated code refers to delegates deprecated in Flutter 3.47 | Real problems in generated code would go unreported |
 | D-12 | The release manifest removes `INTERNET` with `tools:node="remove"` | A plugin that declares the permission cannot bring it back | Debug and profile builds keep it for hot reload |
 | D-13 | Seed colour is `Colors.teal` | A placeholder; one constant in `lib/app.dart` | None |
+| D-14 | The whole Setup plan was built at once (M1, M4, M9) | The prompt for this issue named the Setup plan, not a milestone | Pages exist before the stock and register plans that use them |
+| D-15 | Country data comes from Frappe's `country_info.json` (R11), trimmed | ERPNext's own data; 250 countries | 11 countries use a number format the app lacks and were mapped to the nearest of the six |
+| D-16 | Currency Precision is set from the currency at setup: 0 when the currency has no fraction, 3 for 1,000 fraction units, otherwise 2 | The yen and the dinars would otherwise round wrongly | None found |
+| D-17 | One generic settings form (`SinglesForm`) for the four settings pages, one generic form for the name-and-switches masters | Fewer near-identical screens | A new field type is added in one place for all |
+| D-18 | Deletes rely on SQLite's foreign keys; a FOREIGN KEY failure becomes "used elsewhere, disable it instead", a UNIQUE failure "a record with this name already exists" | No per-table "is it used" queries to keep in step with the schema | The message cannot say which record uses it |
+| D-19 | Data and logic return refusal and problem codes; the UI turns them into messages | `logic/` stays free of Flutter; every message is in the ARB file | One code-to-message switch per kind |
+| D-20 | Setup forms use `DropdownMenu` for short link lists; `LinkField` is used for long lists (country, currency) | A dropdown shows every choice at once | No "Create new" from inside a form (P-11) |
+| D-21 | `FieldGrid` switches to two columns on the pane width (600dp), not the window width | A form in the expanded right pane is narrower than the window | Differs from the letter of R1 §7.2 |
+| D-22 | A form loads all its choices before it is built | A `DropdownMenu` shows its initial selection only if its entries exist on the first build | A short loading indicator |
+| D-23 | `sqlite3` is a direct dependency | To open a backup read-only before a restore | None: drift already pulled it in |
+| D-24 | The database file is drift_flutter's default, `rx_merchant.sqlite` in the app documents directory; `backup.dart` reads the same path | No change to `AppDatabase` | The two must stay in step |
+| D-25 | Data Import also applies three stock rules: an Item Price from Standard Selling Rate (STK-R5), the EAN check digit (STK-R8), no overlapping price validity (STK-R10) | An import must not write data the stock plan forbids | Beyond SET-R16's list of checks |
+| D-26 | A typed number must have groups of the format's size; a format without decimals takes the other mark as decimal point | So "7.5" in `#.###` is refused instead of read as 75 | Typing "1,5" in `#,###.##` is refused rather than guessed |
 
 ---
 
@@ -397,7 +478,7 @@ The five destinations are branches of one `StatefulShellRoute.indexedStack`, so 
 ### 6.1 Entry point and app: `lib/main.dart`, `lib/app.dart`
 
 - `main()` runs `App` inside a `ProviderScope`.
-- `App` is a `ConsumerWidget` that builds `MaterialApp.router` with the router from `routerProvider`, the light and dark themes, and the localisation delegates. The task-switcher title is the `appTitle` message.
+- `App` is a `ConsumerWidget` that builds `MaterialApp.router` with the router from `routerProvider`, the light and dark themes, and the localisation delegates. The task-switcher title is the `appTitle` message. The locale follows System Settings' Language once it is read.
 - `AppTheme.light` and `AppTheme.dark` build `ThemeData` from `ColorScheme.fromSeed` with one seed. The theme sets outlined borders for every form field through `inputDecorationTheme`. The device setting chooses light or dark.
 
 ### 6.2 Database: `lib/core/db/app_database.dart`
@@ -432,7 +513,7 @@ Six classes give typed access with defaults: `StoreProfile`, `SystemSettings`, `
 
 Two defaults are derived rather than fixed:
 
-- `StoreProfile.abbr` defaults to the initials of the store name.
+- `StoreProfile.abbr` defaults to the initials of the store name, also when the stored value is blank.
 - `PrintSettings.rawCharsPerLine` defaults to 48 for 80mm paper and 32 for 58mm paper.
 
 ### 6.4 Providers: `lib/core/db/providers.dart`
@@ -441,6 +522,11 @@ Two defaults are derived rather than fixed:
 |---|---|---|
 | `appDatabaseProvider` | `Provider<AppDatabase>` | Creates the one database and closes it on dispose. Tests override it. |
 | `systemSettingsProvider` | `StreamProvider<SystemSettings>` | System Settings, emitted again on every change. |
+| `singleProvider(doctype)` | `StreamProvider.family<Map<String, String>, String>` | The stored fields of one settings page. |
+| `storeCurrencyProvider` | `StreamProvider<CurrencyData?>` | The Currency record of the store's Default Currency. |
+| `formatsProvider` | `Provider<Formats>` | The display formats in force (section 6.6); defaults while settings load. |
+
+A restore invalidates `appDatabaseProvider`, which closes the old connection and opens the restored file; every provider that reads the database follows.
 
 ### 6.5 Rounding: `lib/core/numbers/flt.dart`
 
@@ -484,6 +570,10 @@ String toStorage(DateTime d);
 The group separator is the second character of the format; the decimal separator is the character before the final `##`. A negative value keeps its sign, except that a value which displays as zero shows no sign.
 
 `formatCurrency` adds the symbol with one space: `$ 12,345.67`, or `12,345.67 $` when `symbolOnRight` is true. The sign stays on the number: `$ -5.00`. With `hideSymbol`, or no symbol, it returns the number alone.
+
+`parseNumber(text, numberFormat)` reads a typed number: group separators are dropped and the format's decimal mark becomes `.`; a format with no decimals (`#,###`, `#.###`) takes the other mark as decimal point. Groups after the first must have the format's size (three digits; two in the middle of Indian grouping), so a mistyped decimal mark is refused rather than misread: `7.5` in `#.###` is null, `7,5` is 7.5. Non-finite text is null.
+
+`Formats` (`lib/core/numbers/formats.dart`) bundles System Settings, Global Defaults and the store Currency, and offers `number`, `money`, `date`, `time`, `parse` and `rounding`. Every Setup screen formats through `formatsProvider`.
 
 `formatDate` accepts ERPNext's Date Format text (`yyyy-mm-dd`, `dd-mm-yyyy`, `dd/mm/yyyy`, `dd.mm.yyyy`, `mm/dd/yyyy`, `mm-dd-yyyy`), where `mm` means month. `formatTime` accepts `HH:mm:ss` and `HH:mm`. `toStorage` produces the text stored in date-time columns, `yyyy-MM-dd HH:mm:ss` in local time, which `DateTime.parse` reads back.
 
@@ -529,13 +619,51 @@ extension NamingSeries on AppDatabase {
 | `ReportTable` | `ReportTable({columns, rows, filters, exportName})` | A filter bar, a table that scrolls both ways, and a CSV export action. A column whose values are all numbers is right-aligned. |
 | `toCsv` | `toCsv(columns, rows)` | A header line, then one line per row. Cells holding a comma or a quote are quoted. |
 
-### 6.9 Wizard placeholder: `lib/features/setup/ui/wizard_screen.dart`
+### 6.9 Setup feature: `lib/features/setup/`
 
-One screen with a message and a **Finish setup** button. The button writes `setup_complete: true` to System Settings. Milestone M1 replaces this file with the real wizard.
+**Data (`data/`).** Query methods are Dart extensions on `AppDatabase`; every write runs in one transaction.
+
+| File | Contents |
+|---|---|
+| `country_info.dart` | `CountryInfo` (name, code, currency, symbol, fraction, fraction units, smallest fraction, date and number format, `currencyPrecision`, `toCurrency()`); `loadCountryInfo()` decodes the 57 KB asset directly (Flutter's `loadString` would hand it to another isolate). |
+| `seed.dart` | `completeSetup(language, country, currencyOf, storeName, abbr)`: every SET-R3 record and the settings keys, then `setup_complete`, in one transaction. `defaultNamingSeries` holds the seven default patterns. |
+| `setup_queries.dart` | `anySubmittedDocument` (SET-R2), `sessionOpen`; `upsert`, `deleteMaster`; saves for Currency, Mode of Payment, Tax, Price List, both tax templates and POS Profile, each with its rule; `posProfileLines`, `itemTaxTemplateRows`, `salesTaxesTemplateRows`; `saveNamingSeries`, `highestUsedNumber`, `updateSeries`; `addCurrency`. Updates set `modified_at`. |
+| `refusal.dart` | `Refusal` codes and `RefusedException`; `refuseOnConstraint` turns SQLite UNIQUE / PRIMARY KEY failures (2067, 1555) into `duplicateName` and FOREIGN KEY failures (787) into `referenced`, also when drift wraps them in `DriftRemoteException`. |
+| `data_import_db.dart` | `importLookups`, `runImport` (one transaction; returns a log), `exportRows` (template header and one row per record). |
+| `backup.dart` | `databasePath`, `backupDirectory`, `listBackups`, `takeBackup` (`VACUUM INTO`, then prune), `checkRestorable`, `restoreDatabase` (the safety backup is skipped when setup was never finished: a fresh install holds nothing to keep; optional `target` and `backupDir` for tests). |
+
+Post-conditions guard the rules that span records: after a Price List save or any delete, at least one Price List is enabled; after a POS Profile save or delete, exactly one enabled profile is the default. A failure rolls the transaction back.
+
+**Logic (`logic/`), pure Dart.**
+
+| Function | Rule |
+|---|---|
+| `validateTaxRows(rows)` | SET-R9: tax mandatory; no previous-row type in row 1; Reference Row # present and earlier; Actual not included; an included previous-row row needs an included reference. Returns (row, problem) pairs. |
+| `tryTaxes(rows, net, qty, precision, method)` | Each row's Amount and running Total, in order, each rounded with `flt`. |
+| `effectiveRate(row, itemTemplate)` | SET-R12: the item's override rate, null for Not Applicable. |
+| `removeTaxRow(rows, n)` | Removes row n and renumbers later Reference Row #; a reference to the removed row is cleared. |
+| `ImportRecordType`, `Col` | The three import templates and their column labels, mandatory columns and keys. |
+| `matchHeaders`, `rowsOf` | Header matching ignoring case, spacing and `*`; data rows as column → cell. |
+| `validateImport` | SET-R16 checks plus D-25: missing, duplicate, not found, unknown link, bad number, value or date, bad barcode, overlapping price. |
+| `validBarcode` (`stock/logic/barcode.dart`) | EAN: 13 digits and a valid check digit; UPC: 12 digits. |
+
+**Interface (`ui/`).**
+
+| File | Screens |
+|---|---|
+| `wizard_screen.dart` | Language (with **Restore from backup** below the list), Region (country and currency pickers, format preview; the device's country preselected), Store (abbreviation suggested), Done. Compact: one step per screen; wider: a 560dp card. |
+| `setup_screen.dart` | `setupPage(slug, id)` and `SetupScreen` (a `ListDetailPane` of `SetupHome` and the page). `SetupHome` lists six groups; pages owned by other plans are shown disabled. |
+| `form_kit.dart` | `FormPage`, `SectionHeading`, `FieldGrid`, `LockNote`, `MasterList`, `showProblems`, `confirm`, `attempt` (runs a save and shows a refusal or any other error), `refusalText`. |
+| `settings_pages.dart` | `SinglesForm` and its field spec; Store Profile, System Settings (live preview), Global Defaults, Selling Settings; `countryInfoProvider`, `submittedProvider`. |
+| `simple_masters.dart` | Currency (live amount preview), `NamedMasterForm`; Mode of Payment, Tax, Price List lists and forms. |
+| `tax_template_pages.dart` | Sales Taxes and Charges Template (rows, row editor, Try it), Item Tax Template; `NumberField`. |
+| `pos_profile_page.dart` | POS Profile list and form, payment row editor. |
+| `naming_series_page.dart` | Patterns per document, next-name example, Update Series. |
+| `data_pages.dart` | Data Import, Data Export, Backups; `pickBackupCopy` (Android file picker, then a private copy) and `restoreAndReopen` (restore, then reopen the database whatever happened), shared by the Backups page and the wizard. |
 
 ### 6.10 Localisation: `lib/l10n/`
 
-`app_en.arb` holds 21 English messages: the app title, five navigation labels, the Cash Register title, the placeholder text, three wizard messages, the start-up error, three widget labels (Create new, Add Row, Export CSV) and six status names. `l10n.yaml` sets `nullable-getter: false`, so `AppLocalizations.of(context)` needs no null check. English is the only locale.
+`app_en.arb` holds 227 English messages: the shell and widget labels of issue 1 and about 200 Setup labels, field names (ERPNext's words), refusal and problem messages. `languageName` holds each language's own name for the language lists. `l10n.yaml` sets `nullable-getter: false`, so `AppLocalizations.of(context)` needs no null check. English is the only locale.
 
 ---
 
@@ -550,7 +678,7 @@ One screen with a message and a **Finish setup** button. The button writes `setu
 | File | `rx_merchant.sqlite` in the app's documents directory, private to the app |
 | Schema version | 1 |
 | At every open | `PRAGMA foreign_keys = ON` |
-| Backup | None yet. Planned for M9. Uninstalling the app deletes the data. |
+| Backup | `{abbr}-backup-{YYYYMMDD-HHMMSS}.sqlite` in `backups/` beside the database, newest Number of Backups kept; Export copies one anywhere. Backups left only on the device are lost with it (section 6.9). |
 
 ### 7.2 Conventions
 
@@ -559,7 +687,7 @@ One screen with a message and a **Finish setup** button. The button writes `setu
 - Date-times are `TEXT` in the form `YYYY-MM-DD HH:MM:SS`, local time.
 - Documents carry `docstatus` with `CHECK (docstatus IN (0,1,2))`.
 - Status columns hold ERPNext's English status names, constrained by `CHECK`.
-- Masters and documents (24 tables) carry `created_at` and `modified_at`, both defaulting to the time of insert. Child tables, `singles`, `series` and the ledger tables do not. See P-3.
+- Masters and documents (24 tables) carry `created_at` and `modified_at`, both defaulting to the time of insert. Every update written by the Setup feature sets `modified_at`. Child tables, `singles`, `series` and the ledger tables have neither. See P-3.
 - Child tables reference their parent by foreign key and order their rows with `idx` where order matters.
 
 ### 7.3 Where each table is defined
@@ -675,7 +803,7 @@ Stored in `singles` under the doctype shown. A key that is absent takes the defa
 | Key | Default |
 |---|---|
 | `store_name` | empty |
-| `abbr` | initials of the store name |
+| `abbr` | initials of the store name (also when blank) |
 | `country` | none |
 | `default_currency` | none |
 | `monthly_sales_target` | 0 (goal off) |
@@ -795,6 +923,23 @@ Each destination shows an outlined icon, and a filled one when selected.
 
 **Theme.** Material 3, light and dark, from one seed colour. The device setting chooses between them. Form fields are outlined.
 
+**First-run wizard.** Four steps with "Step n of 4" and a progress bar; Back and Next. Step 1 also offers **Restore from backup**. Phone: full screen. Tablet: a centred 560dp card.
+
+**Setup destination.**
+
+| Group | Pages |
+|---|---|
+| Store | Store Profile, System Settings, Global Defaults, Currency |
+| Selling | POS Profile, Mode of Payment, Price List, Selling Settings |
+| Taxes | Tax, Sales Taxes and Charges Template, Item Tax Template |
+| Stock | Stock Settings (disabled: later milestone) |
+| Printing | Print Settings, Letter Head, Print Heading, Terms and Conditions (disabled: later milestone) |
+| Data | Naming Series, Data Import, Data Export, Backups |
+
+Compact and medium: the workspace fills the screen and a link pushes the page. Expanded: the workspace is a 360dp left pane with the chosen link highlighted; the page fills the right pane.
+
+**Forms.** A title, Delete (existing masters) and a Save button in the app bar; sections with headings; fields in two columns from 600dp of pane width. Mandatory labels end with `*`. A failed save opens a dialog listing each problem and keeps the form. A locked field shows a lock icon and its reason. Master lists have a search bar, an Add button and an empty state that offers the same action. Child rows open in a bottom sheet on phones and a side sheet on tablets.
+
 ### 8.2 Software interfaces
 
 The system calls no remote service. Its interfaces to other software are the packages of section 5.4 and the Android platform.
@@ -805,14 +950,20 @@ The system calls no remote service. Its interfaces to other software are the pac
 | `flutter_riverpod` | Providing the database and settings to screens | Yes |
 | `go_router` | Routes and the setup gate | Yes |
 | `intl` | Date and time formatting | Yes |
-| `csv`, `path_provider`, `share_plus` | Report export | Yes, in `ReportTable` |
-| `mobile_scanner`, `pdf`, `printing`, `fl_chart`, `file_picker`, `image_picker` | Later milestones | No |
+| `csv`, `path_provider`, `share_plus` | Report export; CSV import and export | Yes |
+| `file_picker` | Choosing an import or restore file; saving templates, exports and backups | Yes |
+| `sqlite3` | Opening a backup read-only before a restore | Yes |
+| `mobile_scanner`, `pdf`, `printing`, `fl_chart`, `image_picker` | Later milestones | No |
 
 ### 8.3 Device and operating-system interfaces
 
 | Interface | Direction | Detail |
 |---|---|---|
-| App documents directory | Read, write | The database file |
+| App documents directory | Read, write | The database file; `backups/` with the backup files |
+| App temporary directory | Write | `restore.sqlite`, a private copy of the file chosen for a restore |
+| Android file picker | In | A CSV to import; a backup to restore |
+| Android save dialog | Out | Import templates and exports (`text/csv`); exported backups |
+| App asset bundle | In | `assets/country_info.json` |
 | App cache directory | Write | `<exportName>.csv`, written before sharing |
 | Android share sheet | Out | Receives the CSV file with MIME type `text/csv` |
 | Camera | In | Declared by the barcode plugin; no code uses it yet |
@@ -855,7 +1006,7 @@ Run from the repository root.
 | 1. Fetch packages | `flutter pub get` | Packages resolved; localisation code generated |
 | 2. Generate database code | `dart run build_runner build` | `lib/core/db/app_database.g.dart` written; one warning (P-2) |
 | 3. Check | `flutter analyze` | `No issues found!` |
-| 4. Test | `flutter test` | `All tests passed!` (93) |
+| 4. Test | `flutter test` | `All tests passed!` (140) |
 | 5. Build | `flutter build apk --release` | `build/app/outputs/flutter-apk/app-release.apk` |
 | 6. Install | `adb install -r build/app/outputs/flutter-apk/app-release.apk` | `Success` |
 
@@ -876,6 +1027,7 @@ The release build is signed with the debug key, as the Flutter template sets it.
 | Application source | `lib/` |
 | Schema | `lib/features/*/data/*.drift`, `lib/features/stock/data/batch_table.dart` |
 | Messages | `lib/l10n/app_en.arb` |
+| Bundled data | `assets/country_info.json` |
 | Tests | `test/` |
 | Dependencies | `pubspec.yaml`, `pubspec.lock` |
 | Analysis rules | `analysis_options.yaml` |
@@ -891,8 +1043,9 @@ The release build is signed with the debug key, as the Flutter template sets it.
 |---|---|---|
 | `a425ed9` | 2026-11-15 00:54 +08:00 | First Commit (the `flutter create` template) |
 | `fafec23` | 2026-11-15 01:12 +08:00 | Added Claude Directory (plans and agent skills) |
+| `97bfd33` | 2026-11-15 09:49 +08:00 | Milestone M0 and its session report |
 
-On the date of issue, all of milestone M0 is in the working tree and **not yet committed**. The project owner commits. The session report (R10) lists every added, changed and deleted file.
+On the date of issue, all of the Setup plan is in the working tree and **not yet committed**. The project owner commits. The session report for this issue (R10) lists every added, changed and deleted file.
 
 ---
 
@@ -903,33 +1056,37 @@ On the date of issue, all of milestone M0 is in the working tree and **not yet c
 | Check | Result |
 |---|---|
 | Static analysis, `flutter analyze` | No issues |
-| Formatting, `dart format` | All 34 files formatted |
-| Automated tests, `flutter test` | 93 of 93 pass |
-| Release build | Builds; 68.9 MB APK |
+| Formatting, `dart format` | All 56 files formatted |
+| Fixes, `dart fix --dry-run` | Nothing to fix |
+| Automated tests, `flutter test` | 140 of 140 pass |
+| Release build | Builds; 75.3 MB APK |
 | Release manifest | No `INTERNET` permission |
-| Launcher label | `Rx Merchant` |
-| Phone emulator, 360dp and 411dp wide | Wizard gate, then bottom bar with five one-line labels |
-| Tablet emulator | Wizard gate, then rail; labels in landscape, none in portrait |
+| Phone emulator, 360dp wide | Wizard, Setup pages, backup / wipe / restore round trip |
+| Tablet emulator | Wizard card; Setup in one pane (portrait) and two panes (landscape); side-sheet row editor |
 | Real device | **Not tested** |
 
-All checks were run on 2026-11-15.
+All checks were run on 2026-11-16, after the last code change. Issue 1's checks (launcher label, 411dp phone, `aapt2` badging) were not repeated.
 
 ### 10.2 Automated tests
 
 | File | Tests | Covers |
 |---|---|---|
-| `test/app_test.dart` | 10 | Wizard gate: fresh install shows only the wizard; finishing opens the Cash Register; a set-up store never sees the wizard. Shell: bottom bar with five destinations in order; boundaries at 599, 600, 839 and 840dp; switching destinations; rotation. |
+| `test/app_test.dart` | 13 | Wizard gate: fresh install shows only the wizard, with Restore from backup; Language, Region (device country preselected), Store (abbreviation suggested), Done lands on the Cash Register; a set-up store never sees the wizard. Shell: bottom bar with five destinations in order; boundaries at 599, 600, 839 and 840dp; switching destinations; rotation. Setup: workspace then pushed page on compact (later-milestone links disabled); workspace beside the page on expanded; a settings page saves to `singles`. |
 | `test/core/db/schema_test.dart` | 4 | Exactly the 48 tables; the 14 indexes; foreign keys on; a child row with a missing parent is refused. |
-| `test/core/db/singles_test.dart` | 13 | Defaults of all six settings pages; derived defaults; write then read; one row per key; clearing a key; the stream emits after a write; the same field under two doctypes stays separate. |
+| `test/core/db/singles_test.dart` | 13 | Defaults of all six settings pages; derived defaults, including a blank abbreviation; write then read; one row per key; clearing a key; the stream emits after a write; the same field under two doctypes stays separate. |
 | `test/core/numbers/flt_test.dart` | 13 | SET-A1 to A3; negative midpoints; whole-number midpoints; zero; integers; nine decimals; the setting-to-method mapping. |
-| `test/core/numbers/format_test.dart` | 13 | SET-A4; all six number formats; precision; padding; negative values; a negative value that rounds to zero; currency symbol placement; all date and time formats; storage text round trip. |
+| `test/core/numbers/format_test.dart` | 17 | SET-A4; all six number formats; precision; padding; negative values; a negative value that rounds to zero; currency symbol placement; all date and time formats; storage text round trip; `parseNumber` round trip, plain typing, mistyped decimal marks, non-numbers. |
 | `test/core/naming/naming_series_test.dart` | 11 | SET-A5 to A7; date parts; hashes without a dot; suffix; a counter past its digit count; a failed transaction does not consume a number. |
 | `test/core/widgets/list_detail_pane_test.dart` | 5 | Two panes when expanded; one pane at 400 and 839dp; nothing selected. |
 | `test/core/widgets/status_chip_test.dart` | 7 | Colour role and label of each status; an unknown status. |
 | `test/core/widgets/child_table_test.dart` | 5 | Rows listed; bottom sheet when compact; side sheet when wider; Add Row; read-only. |
 | `test/core/widgets/link_field_test.dart` | 7 | Label and value; matches and Create new; narrowing and picking; mandatory mark and error; clear button rules. |
 | `test/core/widgets/report_table_test.dart` | 5 | CSV header and rows; quoting; empty cells; headers, cells and export action; sideways scroll. |
-| **Total** | **93** | |
+| `test/features/setup/logic/tax_template_test.dart` | 13 | SET-A8 to A11; included-reference rule; missing tax; SET-R12 worked example (61.88); row removal renumbering; stored type values. |
+| `test/features/setup/logic/data_import_test.dart` | 9 | Header matching; blank rows; SET-A17 problem position; insert and update checks; barcode ownership; EAN / UPC; price validity overlap; `validBarcode`. |
+| `test/features/setup/data/setup_db_test.dart` | 11 | SET-A12; a failed wizard writes nothing; SET-A13 to A16; delete of a used master refused; duplicate name; default profile and payment rules; group warehouse; disabled choices; Update Series below a used number and the next name; naming series order. |
+| `test/features/setup/data/import_backup_test.dart` | 7 | 200 items imported with price and barcode, exported, updated; SET-A17 at database level; Item Price and Item Barcode insert and update; SET-A18; SET-A19; restore onto a fresh install takes no safety backup, onto a set-up store one; Number of Backups below 1. |
+| **Total** | **140** | |
 
 Database tests run against an in-memory SQLite database with the real schema. Widget tests run the real widgets inside the app's theme and localisation. No test uses a mock.
 
@@ -941,28 +1098,34 @@ Database tests run against an in-memory SQLite database with the real schema. Wi
 | SET-R4, SET-A1 to A3 | `flt_test.dart` |
 | SET-R5, SET-A4 | `format_test.dart` |
 | SET-R6, SET-A5 to A7 | `naming_series_test.dart` |
+| SET-R1, R3, A12 | `setup_db_test.dart`; `app_test.dart` wizard walk-through |
+| SET-R2, A13; R7; R8; R13, A14; R9, A15; R14, A16 | `setup_db_test.dart` |
+| SET-R9, A8 to A11; R12 | `tax_template_test.dart` |
+| SET-R16, A17 | `data_import_test.dart`, `import_backup_test.dart` |
+| SET-R17, A18; R18, A19 | `import_backup_test.dart`; emulator round trip (10.5) |
+| SET-A20 | Emulator checks (10.5) |
 | C-4 | `app_test.dart` "adaptive shell"; `list_detail_pane_test.dart`; `child_table_test.dart` |
 | C-9, C-10 | `schema_test.dart` |
 | C-2 | Release manifest inspection (10.4) |
 
 ### 10.4 Build verification
 
-- `flutter build apk --release` completed and wrote `app-release.apk`, 68.9 MB.
-- The merged release manifest contains `android.permission.INTERNET` zero times.
-- `aapt2 dump badging` reports `application-label:'Rx Merchant'`, `minSdkVersion:'24'`, `targetSdkVersion:'36'`, package `com.rx_merchant.rx_merchant`, version 1.0.0 (1).
+- `flutter build apk --release` completed and wrote `app-release.apk`, 75.3 MB (68.9 MB at issue 1).
+- The merged release manifest contains `android.permission.INTERNET` zero times. Its `uses-permission` entries are unchanged from issue 1: `ACCESS_NETWORK_STATE`, `CAMERA`, `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`.
 
 ### 10.5 Device verification
 
-Emulators only.
+Emulators only, started with `-gpu swiftshader_indirect` (P-1). Issue 2 checks:
 
 | Device | Window | Observed |
 |---|---|---|
-| `Medium_Phone_API_36.1` | 411dp wide | Wizard gate. After Finish setup: Cash Register placeholder, bottom bar with five destinations. |
-| `Medium_Phone_API_36.1`, display forced to 360dp | 360dp wide | Same. All five labels on one line: Register, Invoices, Stock, Dashboard, Setup. |
-| `Medium_Tablet`, landscape | expanded | Wizard gate. After Finish setup: rail with labels. |
-| `Medium_Tablet`, portrait | medium | Rail without labels. |
+| `Medium_Phone_API_36.1` | 360dp wide | Wizard: device country preselected; country search finds Philippines; currency follows; abbreviation RCS suggested; "Add your first item" lands on Stock. Relaunch skips the wizard. System Settings: Date Format changed, preview follows, Save shows "Saved". Tax created; template with a 12% row: Try it shows 120.00 on 1,000.00. POS Profile shows the seeded values; template chosen and saved. Backups: Back up now lists the backup in the chosen date format. |
+| `Medium_Phone_API_36.1` | 360dp wide | SET-B9 round trip: Export to Downloads (454,656 bytes); app data cleared; wizard run with another store name; Restore from the exported file. The live database then held the original store name, template "VAT 12" and the POS Profile's link to it; a safety backup of the replaced data was taken first; Store Profile opened normally. |
+| `Medium_Phone_API_36.1` | 360dp wide | Restore from the wizard: app data cleared; step 1 shows Restore from backup; the file picker opened; picking the exported backup landed on the Cash Register. The live database held the restored store, template and POS Profile; no backups folder was created. |
+| `Medium_Tablet`, portrait | medium, 800dp | Wizard as a card; rail without labels; POS Profile form in two columns. |
+| `Medium_Tablet`, landscape | expanded, 1280dp | Rail with labels; Setup workspace on the left, page on the right, chosen link highlighted; payment row editor as a side sheet. |
 
-One anomaly was observed during these checks and is recorded as P-1.
+Logcat showed no Flutter error on either device. Four defects found in these checks were fixed before issue (section 10.6).
 
 ### 10.6 Code review
 
@@ -976,6 +1139,24 @@ One anomaly was observed during these checks and is recorded as P-1.
 | Over-engineering | Manual audit of all hand-written code | Nothing worth cutting. One unused constant, `AppSpacing.xs`, kept as part of the spacing scale. |
 | Formatting | `dart format` | One test file reformatted |
 
+Issue 2. The project names "flutter review" and Ponytail. No tool by that name exists, so the review was `flutter analyze`, `dart fix`, and the code-review skill: two independent reviewers of the working tree against `97bfd33`, one for standards (R1 sections 5 to 7 and a code-smell list), one against R2. Findings were fixed with the smallest change at the cause.
+
+| Finding | Fix |
+|---|---|
+| Currency form saved Smallest Currency Fraction Value as 1 in `#.###,##` stores | The field shows the value in the Number Format |
+| "7.5" typed in a `#.###` store saved 75 | `parseNumber` checks group sizes (D-26) |
+| Deleting a tax row left later Reference Row # on the wrong row | `removeTaxRow` renumbers |
+| Backups page offered 1 to 20 backups; System Settings allows more | Range follows the stored value |
+| Errors other than refusals were not shown; a failed restore could leave the database closed | `attempt` shows any error; restore always reopens the database |
+| A blank Abbreviation named backups "-backup-…" | `StoreProfile.abbr` falls back to initials |
+| `.FY.` accepted in a naming series | Refused with a message |
+| `modified_at` not set on three updates | Set |
+| Screens queried the database directly; the Currency mapping existed twice | Query methods; `CountryInfo.toCurrency()` |
+| Raw error text untranslated | Through a message |
+| Emulator: wizard card filled the tablet height; Price List blank on first open; a Back arrow beside pages on tablets; Try it Total off a 360dp screen | Fixed (D-22 for the second) |
+
+Left as they are, with reasons: link fields as dropdowns (D-20, P-11); stored option values untranslated (P-11); `FieldGrid` on pane width (D-21); the import log lists imported records only; the extra stock checks in Data Import (D-25); judgement-call code smells (three similar master pages, page slugs listed twice, short names).
+
 ---
 
 ## 11. User documentation
@@ -984,7 +1165,12 @@ What the store owner can do with this build.
 
 **Install.** Install the APK on an Android 7.0 or later phone or tablet.
 
-**First start.** The app opens on a screen titled **Welcome**. It says the first-run wizard arrives in a later milestone. Tap **Finish setup**.
+**First start.** The app opens on the **Welcome** wizard.
+
+1. **Language.** English is the only language. Tap **Next**. Moving from another device? Tap **Restore from backup** and pick a backup file instead; the app opens on that store and skips the other steps.
+2. **Region.** Your device's country is filled in. Tap **Country** to search for another. The currency follows the country; tap **Currency** to change it. The preview shows how dates and amounts will look. Tap **Next**.
+3. **Your store.** Type the store name. The abbreviation is suggested from its initials; it names your backup files. Tap **Next**.
+4. **All set.** Tap **Open Cash Register** or **Add your first item**. The app creates the store's starting records: the currency, the "Stores" warehouse, item groups, units, the "Standard Selling" price list, the Cash, Credit Card and Wire Transfer payment modes, and the "Main Counter" POS Profile. Sales are tax-free until a tax template is chosen on the POS Profile.
 
 **Navigation.** The app shows five destinations. On a phone they are in a bar at the bottom. On a tablet they are in a rail at the side; in landscape the rail also shows labels.
 
@@ -994,7 +1180,25 @@ What the store owner can do with this build.
 | Invoices | Same |
 | Stock | Same |
 | Dashboard | Same |
-| Setup | Same |
+| Setup | Every setup page; see below |
+
+**Setup.** Grouped links: Store, Selling, Taxes, Stock, Printing, Data. Greyed links arrive with later milestones. On a tablet in landscape the links stay on the left and the page opens on the right.
+
+| To | Go to |
+|---|---|
+| Rename the store, set the monthly sales target | Store Profile |
+| Change date, time or number formats, rounding, how many backups to keep | System Settings; the preview shows the result before you save |
+| Hide the currency symbol | Global Defaults |
+| Change the symbol or its side | Currency |
+| Add a payment mode such as GCash | Mode of Payment, then add it to the POS Profile's Payment Methods |
+| Charge VAT | Tax: add "VAT". Sales Taxes and Charges Template: add a template with a row "On Net Total", tax VAT, rate 12; check it in **Try it**. POS Profile: choose the template under Taxes and Charges. |
+| Exempt some items from a tax | Item Tax Template: Not Applicable for that tax (assigning it to items comes with the Stock milestone) |
+| Change how invoices are numbered | Naming Series; Update Series moves the counter |
+| Load many items | Data Import: Download Template, fill it in a spreadsheet, Choose File, Start Import. Problems are listed by row and column; nothing is imported until all are fixed. |
+| Keep a copy of the data | Backups: Back up now, then the save icon to store the file somewhere other than the device |
+| Bring data back | Backups: Restore from file; the current data is backed up first. On a new device, tap **Restore from backup** on the wizard's first page instead of setting up. |
+
+A record that is in use cannot be deleted: disable it instead.
 
 **Later starts.** The app opens on the Register destination. The Welcome screen does not appear again.
 
@@ -1002,7 +1206,7 @@ What the store owner can do with this build.
 
 **Dark theme.** Follows the device setting.
 
-Nothing else is available yet. No data can be entered.
+Selling, invoices, stock movements and the dashboard are not available yet.
 
 ---
 
@@ -1014,17 +1218,21 @@ Nothing else is available yet. No data can be entered.
 |---|---|---|---|
 | P-1 | On the development machine's Android emulator in hardware GPU mode, the first app launch after the emulator boots, or after the display density changes, can draw the first screen after the wizard with text missing: once the app-bar title, twice part of the body text, once (on the tablet) rail icons and labels. It clears on the next repaint. | Cosmetic, on the emulator. | Open. Follows the emulator's GPU path: 2 of 2 trigger launches showed it in hardware mode (AMD integrated GPU); 0 of 3 trigger launches and 0 of 6 launches overall in software mode (`-gpu swiftshader_indirect`), same APK; 6 warm relaunches in hardware mode were clean. Small samples. The cause inside the emulator is not known. **Not checked on a real device.** |
 | P-2 | `dart run build_runner build` prints one warning: `item` cannot be found for the foreign key of the `batch` table. | None. The SQL constraint is correct and the schema test passes. | Accepted (D-3). |
-| P-3 | `modified_at` is set when a row is inserted and never updated. | None yet: no code updates a row. | Open. Each milestone that adds an update must set `modified_at`. |
+| P-3 | `modified_at` must be set by every update. | None: every update the Setup feature writes sets it. | Open as a rule for later milestones. |
 | P-4 | The release build carries `ACCESS_NETWORK_STATE`, added by a plugin. | None: without `INTERNET` the app cannot connect. | Accepted. Removing it risks a crash in a plugin's background job. |
-| P-5 | The wizard is a placeholder. Finish setup records completion without collecting anything. | The store has no name, currency or formats beyond the defaults. | By design until M1. |
+| P-5 | (Issue 1: the wizard was a placeholder.) | — | **Closed** at issue 2: the real wizard replaces it. |
 | P-6 | The release build is signed with the debug key. | It cannot be published. | By design: the app is not being published. |
 | P-7 | Generated localisation code is excluded from analysis. | A real problem in it would go unreported. | Accepted (D-11). |
 | P-8 | No real device has been used. | Behaviour on real hardware is unverified. | Open. |
+| P-9 | Restoring onto a fresh install needed the wizard first, because Setup is behind the wizard gate. | — | **Closed** in issue 2: the wizard's first step offers Restore from backup. |
+| P-10 | Leaving a form with unsaved changes discards them without asking. | Edits can be lost by a stray Back. | Open. |
+| P-11 | Two deviations from R1 §7.1 and §4: Setup link fields are dropdowns without "Create new" (D-20); stored option values show in English as stored. | Owner must create a master from its own page first; a second language would leave those values untranslated. | Accepted for now. |
+| P-12 | The automatic backup on POS Closing submit (SET-R17) is not wired. | Backups are taken only on demand. | Waits for M5; `takeBackup()` is ready. |
 
 ### 12.2 Limits of this issue
 
 - English is the only language.
-- There is no backup. Uninstalling the app deletes the data.
+- Backups kept only on the device are lost with it; Export copies them elsewhere.
 - No migration path exists yet (section 7.7).
 
 ### 12.3 Not built yet
@@ -1033,13 +1241,12 @@ Beyond the milestones in section 4.4, these foundation pieces were left for the 
 
 - Docstatus rules for documents (save, submit, cancel, amend)
 - Amount in words
-- Country defaults (`country_info.json`)
-- Parsing of typed numbers in the chosen number format
 - Camera and Bluetooth permission declarations of the app itself
 - A thermal printing package
+- From the Setup plan, waiting on other plans: the POS Closing backup hook (M5); the Stock Settings page (R3); Print Settings, Letter Head, Print Heading and Terms and Conditions pages (R6); assigning Item Tax Templates to items and groups (R3)
 
 ---
 
 ## 13. Summary
 
-Rx Merchant is an offline Android point-of-sale app for one store owner, modelled on ERPNext. At this issue, milestone M0 is complete: the project, the full database schema (48 tables, 14 indexes), settings access with defaults, rounding, formatting, naming series, the theme, the adaptive navigation frame, the setup gate and the shared form widgets. 93 automated tests pass, analysis is clean, and the release build carries no internet permission. No business screen exists yet; milestones M1 to M9 build them. The work is not yet committed, no real device has been tested, and one emulator rendering anomaly (P-1) is open.
+Rx Merchant is an offline Android point-of-sale app for one store owner, modelled on ERPNext. At this issue, milestone M0 and the whole Setup plan are complete: a first-run wizard that seeds the store in one transaction; the Setup destination with Store Profile, System Settings, Global Defaults, Selling Settings, Currency, Mode of Payment, Tax, Price List, Sales Taxes and Charges Template with its "Try it" panel, Item Tax Template, POS Profile and Naming Series; Data Import and Export of items, prices and barcodes; and Backup and Restore, also from the wizard's first step on a new device. The schema is unchanged. 140 automated tests pass, analysis is clean, the release build carries no internet permission, and the wizard, Setup pages and a backup-wipe-restore round trip were checked on phone and tablet emulators. The work is not yet committed and no real device has been tested. Selling, invoices, stock and the dashboard come next (M2, M3, M5 to M8).

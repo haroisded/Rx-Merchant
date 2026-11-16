@@ -58,14 +58,16 @@ class StoreProfile {
 
   String get storeName => v['store_name'] ?? '';
 
-  /// Defaults to the initials of the store name.
-  String get abbr =>
-      v['abbr'] ??
+  /// Defaults to the initials of the store name, also when saved blank.
+  String get abbr => switch (v['abbr']?.trim()) {
+    final a? when a.isNotEmpty => a,
+    _ =>
       storeName
           .split(RegExp(r'\s+'))
           .where((w) => w.isNotEmpty)
           .map((w) => w[0].toUpperCase())
-          .join();
+          .join(),
+  };
   String? get country => v['country'];
   String? get defaultCurrency => v['default_currency'];
 

@@ -117,4 +117,34 @@ void main() {
       expect(DateTime.parse(toStorage(d)), d);
     });
   });
+
+  group('parseNumber (SET-R5, typing side)', () {
+    test('reads what formatNumber shows', () {
+      for (final f in ['#,###.##', '#.###,##', '# ###.##', '#,##,###.##']) {
+        expect(parseNumber(formatNumber(1234567.89, f, 2), f), 1234567.89);
+      }
+      expect(parseNumber('1.234.567', '#.###'), 1234567);
+    });
+
+    test('plain typing works without group separators', () {
+      expect(parseNumber('12.5', '#,###.##'), 12.5);
+      expect(parseNumber('12,5', '#.###,##'), 12.5);
+      expect(parseNumber('-3', '#,###.##'), -3);
+    });
+
+    test('a mistyped decimal mark is refused, not read as a group', () {
+      expect(parseNumber('7.5', '#.###'), isNull);
+      expect(parseNumber('7,5', '#.###'), 7.5);
+      expect(parseNumber('1,5', '#,###.##'), isNull);
+      expect(parseNumber('7.5', '#,###'), 7.5);
+      expect(parseNumber('0.01', '#.###,##'), isNull);
+      expect(parseNumber('0,01', '#.###,##'), 0.01);
+    });
+
+    test('rejects text that is not a finite number', () {
+      expect(parseNumber('', '#,###.##'), isNull);
+      expect(parseNumber('abc', '#,###.##'), isNull);
+      expect(parseNumber('Infinity', '#,###.##'), isNull);
+    });
+  });
 }

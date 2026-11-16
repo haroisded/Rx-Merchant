@@ -5,6 +5,12 @@
 * "B:\Development-Projects\erpnext-planner\Plans\context-ai-response.txt"
   ( note: don't do these referenced files, only read them, context only )
 
+- For Past Session Contexts - check the...
+  "B:\Development-Projects\rx_merchant\.claude\commits"
+
+- To gain context about the Current System - read...
+  "B:\Development-Projects\rx_merchant\.claude\erpnext-planner\system-documentation.md"
+
 
 # context
 - project has already been setup, using the...
@@ -14,7 +20,10 @@
 
 - git has already been setted up 
 
+- Plans that has already been finished...
+* "B:\Development-Projects\erpnext-planner\Plans\00-overview-and-foundation.md"
+
 
 # user-prompt
 - once done, I request read word for word and do only...
-  "B:\Development-Projects\erpnext-planner\Plans\00-overview-and-foundation.md"
+"B:\Development-Projects\rx_merchant\.claude\erpnext-planner\Plans\01-setup.md"
