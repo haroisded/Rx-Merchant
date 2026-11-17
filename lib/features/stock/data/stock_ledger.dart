@@ -77,28 +77,70 @@ extension StockLedger on AppDatabase {
     final system = SystemSettings(await readSingle(SystemSettings.doctype));
     final pending = {...changes};
     final recosted = <int>{};
+    final resold = <int>{};
     var passes = 0;
     while (pending.isNotEmpty) {
       if (++passes > 10000) throw StateError('Stock repost did not settle');
       final MapEntry(key: chain, value: from) = pending.entries.first;
       pending.remove(chain);
-      for (final next in await _repost(chain, from, stock, system, recosted)) {
+      for (final next in await _repost(
+        chain,
+        from,
+        stock,
+        system,
+        recosted,
+        resold,
+      )) {
         _touch(pending, next, _never);
       }
     }
     for (final id in recosted) {
       await syncStockEntryValues(id);
     }
+    if (resold.isNotEmpty) {
+      await _syncSaleCosts(
+        resold,
+        RoundingMethod.fromSetting(system.roundingMethod),
+      );
+    }
+  }
+
+  /// A sale line's cost per stock unit (`incoming_rate`, which feeds Gross
+  /// Profit) follows its ledger entries, also after a backdated posting
+  /// recosts them (POS-R17).
+  Future<void> _syncSaleCosts(Set<int> lineIds, RoundingMethod rounding) async {
+    final rows = await customSelect(
+      'SELECT voucher_detail_id AS line, SUM(-stock_value_difference) AS cost, '
+      "SUM(-actual_qty) AS qty FROM stock_ledger_entry WHERE voucher_type = 'Sales Invoice' "
+      'AND actual_qty < 0 AND is_cancelled = 0 '
+      'AND voucher_detail_id IN (${lineIds.join(',')}) GROUP BY voucher_detail_id',
+    ).get();
+    for (final r in rows) {
+      final qty = r.read<double>('qty');
+      await (update(
+        salesInvoiceItem,
+      )..where((l) => l.id.equals(r.read<int>('line')))).write(
+        SalesInvoiceItemCompanion(
+          incomingRate: Value(
+            qty == 0
+                ? 0
+                : flt(r.read<double>('cost') / qty, ratePrecision, rounding),
+          ),
+        ),
+      );
+    }
   }
 
   /// Replays one chain; returns the chains whose transfer-in rate changed.
-  /// Stock Entries whose outgoing cost changed are added to [recosted].
+  /// Stock Entries whose outgoing cost changed are added to [recosted], sale
+  /// lines to [resold].
   Future<Set<Chain>> _repost(
     Chain chain,
     String checkFrom,
     StockSettings stock,
     SystemSettings system,
     Set<int> recosted,
+    Set<int> resold,
   ) async {
     final (itemId, warehouseId) = chain;
     final it = await (select(
@@ -193,6 +235,11 @@ extension StockLedger on AppDatabase {
       if (actual < 0 && r.voucherType == 'Stock Entry') {
         outRates[(r.voucherDetailId, r.batchId)] = outgoing;
         if (difference != r.stockValueDifference) recosted.add(r.voucherId);
+      }
+      if (actual < 0 &&
+          r.voucherType == 'Sales Invoice' &&
+          difference != r.stockValueDifference) {
+        resold.add(r.voucherDetailId);
       }
       if (actual != r.actualQty ||
           b.qty != r.qtyAfterTransaction ||

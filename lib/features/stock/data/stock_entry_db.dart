@@ -186,7 +186,14 @@ extension StockEntryDb on AppDatabase {
         ),
       );
       for (final e in l.entries) {
-        await _insertEntry(purpose, l, e, at);
+        await insertEntry(
+          stockEntryType,
+          l.id!,
+          l.itemId,
+          e,
+          at,
+          receipt: purpose == StockPurpose.materialReceipt,
+        );
       }
     }
     for (final (description, amount) in costs) {
@@ -234,31 +241,34 @@ extension StockEntryDb on AppDatabase {
     )..where((c) => c.stockEntryId.equals(entryId))).go();
   }
 
-  /// Resolves one typed Serial / Batch Entry and stores it against line [l].
-  Future<void> _insertEntry(
-    StockPurpose purpose,
-    EntryLine l,
+  /// Resolves one typed Serial / Batch Entry and stores it against line
+  /// [detailId] of a [voucherType] document. Only a [receipt] creates new
+  /// batches and serial numbers.
+  Future<void> insertEntry(
+    String voucherType,
+    int detailId,
+    int itemId,
     SbEntry e,
-    String posting,
-  ) async {
-    final receipt = purpose == StockPurpose.materialReceipt;
+    String posting, {
+    bool receipt = false,
+  }) async {
     int? batchId;
     if (e.batchNo case final name? when name.isNotEmpty) {
       final found = await (select(
         batches,
       )..where((b) => b.batchId.equals(name))).getSingleOrNull();
-      if (found != null && found.itemId != l.itemId ||
+      if (found != null && found.itemId != itemId ||
           found == null && !receipt) {
         throw RefusedException(Refusal.batchNotFound, name);
       }
-      batchId = found?.id ?? await createBatch(l.itemId, name, posting);
+      batchId = found?.id ?? await createBatch(itemId, name, posting);
     }
     int? serialId;
     if (e.serialNo case final name? when name.isNotEmpty) {
       final found = await (select(
         serialNo,
       )..where((s) => s.serialNo.equals(name))).getSingleOrNull();
-      if (found != null && found.itemId != l.itemId ||
+      if (found != null && found.itemId != itemId ||
           found == null && !receipt) {
         throw RefusedException(Refusal.serialNotAvailable, name);
       }
@@ -270,7 +280,7 @@ extension StockEntryDb on AppDatabase {
           await into(serialNo).insert(
             SerialNoCompanion.insert(
               serialNo: name,
-              itemId: l.itemId,
+              itemId: itemId,
               batchId: Value(batchId),
             ),
           );
@@ -279,9 +289,9 @@ extension StockEntryDb on AppDatabase {
     if (batchId == null && serialId == null) return;
     await into(serialAndBatchEntry).insert(
       SerialAndBatchEntryCompanion.insert(
-        voucherType: stockEntryType,
-        voucherDetailId: l.id!,
-        itemId: l.itemId,
+        voucherType: voucherType,
+        voucherDetailId: detailId,
+        itemId: itemId,
         serialNoId: Value(serialId),
         batchId: Value(batchId),
         qty: serialId != null ? 1 : e.qty,
@@ -530,27 +540,57 @@ extension StockEntryDb on AppDatabase {
       return;
     }
 
+    await fillOutwardEntries(
+      stockEntryType,
+      row.id,
+      fact,
+      row.itemId,
+      row.sWarehouseId!,
+      row.transferQty,
+      posting,
+      allowExpired: purpose == StockPurpose.materialIssue,
+    );
+  }
+
+  /// STK-R27: an outgoing line of a batch or serial item left without
+  /// entries takes them by Pick Serial / Batch Based On when Auto Create
+  /// Serial and Batch Bundle For Outward is on; otherwise it is refused.
+  Future<void> fillOutwardEntries(
+    String voucherType,
+    int detailId,
+    ItemFacts fact,
+    int itemId,
+    int warehouseId,
+    double qty,
+    String posting, {
+    required bool allowExpired,
+  }) async {
     final settings = StockSettings(await readSingle(StockSettings.doctype));
     if (!settings.autoCreateSerialAndBatchBundleForOutward) {
       throw RefusedException(Refusal.notEnoughEntries, fact.code);
     }
     final picks = await availableEntries(
-      row.itemId,
-      row.sWarehouseId!,
+      itemId,
+      warehouseId,
       posting,
       serials: fact.hasSerial,
-      allowExpired: purpose == StockPurpose.materialIssue,
+      allowExpired: allowExpired,
     );
-    final taken = autoPick(
-      picks,
-      row.transferQty,
-      settings.pickSerialAndBatchBasedOn,
-    );
-    if ((taken.fold(0.0, (s, t) => s + t.$2) - row.transferQty).abs() > 1e-9) {
+    final taken = autoPick(picks, qty, settings.pickSerialAndBatchBasedOn);
+    if ((taken.fold(0.0, (s, t) => s + t.$2) - qty).abs() > 1e-9) {
       throw RefusedException(Refusal.notEnoughEntries, fact.code);
     }
-    for (final (e, qty) in taken) {
-      await add(e.serialId, e.batchId, qty);
+    for (final (e, q) in taken) {
+      await into(serialAndBatchEntry).insert(
+        SerialAndBatchEntryCompanion.insert(
+          voucherType: voucherType,
+          voucherDetailId: detailId,
+          itemId: itemId,
+          serialNoId: Value(e.serialId),
+          batchId: Value(e.batchId),
+          qty: q,
+        ),
+      );
     }
   }
 

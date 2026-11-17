@@ -107,6 +107,15 @@ enum LineProblem {
   entriesQty,
   batchOrSerialItem,
   duplicateRow,
+
+  /// POS-R3, R16: the item is not a sales item.
+  notSalesItem,
+
+  /// POS-R8: the discount is above the item's Max Discount (%).
+  discountAboveMax,
+
+  /// POS-R16: the net rate per stock unit is below the valuation rate.
+  belowValuationRate,
 }
 
 /// What the line checks need to know about an item.

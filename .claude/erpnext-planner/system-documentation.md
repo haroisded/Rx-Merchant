@@ -7,8 +7,8 @@
 | Title | Rx Merchant: System Documentation |
 | System | Rx Merchant, an offline Android point-of-sale app |
 | System version | 1.0.0+1 (`pubspec.yaml`) |
-| Date of issue | 2026-11-17 |
-| Status | Issued. Describes the system at the end of the Stock plan (R3), build steps STK-B1 to STK-B13 (milestones M2, M3 and the stock part of M8), on top of M0 and the whole Setup plan (M1, M4, M9) with the POS Profile removed (issue 3). |
+| Date of issue | 2026-11-18 |
+| Status | Issued. Describes the system at the end of the Cash Register plan (R4), build steps POS-B1 to POS-B9 (milestone M5 and the register part of M8), on top of M0, the whole Setup plan (M1, M4, M9) and the whole Stock plan (M2, M3, the stock part of M8). |
 | Issuing organization | The Rx Merchant project (one owner, who is also the developer) |
 | Prepared by | Claude (AI assistant), for the project owner |
 | Approval | Pending the project owner's review |
@@ -22,6 +22,7 @@
 | 2 | 2026-11-16 | Covers the Setup plan (R2), SET-B1 to B9: first-run wizard and seed, the Setup destination, settings pages, Currency, Price List, Naming Series, Mode of Payment, taxes, POS Profile, Data Import and Export, Backup and Restore, and "Restore from backup" on the wizard's first step. Sections 1, 3 to 6 and 8 to 13 updated; section 6.9 rewritten; section 7 changed only in 7.1, 7.2 and 7.6. |
 | 3 | 2026-11-16 | POS Profile removed: the app serves one owner with one register. Tables `pos_profile`, `pos_profile_payment` and `pos_profile_item_group` and the `pos_profile_id` columns of `pos_opening_entry`, `pos_closing_entry` and `sales_invoice` deleted from schema version 1 in place (no migration, by the owner's decision). The register's options moved to a new **POS Settings** page (`singles`); its warehouse, price list, taxes and letter head are the store defaults. The Default Price List of Selling Settings must stay enabled and follows a rename. Plans 00, 01, 02, 03 and 05 updated to match. Sections 0, 2.2, 3, 4, 5.3, 5.6, 5.7, 6.3, 6.9, 6.10, 7, 8.1, 9, 10, 11, 12 and 13 updated. |
 | 4 | 2026-11-17 | The Stock plan (R3), STK-B1 to B13: the Stock destination; Warehouse and Item Group trees, UOM, Brand, Item Attribute; Item with barcodes, units, re-order, tax, image, variants; Item Price and the price and item tax lookups; Stock Settings; the stock ledger engine (FIFO, Moving Average, serial cost, negative-stock, backdating, freeze); Stock Entry; Stock Reconciliation; batches and serial numbers with the inline Serial / Batch editor; seven stock reports and the low-stock badge. Schema unchanged. Every section updated except 2.3, 5.5, 6.1 to 6.7 and 7.7; new section 6.11. |
+| 5 | 2026-11-18 | The Cash Register plan (R4), POS-B1 to B9: the POS Opening Entry, the POS screen (item selector, cart, item detail, number pad, payment, order summary, recent orders) in three window size classes, the totals engine (item and additional discounts, taxes on net total, previous rows, quantity and fixed amounts, taxes included in the rate, item tax overrides, rounding to the smallest coin, In Words), Submit with the stock ledger, held orders, the POS Closing Entry with its backup, and serial numbers and batches at the counter. The sale-side stock rules left by issue 4 (D-34, P-16) are wired, except the cost of a sale return, which comes with returns (R6). Printing and returns stay with R6. Schema unchanged. Every section updated except 2.3, 5.5, 6.1 to 6.5, 7.1, 7.3 to 7.7 and 8.4; new section 6.12. |
 
 ### How this document follows ISO/IEC/IEEE 15289
 
@@ -61,13 +62,13 @@ It describes the current state only. Planned behaviour is listed in section 4.4 
 | Version | 1.0.0, build 1 |
 | Platform | Android only. Minimum SDK 24 (Android 7.0), target and compile SDK 36. |
 | Form factors | Phones and tablets, portrait and landscape |
-| Milestone state | M0, the whole Setup plan (M1, M4, M9) and the whole Stock plan (M2, M3, and the stock part of M8) complete. M5 to M7, and the Cash Register part of M8 (POS-B9), not started. |
+| Milestone state | M0, the whole Setup plan (M1, M4, M9), the whole Stock plan (M2, M3) and the whole Cash Register plan (M5) complete; M8 complete. M6 (Invoices) and M7 (Dashboard) not started. |
 
 ### 1.2 What the system is
 
 An Android app for one store run by one owner. It works with no internet connection. When complete it will keep the item catalogue and stock, sell at a cash register, print receipts and invoices, and show a sales dashboard. Its screens, field names and rules follow ERPNext, reduced to what one store owner needs.
 
-At this issue the store can be set up completely and its stock kept. A first-run wizard creates the store and its default records; the Setup destination holds every settings page and master of the Setup plan; the Stock destination holds the item catalogue, prices, warehouses, stock movements (receipts, issues, transfers, counts), batches, serial numbers and the stock reports; items can be imported from CSV; the data can be backed up and restored. The Register, Invoices and Dashboard destinations are still empty.
+At this issue the store can be set up completely, its stock kept, and goods sold at the register. A first-run wizard creates the store and its default records; the Setup destination holds every settings page and master of the Setup plan; the Stock destination holds the item catalogue, prices, warehouses, stock movements (receipts, issues, transfers, counts), batches, serial numbers and the stock reports; the Register destination opens a cash-register session, sells with taxes and discounts, takes cash, card or split payments, holds orders, and closes the session with a cash count and a backup; items can be imported from CSV; the data can be backed up and restored. The Invoices and Dashboard destinations are still empty, and nothing can be printed yet.
 
 ---
 
@@ -86,7 +87,7 @@ At this issue the store can be set up completely and its stock kept. A first-run
 | R7 | ERPNext documentation, merged | `.claude/erpnext-planner/erpnext-docs-merged.md` |
 | R8 | ISO/IEC/IEEE 15289:2019, Content of life-cycle information items (documentation) | Published standard |
 | R9 | Material Design 3 guidelines (window size classes, navigation, sheets) | m3.material.io |
-| R10 | Session reports: issue 1 `2026-11-15_09-47-00.txt`, issue 2 `2026-11-16_17-26-13.txt`, issue 3 `2026-11-16_22-00-06.txt`, issue 4 `2026-11-17_14-38-00.txt` | `.claude/commits/` |
+| R10 | Session reports: issue 1 `2026-11-15_09-47-00.txt`, issue 2 `2026-11-16_17-26-13.txt`, issue 3 `2026-11-16_22-00-06.txt`, issue 4 `2026-11-17_14-38-00.txt`, issue 5 `2026-11-18_00-48-56.txt` | `.claude/commits/` |
 | R11 | Frappe `frappe/geo/country_info.json` (MIT licence), source of `assets/country_info.json` | github.com/frappe/frappe |
 
 ### 2.2 Glossary
@@ -121,6 +122,13 @@ At this issue the store can be set up completely and its stock kept. A first-run
 | Serial / Batch Entries | The serial numbers and batches chosen for one document line (ERPNext's Serial and Batch Bundle), rows of `serial_and_batch_entry`. |
 | Template, Variant | An item with Has Variants is a template that is never transacted; its variants are the sellable items, one per combination of attribute values (STK-R14 to R17). |
 | Low stock | An item whose quantity in a warehouse is at or below its Re-order Level (STK-R12). |
+| Session | A period of selling between a submitted POS Opening Entry and its POS Closing Entry. At most one is Open. |
+| POS Opening Entry | Opens a session with the cash (and other) amounts in the drawer (POS-R2). |
+| POS Closing Entry | Closes a session: its sales and returns, the amount expected per payment mode, the amount counted, and the difference (POS-R20). |
+| Held order | A sale saved as a draft (Save as Draft): no name and no stock effect until it is completed (POS-R18). |
+| Amount to pay | The Rounded Total when rounding is on, otherwise the Grand Total (POS-R14). |
+| Additional discount | A discount on the whole sale, on Net Total or on Grand Total (POS-R13), beside each line's own discount. |
+| In Words | The amount to pay spelled out, for example "PHP Seven Hundred And Fifty-Four and Ninety Centavo only." |
 
 ### 2.3 Notation
 
@@ -157,7 +165,7 @@ One person: the store owner. The owner sets the system up, maintains items and s
 
 ### 3.4 Operation at this issue
 
-Steps 1, 2 and 3 of the flow exist:
+Steps 1 to 4 of the flow exist:
 
 1. The app starts and reads System Settings.
 2. On a fresh install it shows the first-run wizard. Nothing else is reachable. On its first step **Restore from backup** brings in another device's data instead, and the app opens on the restored store.
@@ -165,7 +173,8 @@ Steps 1, 2 and 3 of the flow exist:
 4. On the last step the owner taps **Open Cash Register** or **Add your first item**. The app writes every seed record and marks setup complete in one transaction, then lands on the chosen destination.
 5. In **Setup** the owner adjusts the store and formats, defines payment modes, taxes, tax templates, price lists and POS Settings, edits naming series, imports or exports items, prices and barcodes, and backs up or restores the data.
 6. In **Stock** the owner keeps the catalogue (items, groups, units, brands, attributes and variants, prices, barcodes), the warehouses and Stock Settings; brings stock in, moves it and writes it off with Stock Entries; counts it with Stock Reconciliations; tracks batches and serial numbers; and reads the stock reports. A badge on Stock counts the items at or below their re-order level.
-7. Register, Invoices and Dashboard still show "This screen arrives in a later milestone."
+7. In **Register** the owner opens a session with the opening cash, sells (scan, search or tap items; change quantity, unit, rate and discounts; take one or several payments; see the change), holds orders and completes them later, and closes the session: the app shows the expected amount per payment mode against the counted amount, and takes a backup.
+8. Invoices and Dashboard still show "This screen arrives in a later milestone." Receipts cannot be printed yet.
 
 ### 3.5 What the system deliberately leaves out
 
@@ -199,7 +208,7 @@ Taken from R1, section 2. Each exclusion applies to every screen and table.
 | C-5 | Material 3 only. Colours come from `ColorScheme` roles; the seed colour is the only literal. | `AppTheme` in `lib/app.dart` | Met |
 | C-6 | Every user-visible label goes through localisation | `lib/l10n/app_en.arb`, generated `AppLocalizations` | Met for labels and messages. Stored option values (charge types, Mode of Payment types, Rounding Method, valuation methods, purposes in lists) show as stored, in ERPNext's English (P-11). |
 | C-7 | Three hops at most: screen, provider, query or pure function. No repository interfaces, use-case classes or mapper layers. | Code structure (section 5) | Met |
-| C-8 | Numeric columns are `REAL`. Every calculated value is rounded by `flt` before it is stored. | Schema; `lib/core/numbers/flt.dart` | Met. Stock values round to Currency Precision, quantities to Float Precision, valuation rates to 9 decimals (`logic/valuation.dart`). |
+| C-8 | Numeric columns are `REAL`. Every calculated value is rounded by `flt` before it is stored. | Schema; `lib/core/numbers/flt.dart` | Met. Stock values round to Currency Precision, quantities to Float Precision, valuation rates to 9 decimals (`logic/valuation.dart`). Sale amounts and taxes round to Currency Precision in the totals engine (`pos/logic/totals.dart`), always with the Rounding Method in force. |
 | C-9 | Foreign keys are enforced | `PRAGMA foreign_keys = ON` at every open | Met, verified |
 | C-10 | Schema version 1 contains every table of every feature plan | 45 tables, 14 indexes | Met, verified |
 | C-11 | ERPNext's labels and status names are used as is | Status values in the schema; localisation keys | Met for what exists |
@@ -222,7 +231,7 @@ Taken from R1, section 2. Each exclusion applies to every screen and table.
 | SET-R14 | POS Settings: Default Mode of Payment (Cash), the eight configuration switches, Action on New Invoice, Apply Discount On, Print Format, Print Heading, Terms and Conditions | `PosSettings` in `singles.dart`; `PosSettingsPage` in `settings_pages.dart` | `singles_test.dart` (defaults, blank "None"); saving goes through `SinglesForm`, tested in `app_test.dart` |
 | SET-R15 | Monthly Sales Target on Store Profile; it blocks nothing | `StoreProfilePage` in `settings_pages.dart` (money field) | Field seen on the emulator; saving goes through `SinglesForm`, tested in `app_test.dart`. The dashboard use comes with M7. |
 | SET-R16 | Data Import of Item, Item Price, Item Barcode: template, every row checked first, problems by row and column, one transaction, a result log; Data Export of the same columns | `logic/data_import.dart`, `data/data_import_db.dart`, `ui/data_pages.dart` | `data_import_test.dart`; `import_backup_test.dart` (SET-A17, 200 items) |
-| SET-R17 | Backup by `VACUUM INTO`, named `{abbr}-backup-{YYYYMMDD-HHMMSS}.sqlite`, newest Number of Backups kept, Export outside the app | `takeBackup`, `listBackups` in `data/backup.dart`; `BackupsPage` | `import_backup_test.dart` (SET-A18); emulator. The automatic backup on POS Closing waits for M5. |
+| SET-R17 | Backup by `VACUUM INTO`, named `{abbr}-backup-{YYYYMMDD-HHMMSS}.sqlite`, newest Number of Backups kept, Export outside the app | `takeBackup`, `listBackups` in `data/backup.dart`; `BackupsPage` | `import_backup_test.dart` (SET-A18); emulator. Also taken after every POS Closing Entry (`submitClosing`): `pos_db_test.dart` (POS-A22), emulator. |
 | SET-R18 | Restore checks the file, refuses with an open session, backs up first (skipped when setup was never finished), replaces the database and reopens it; available on the Backups page and on the wizard's first step | `checkRestorable`, `restoreDatabase`; `pickBackupCopy`, `restoreAndReopen`; `BackupsPage`, `WizardScreen` | `import_backup_test.dart` (SET-A19, fresh-install restore); emulator round trips (section 10.5) |
 | R1 §6.5 | Settings pages are stored as key-value rows, with typed access and defaults | `lib/core/db/singles.dart` | `test/core/db/singles_test.dart` |
 | R1 §7.2, §7.3 | Navigation is a bottom bar on compact windows, a rail on medium windows, a rail with labels on expanded windows; five destinations in fixed order | `lib/core/widgets/adaptive_shell.dart` | `test/app_test.dart`, group "adaptive shell" |
@@ -248,6 +257,18 @@ Taken from R1, section 2. Each exclusion applies to every screen and table.
 | STK-R42 | Stock Reconciliation: Opening Stock and counts; current values as of the posting time; unchanged rows dropped; Fetch Items, Scan Mode, CSV with exact headers; batch and serial items refused | `data/stock_reconciliation_db.dart`; `ui/stock_reconciliation_page.dart` | `stock_db_test.dart` (STK-A22); emulator |
 | STK-R43 | Stock Ledger, Stock Balance, Quick Stock Balance, Batch-wise Balance History, Serial No Ledger, Item Price Stock, Low Stock; cancelled entries left out; CSV export | `data/stock_reports.dart`; `ui/report_pages.dart` | `stock_db_test.dart`; `stock_ui_test.dart`; emulator |
 | R3 §5 | Stock workspace of grouped cards; with a record open on an expanded window its list takes the left pane | `ui/stock_screen.dart`; `_workspaceRoute` in `lib/router.dart` | `stock_ui_test.dart`; emulator |
+| STK-R11, R22, R24, R26, R27 on a sale | A sold item with no Item Price in the sale's list gets one, once; an expired batch is never sold; only Available serial numbers in the sale's warehouse are sold and become Delivered with their warranty expiry; empty batch / serial lines are picked at Submit when the setting is on | `submitSale`, `_checkSaleEntries`, `_deliverSerials`, `_insertMissingPrices` in `pos/data/pos_db.dart`; `fillOutwardEntries` | `pos_db_test.dart` (POS-A25, STK-R22, STK-R11) |
+| POS-R1, R2 | Nothing is sold without an Open POS Opening Entry; it records an Opening Amount per enabled mode; only one session is Open | `openSessionWith`, `watchOpenSession` (`pos/data/pos_db.dart`); `OpeningForm`; unique index `one_open_session_idx` | `pos_db_test.dart` (POS-A21); `pos_ui_test.dart`; emulator |
+| POS-R2a | A new sale copies the Default Warehouse, the Default Price List, the default enabled tax template's rows, Apply Discount On, the default Letter Head, Print Heading and Terms | `newSale` | `pos_db_test.dart` (POS-A23); emulator |
+| POS-R3, R4 | The selector lists enabled, non-template sales items not past End of Life, with price and stock in the sale's warehouse; search by name, code, barcode or serial; group filter with subgroups; Hide images, Hide unavailable Items, Automatically Add Filtered Item To Cart; an exact barcode adds in its unit; equal lines merge; a short stock item is refused | `watchRegisterItems`; `ItemSelector`; `addToSale` (`pos/logic/sale.dart`); `CartNotifier.add` | `sale_test.dart`; `pos_ui_test.dart` (barcode); emulator |
+| POS-R5 to R8 | Unit with its factor and price; Price List Rate editable only with Selling Settings' permission; rate and discounts only with POS Settings' permissions; a typed rate below the list rate is a discount; a discount above Max Discount refused as it is typed and at Submit | `newLine`, `setUnit`, `reprice`; `linePrice`; `CartNotifier.setPrice`; `ItemDetail`; number pad | `totals_test.dart` (POS-A9); `pos_db_test.dart` (POS-A10, A15); emulator |
+| POS-R9 to R14 | The totals engine: item values; taxes included in the rate worked back; tax rows of all five types with item overrides and Not Applicable; additional discount on Net Total or Grand Total; Grand Total; Rounded Total by the smallest coin; In Words | `computeTotals`, `roundToFraction` (`pos/logic/totals.dart`); `moneyInWords` (`core/numbers/in_words.dart`) | `totals_test.dart` (POS-A1 to A8, A11 to A13, A16, Grand Total discount remainder); `in_words_test.dart` |
+| POS-R15 | Every enabled mode; the default mode pre-filled with the amount to pay; split payments; change; a card or bank amount above what is due refused; no partial payment | `settle`; `PaymentPanel`, `defaultMode` | `totals_test.dart` (POS-A14); `pos_db_test.dart` (POS-A20); emulator |
+| POS-R16, R17 | Submit checks reported together; Submit names the sale, posts the ledger, records each line's cost, delivers serial numbers, inserts a missing price and sets Paid, in one transaction; a refused Submit leaves the cart usable | `saleProblems`, `submitSale` (`_keepOnFailure`); `RefusedAll` | `pos_db_test.dart` (POS-A17, A19, A20, A25, retry after a refusal) |
+| POS-R18, R19 | Save as Draft (no name, no stock); Action on New Invoice; a held order is repriced when reopened and joins the session it is completed in; Recent Orders with Draft, Paid and Return filters and search; drafts edit or delete | `saveSale`, `loadSale`, `deleteSale`, `watchRecentOrders`; `RecentOrders`; `_replaceCart` | `pos_db_test.dart` (POS-A18, A24); emulator (a held order survives a restart) |
+| POS-R20 | POS Closing Entry: period, sales and returns, totals, expected amount per mode (opening + received − change), counted amount, difference, remarks; it closes the session and takes a backup; the latest closing can be cancelled while nothing newer exists | `closingDraft`, `submitClosing`, `cancellableClosing`, `cancelLastClosing` (`pos/data/pos_closing_db.dart`); `ClosingPage` | `pos_db_test.dart` (POS-A22, A24); emulator |
+| POS-R21 | A scanned serial number adds its unit; the line's Serial / Batch Entries in the item detail, with Auto Fetch; auto pick at Submit, or refusal | `availableSerial`; `addToSale`; `SerialBatchEditor` in `ItemDetail`; `fillOutwardEntries` | `sale_test.dart`; `pos_db_test.dart` (POS-A25, STK-R22) |
+| R4 §5 | The POS screen in three layouts: phone in two steps with a bottom sheet for the item detail and the opening as an AlertDialog; Medium with selector and cart, item detail and payment as side sheets over the selector; Expanded with item detail and payment in the selector pane and a number pad under the cart | `PosScreen`, `OpeningForm`, `CartPanel`, `PaymentPanel`, `OrderSummary` | `pos_ui_test.dart` (phone, Medium, tablet); emulator |
 
 ### 4.3 Acceptance criteria met
 
@@ -281,6 +302,10 @@ Taken from R1, section 2. Each exclusion applies to every screen and table.
 | STK-A20, A21 | A backdated receipt recosts a later issue to 1,450; cancelling a receipt the issue needs is refused and names the issue (tested on the A20 receipts without the backdated one; with it, enough stock remains) | Pass |
 | STK-A22 to A27 | Reconciliation −2 / −160 / 840; transfer keeps total value; a receipt whose serial was sold cannot be cancelled; expired batch: transfer refused, issue allowed; bin rebuilt from the ledger is identical; Stock Frozen Upto | Pass |
 | STK-B1 to B13 runnable results | Masters nest and disable; an item is found by its barcode; the item strip shows prices; defaults flow into new items; receive, issue, transfer, count; reports match the ledger and export; 6 T-shirt variants; batch by earliest expiry, blocked when expired; units go out at their own cost; 50 serials from one range | Pass (tests and emulator, sections 10.2, 10.5) |
+| POS-A1 to A8 | Tax 55.92 and Grand Total 754.92; 108 with 8% included is 100 + 8; item templates give 61.88 on 947; Not Applicable stored as "NA"; previous row amount 80 + 1.60, previous row total 80 + 21.60; Actual 25; On Item Quantity 10 | Pass |
+| POS-A9 to A16 | 200 less 10% is 180, 360 for two; 25% against a 20% Max Discount refused; the four discount cells (972 / 972 / 1,026 / 1,030); 754.92 rounds to 754.92 / 754.90 / 755, and 754.93 to 754.95; change 245.10 and 45.10, card 800 refused; 3 Cartons are 30; two lines at 54 with 8% included give exactly 108.00 | Pass |
+| POS-A17 to A25 | A sale of 2 posts −2 at cost 100, Paid, `ACC-SINV-2026-00001`; deleted drafts leave no gap; overselling refused with nothing written; short payment refused; a second session refused; the closing example (cash 1,401.80, card 500, difference −1.80); a later template edit leaves the sale alone; a held order joins the later session; a Delivered serial cannot be sold | Pass |
+| POS-B1 to B9 runnable results | A session is asked for, then the register opens; every worked example passes; items scanned into a cart with live totals; unit, rate and discounts change the totals; change right for cash and split, card overpayment refused; a sale reduces stock and appears in the Stock Ledger; a held order survives an app restart and is completed; the closing example reproduces; a serialised unit is sold by its serial number | Pass (tests and emulator, sections 10.2, 10.5) |
 
 ### 4.4 Requirements not yet implemented
 
@@ -291,11 +316,11 @@ Taken from R1, section 2. Each exclusion applies to every screen and table.
 | M2 Stock A | Warehouse, Item Group, UoM, Brand, Item, Item Price, Stock Settings | **Done** |
 | M3 Stock B | Stock ledger engine, Stock Entry, Stock Reconciliation, core stock reports | **Done** |
 | M4 Setup B | Mode of Payment, taxes, POS Settings, Selling Settings | **Done** |
-| M5 Cash Register | Sessions, POS screen, totals engine, payment, submit | Not started |
+| M5 Cash Register | Sessions, POS screen, totals engine, payment, submit | **Done** |
 | M6 Invoices | List, detail, print formats, PDF, thermal printing, returns, cancel | Not started |
 | M7 Dashboard | Cards, charts, sales goal, reports | Not started |
-| M8 Stock C | Variants, batches, serial numbers | **Done** for stock documents (STK-B10 to B13); selling them at the Cash Register (POS-B9) waits for M5 |
-| M9 Setup C | Data import and export, backup and restore | **Done**, except the backup on POS Closing, which needs M5 |
+| M8 Stock C | Variants, batches, serial numbers across stock documents and the Cash Register | **Done** (STK-B10 to B13, POS-B9) |
+| M9 Setup C | Data import and export, backup and restore | **Done**, including the backup on POS Closing |
 
 ---
 
@@ -329,6 +354,12 @@ flowchart TD
     Router --> Wizard[features/setup/ui/wizard_screen.dart]
     Router --> SetupUi[features/setup/ui/setup_screen.dart<br/>and the Setup pages]
     Router --> StockUi[features/stock/ui/stock_screen.dart<br/>and the Stock pages]
+    Router --> PosUi[features/pos/ui/pos_screen.dart<br/>selector, cart, detail, payment, closing]
+    PosUi --> PosLogic[features/pos/logic/<br/>sale, totals]
+    PosUi --> PosData[features/pos/data/<br/>pos_db, pos_closing_db]
+    PosData --> PosLogic
+    PosData --> StockData
+    PosData --> Database
     StockUi --> StockLogic[features/stock/logic/<br/>valuation, stock_rules, stock_documents, variants, serials]
     StockUi --> StockData[features/stock/data/<br/>stock_ledger, stock_entry_db, stock_reconciliation_db,<br/>stock_masters, stock_lists, stock_reports]
     StockData --> StockLogic
@@ -357,7 +388,7 @@ A screen reads a provider or calls a query method on `AppDatabase` (a Dart exten
 lib/
   main.dart                     entry point
   app.dart                      App widget, AppTheme
-  router.dart                   routes, setup gate, placeholder screens
+  router.dart                   routes, setup gate, placeholder screens (Invoices, Dashboard)
   core/
     db/
       app_database.dart         AppDatabase (drift)
@@ -368,6 +399,7 @@ lib/
       flt.dart                  rounding
       format.dart               number, currency, date, time formatting; typed-number parsing
       formats.dart              Formats: the display formats in force
+      in_words.dart             amount in words (In Words)
     naming/
       naming_series.dart        naming series resolver and counter
     widgets/
@@ -376,7 +408,7 @@ lib/
       adaptive_shell.dart       navigation frame
       list_detail_pane.dart     one-pane / two-pane layout
       link_field.dart           picker for one master record
-      child_table.dart          child rows and the row editor sheet
+      child_table.dart          child rows and the row editor sheet (trailing or leading side)
       status_chip.dart          document status indicator
       report_table.dart         report table and CSV export
       date_field.dart           date and date-time picker field
@@ -423,17 +455,32 @@ lib/
     stock/ui/report_pages.dart  the seven reports
     stock/ui/scan.dart          camera barcode scan
     pos/data/pos.drift          8 tables, 5 indexes
+    pos/data/pos_db.dart        sessions, register items, the sale (new, lines, units, prices), held orders, checks, Submit
+    pos/data/pos_closing_db.dart POS Closing Entry: draft, submit with backup, cancel the latest
+    pos/logic/sale.dart         Sale and SaleLine (the cart), adding a line, item tax rates as JSON
+    pos/logic/totals.dart       the totals engine, line prices, rounding to the smallest coin, payments
+    pos/ui/pos_screen.dart      the register: opening gate, three layouts, menu, Action on New Invoice
+    pos/ui/pos_providers.dart   POS and Selling Settings, session, items, cart (CartNotifier) and totals
+    pos/ui/opening_form.dart    POS Opening Entry
+    pos/ui/item_selector.dart   search, scan, group filter, item grid or list
+    pos/ui/cart_panel.dart      cart lines, totals, Add Discount, Checkout, number pad
+    pos/ui/item_detail.dart     quantity, unit, rate, discounts, Serial / Batch Entries
+    pos/ui/payment_panel.dart   payment modes, number pad, change, Complete Order
+    pos/ui/order_summary.dart   the submitted sale
+    pos/ui/recent_orders.dart   Recent Orders
+    pos/ui/closing_page.dart    POS Closing Entry
+    pos/ui/pos_widgets.dart     LiveNumberField, TotalRow, NumberPad
     invoices/data/invoices.drift 3 tables
   l10n/
-    app_en.arb                  466 messages, English
+    app_en.arb                  526 messages, English
     app_localizations*.dart     generated by gen-l10n
 assets/
   country_info.json             250 countries (R11)
-test/                           191 tests (section 10.2)
+test/                           223 tests (section 10.2)
 android/                        Android host project
 ```
 
-Size at this issue: about 15,700 lines of hand-written Dart under `lib/` (9,190 of them in the Stock feature, about 4,800 in Setup), 597 lines of schema (unchanged), about 3,200 lines of tests.
+Size at this issue: about 19,900 lines of hand-written Dart under `lib/` (3,958 of them in the Cash Register feature, about 9,200 in Stock, about 4,800 in Setup), 597 lines of schema (unchanged), about 4,000 lines of tests (823 of them for the Cash Register).
 
 ### 5.4 Technology
 
@@ -454,7 +501,7 @@ Size at this issue: about 15,700 lines of hand-written Dart under `lib/` (9,190 
 | Lints | `flutter_lints` | 6.0.0 |
 | Android build | Gradle, Android Gradle Plugin, Kotlin, Java | 9.5.0, 9.3.1, 2.4.20, 17 |
 
-Used from this issue: `mobile_scanner` 7.5.0 (camera barcode scan; its default bundled ML Kit model needs no download) and `image_picker` 1.2.4 (item photo, at most 512 px). Declared for later milestones and not yet imported: `pdf` 3.13.1 and `printing` 5.15.1 (documents), `fl_chart` 1.3.1 (dashboard). `cupertino_icons` 2.0.0 is present only for its icon font.
+Used since issue 4: `mobile_scanner` 7.5.0 (camera barcode scan; its default bundled ML Kit model needs no download) and `image_picker` 1.2.4 (item photo, at most 512 px). Declared for later milestones and not yet imported: `pdf` 3.13.1 and `printing` 5.15.1 (documents), `fl_chart` 1.3.1 (dashboard). `cupertino_icons` 2.0.0 is present only for its icon font.
 
 ### 5.5 Start-up and the setup gate
 
@@ -497,7 +544,8 @@ If the settings cannot be read, `/loading` shows "The database could not be open
 |---|---|---|
 | `/loading` | Blank, or the start-up error | Shown only while settings are read |
 | `/wizard` | First-run wizard | Outside the navigation frame; `?next=` names where to land |
-| `/pos` | Cash Register placeholder | Branch 1, the home location |
+| `/pos` | Cash Register: the POS Opening Entry until a session is open, then the register | Branch 1, the home location |
+| `/pos/closing` | POS Closing Entry of the open session | Back returns to the register; after Submit the opening form shows |
 | `/invoices` | Invoices placeholder | Branch 2 |
 | `/stock` | Stock workspace | Branch 3 |
 | `/dashboard` | Dashboard placeholder | Branch 4 |
@@ -546,11 +594,22 @@ The five destinations are branches of one `StatefulShellRoute.indexedStack`, so 
 | D-31 | `ReportTable` builds rows lazily in two synced lists (a pinned first column and the rest) instead of a `DataTable` | R3 asks for a pinned first column and smooth scrolling of 5,000 rows; a `DataTable` builds every cell at once and cannot pin | Fixed column widths (160 / 128dp); a deviation from R1 §7.1's "DataTable" |
 | D-32 | "Edit Posting Date and Time" is not stored: a draft saved with it off has posting time = modified time; `postingSetByHand` reads the switch back, and Submit moves an unedited posting to the moment of submit | No schema change (D-29 is not repeated) | The rule couples two columns; documented in `stock_documents.dart` |
 | D-33 | The engine replays each changed item-warehouse chain from its first entry and refuses negative stock only from the changed posting onward; a transfer's target chain is replayed when its incoming rate changes | Simple and always correct; R3 states the ceiling | Linear in an item's history (P-15) |
-| D-34 | Rules that only apply to a sale (STK-R11, R26, the sale side of R22 and R27, the rate of a sale return) wait for the Cash Register plan; the engine is voucher-type generic and `priceFor`, `itemTaxTemplateOf`, `availableEntries` are ready | Owner's decision; the sale is plan 03's | Plan 03 must wire them |
+| D-34 | Rules that only apply to a sale (STK-R11, R26, the sale side of R22 and R27, the rate of a sale return) were left for the Cash Register plan; the engine is voucher-type generic and `priceFor`, `itemTaxTemplateOf`, `availableEntries` were ready | Owner's decision; the sale is plan 03's | Wired at issue 5, except the rate of a sale return, which comes with returns (R6) |
 | D-35 | A template's numeric range is narrowed by ticking values in Create > Multiple Variants | No columns for a template range in schema version 1 | The narrowing is not stored on the template |
 | D-36 | Opening stock from the item form is a Material Receipt (Is Opening) for every stock item (STK-R5); STK-R40's reconciliation route also works | R5 says so | Two ways to enter opening stock |
 | D-37 | Material Issue may take expired batches (the write-off of STK-R22); Material Transfer may not | R22 and R21 read together | — |
 | D-38 | The low-stock count reaches the shell from the router (`AdaptiveShell.stockBadge`) | `core` must not import a feature | The router watches two stock providers |
+| D-39 | Complete Order and the POS Opening Entry's Open submit without a confirmation dialog | ERPNext's POS submits on Complete Order; the button is itself the confirmation, and a cashier makes it many times a day. The POS Closing Entry and every cancel still confirm | A deviation from R1 §6.1's "Submit asks for confirmation" |
+| D-40 | The cart is one `Sale` object held by a Riverpod `AsyncNotifier` (`cartProvider`), changed in place and redrawn with `ref.notifyListeners()`; only Save as Draft writes it | It survives rotation and the switch between layouts; R4 asks that a sale killed mid-way is offered again only if it was saved | A new pattern beside the stream providers; the cart's objects are mutable |
+| D-41 | The totals engine follows ERPNext's `taxes_and_totals` order. Two rounding remainders go to the last tax row: the one that makes a sale with taxes included in the rate total what was entered (POS-R12), and the one left by a discount on Grand Total (POS-R13) | Net Total + taxes then always equals the Grand Total | The last row can differ by a cent from its own rate × base |
+| D-42 | `sales_invoice_tax.item_wise_tax_detail` is keyed by `sales_invoice_item.id`, with `[rate, amount]` and "NA" for Not Applicable | R4's column comment; the item code can repeat on two lines | The ids change each time a draft is saved, because its lines are rewritten |
+| D-43 | Change is charged to the sale's first payment of a Cash-type mode when the closing entry computes expected amounts; a card or bank amount above what is still due is refused | Change is cash (R4 POS-R15, R20) | A sale with two cash modes takes the change from the first |
+| D-44 | A sale line's `incoming_rate` is re-read from its ledger entries whenever its chain is replayed, not only at Submit | Gross Profit (R5) must follow a backdated receipt, as the ledger does | One query per replay that touches a sale; beyond the letter of POS-R17 |
+| D-45 | A closed session is reopened by "Cancel POS-CLO-…" on the opening form; there is no list of closing entries | R4 allows cancelling the latest closing only, so one button covers it | Older closing entries are seen only in the database and backups until R6 lists documents |
+| D-46 | `insertEntry` and `fillOutwardEntries` of the Stock Entry code became public and take the voucher type, so a Sales Invoice uses them | One copy of the serial / batch resolution and auto pick | Stock Entry behaviour unchanged |
+| D-47 | On a Medium window the item detail and payment open as side sheets on the leading edge (`showRowEditor(leading: true)`) | R4: "side sheets over the selector", so the cart on the trailing side stays visible | One more option on a shared widget |
+| D-48 | Tapping a payment mode that holds nothing fills it with the amount still due; the number pad then types over it | Split payments in two taps, as in ERPNext's POS | Beyond the letter of POS-R15 |
+| D-49 | Sale lines are checked with the Stock Entry line checks (Material Issue) minus "not a stock item", plus not a sales item, Max Discount, valuation rate, stock and payment; all are reported together. Serial and batch checks run inside Submit and report one problem at a time | One set of line rules for every outgoing document | A serial or batch problem shows alone, after the others are fixed |
 
 ---
 
@@ -658,6 +717,8 @@ The group separator is the second character of the format; the decimal separator
 
 `Formats` (`lib/core/numbers/formats.dart`) bundles System Settings, Global Defaults and the store Currency, and offers `number`, `money`, `date`, `time`, `parse` and `rounding`. Every Setup screen formats through `formatsProvider`.
 
+`moneyInWords(amount, code, fraction, precision)` (`lib/core/numbers/in_words.dart`) writes an amount as Frappe's `money_in_words` does: the currency code, the whole part in title-cased English words with "And" after hundreds and commas between thousands groups, then "and" with the fraction in words and the currency's Fraction name, then "only.": `PHP Seven Hundred And Fifty-Four and Ninety Centavo only.`; a zero whole part gives the fraction alone. International scale only (marked `ponytail:`; the Indian lakh and crore are not written).
+
 `formatDate` accepts ERPNext's Date Format text (`yyyy-mm-dd`, `dd-mm-yyyy`, `dd/mm/yyyy`, `dd.mm.yyyy`, `mm/dd/yyyy`, `mm-dd-yyyy`), where `mm` means month. `formatTime` accepts `HH:mm:ss` and `HH:mm`. `toStorage` produces the text stored in date-time columns, `yyyy-MM-dd HH:mm:ss` in local time, which `DateTime.parse` reads back.
 
 ### 6.7 Naming series: `lib/core/naming/naming_series.dart`
@@ -696,7 +757,7 @@ extension NamingSeries on AppDatabase {
 | `AdaptiveShell` | `AdaptiveShell({navigationShell})` | The navigation frame (section 8.1). Tapping the destination already shown returns it to its first screen. |
 | `ListDetailPane` | `ListDetailPane({list, detail})` | Expanded: a 360dp list, a divider, and the detail. Smaller: one pane, the detail when there is one, otherwise the list. |
 | `LinkField<T>` | `LinkField({label, value, search, labelOf, onChanged, onCreateNew, mandatory, errorText})` | Opens a search view listing what `search` returns for the typed text, followed by "Create new" when `onCreateNew` is given. A mandatory field ends its label with `*` and has no clear button. An optional field with a value shows a clear button that reports `null`. |
-| `showRowEditor<R>` | `showRowEditor(context, builder)` | Compact: a modal bottom sheet that stays above the keyboard. Wider: a 400dp side sheet that slides in from the trailing edge. Completes with the value the editor pops. |
+| `showRowEditor<R>` | `showRowEditor(context, builder, {leading})` | Compact: a modal bottom sheet that stays above the keyboard. Wider: a 400dp side sheet that slides in from the trailing edge, or from the leading edge with `leading` (D-47). Completes with the value the editor pops. |
 | `ChildTable<T>` | `ChildTable({rows, rowBuilder, editorBuilder, readOnly})` | Lists the rows. Tapping one opens it in `showRowEditor`; "Add Row" opens the editor with no row. `readOnly` hides "Add Row"; rows still open. |
 | `StatusChip` | `StatusChip(status)` | Shows the translated status in its colour role (section 8.1). An unknown status shows as is, in the neutral role. |
 | `ReportTable` | `ReportTable({columns, rows, filters, exportName, totals, cell, onRowTap, emptyText})` | A filter bar, a table whose rows are built as they scroll into view, a first column that stays put while the others scroll sideways, an optional totals row, and a CSV export action. Values past the last column are carried for `onRowTap` and are neither shown nor exported. `cell` formats a value for display; the export keeps raw values. A column whose values are all numbers is right-aligned (D-31). |
@@ -712,7 +773,7 @@ extension NamingSeries on AppDatabase {
 | `country_info.dart` | `CountryInfo` (name, code, currency, symbol, fraction, fraction units, smallest fraction, date and number format, `currencyPrecision`, `toCurrency()`); `loadCountryInfo()` decodes the 57 KB asset directly (Flutter's `loadString` would hand it to another isolate). |
 | `seed.dart` | `completeSetup(language, country, currencyOf, storeName, abbr)`: every SET-R3 record and the settings keys, then `setup_complete`, in one transaction. `defaultNamingSeries` holds the seven default patterns. |
 | `setup_queries.dart` | `anySubmittedDocument` (SET-R2), `sessionOpen`; `upsert`, `deleteMaster`; saves for Currency, Mode of Payment, Tax, Price List and both tax templates, each with its rule; `itemTaxTemplateRows`, `salesTaxesTemplateRows`; `saveNamingSeries`, `highestUsedNumber`, `updateSeries`; `addCurrency`. Updates set `modified_at`. |
-| `refusal.dart` | `Refusal` codes and `RefusedException`; `refuseOnConstraint` turns SQLite UNIQUE / PRIMARY KEY failures (2067, 1555) into `duplicateName` and FOREIGN KEY failures (787) into `referenced`, also when drift wraps them in `DriftRemoteException`. |
+| `refusal.dart` | `Refusal` codes and `RefusedException`; `RefusedAll` (several refusals reported together, POS-R16); `refuseOnConstraint` turns SQLite UNIQUE / PRIMARY KEY failures (2067, 1555) into `duplicateName` and FOREIGN KEY failures (787) into `referenced`, also when drift wraps them in `DriftRemoteException`. |
 | `data_import_db.dart` | `importLookups`, `runImport` (one transaction; returns a log), `exportRows` (template header and one row per record). |
 | `backup.dart` | `databasePath`, `backupDirectory`, `listBackups`, `takeBackup` (`VACUUM INTO`, then prune), `checkRestorable`, `restoreDatabase` (the safety backup is skipped when setup was never finished: a fresh install holds nothing to keep; optional `target` and `backupDir` for tests). |
 
@@ -737,7 +798,7 @@ A post-condition guards the rule that spans records: after a Price List save or 
 |---|---|
 | `wizard_screen.dart` | Language (with **Restore from backup** below the list), Region (country and currency pickers, format preview; the device's country preselected), Store (abbreviation suggested), Done. Compact: one step per screen; wider: a 560dp card. |
 | `setup_screen.dart` | `setupPage(slug, id)` and `SetupScreen` (a `ListDetailPane` of `SetupHome` and the page). `SetupHome` lists six groups; pages owned by other plans are shown disabled. |
-| `form_kit.dart` | `FormPage`, `SectionHeading`, `FieldGrid`, `LockNote`, `MasterList` (optional `trailingOf`, used for document status chips), `showProblems`, `confirm`, `attempt` (runs a save and shows a refusal or any other error, numbers and dates in the store's formats), `refusalText`, `lineProblemText`, `lineProblemMessage`. |
+| `form_kit.dart` | `FormPage`, `SectionHeading`, `FieldGrid`, `LockNote`, `MasterList` (optional `trailingOf`, used for document status chips), `showProblems`, `confirm`, `attempt` (runs a save and shows a refusal, every refusal of a `RefusedAll`, or any other error, numbers and dates in the store's formats), `refusalText`, `lineProblemText`, `lineProblemMessage`. |
 | `settings_pages.dart` | `SinglesForm` and its field spec; Store Profile, System Settings (live preview), Global Defaults, Selling Settings, POS Settings (Payment Methods, Configurations, Print Settings; choices of enabled modes, print headings and enabled terms read first); `countryInfoProvider`, `submittedProvider`. |
 | `simple_masters.dart` | Currency (live amount preview), `NamedMasterForm`; Mode of Payment, Tax, Price List lists and forms. |
 | `tax_template_pages.dart` | Sales Taxes and Charges Template (rows, row editor, Try it), Item Tax Template; `NumberField`. |
@@ -746,7 +807,7 @@ A post-condition guards the rule that spans records: after a Price List save or 
 
 ### 6.10 Localisation: `lib/l10n/`
 
-`app_en.arb` holds 466 English messages: the shell and widget labels of issue 1, about 200 Setup labels and 250 Stock labels, field names (ERPNext's words), refusal and problem messages. `languageName` holds each language's own name for the language lists. `l10n.yaml` sets `nullable-getter: false`, so `AppLocalizations.of(context)` needs no null check. English is the only locale.
+`app_en.arb` holds 526 English messages: the shell and widget labels of issue 1, about 200 Setup labels, 250 Stock labels and 60 Cash Register labels, field names (ERPNext's words), refusal and problem messages. `languageName` holds each language's own name for the language lists. `l10n.yaml` sets `nullable-getter: false`, so `AppLocalizations.of(context)` needs no null check. English is the only locale.
 
 ### 6.11 Stock feature: `lib/features/stock/`
 
@@ -756,7 +817,7 @@ A post-condition guards the rule that spans records: after a Price List save or 
 |---|---|
 | `valuation.dart` | `StockBalance`: `receive`, `issue`, `reset` for FIFO (queue of `[qty, rate]` layers with ERPNext's negative-layer rules: an issue past the queue keeps a negative layer at the last rate, the next receipt settles it), Moving Average (rate held at 9 decimals; with no stock on hand the incoming rate becomes the rate) and serial cost (each unit at its own rate). Values rounded to Currency Precision. |
 | `stock_rules.dart` | `stockQty`, `isWhole`, `spreadCosts` (proportional, last row takes the remainder), `validityOverlaps`, `pickPrice` (STK-R10 steps 1-2), `itemTaxTemplateFor` (STK-R13), `batchStatus`, `defaultExpiry`, `autoPick` (FIFO / LIFO / Expiry). |
-| `stock_documents.dart` | `EntryLine`, `SbEntry`, `ReconciliationLine`, `StockPurpose`, `LineProblem`; `checkEntryLines` and `checkReconciliationLines` (mandatory warehouses, groups, fractions, item state, zero rate, serial count and duplicates, entry totals, batch or serial items in a count); `postingSetByHand` (D-32). |
+| `stock_documents.dart` | `EntryLine`, `SbEntry`, `ReconciliationLine`, `StockPurpose`, `LineProblem` (with the sale's `notSalesItem`, `discountAboveMax`, `belowValuationRate`); `checkEntryLines` and `checkReconciliationLines` (mandatory warehouses, groups, fractions, item state, zero rate, serial count and duplicates, entry totals, batch or serial items in a count); `postingSetByHand` (D-32). |
 | `variants.dart` | `numericValues`, `combinations`, `variantCode`. |
 | `serials.dart` | `serialRange` (`SN-01::10`). |
 
@@ -764,8 +825,8 @@ A post-condition guards the rule that spans records: after a Price List save or 
 
 | File | Contents |
 |---|---|
-| `stock_ledger.dart` | `postLedger` (insert, then replay), `cancelLedger`, `repostChains`, `balanceAt`, `checkNotFrozen`, `syncStockEntryValues`, `rebuildBins`. Replaying a chain (D-33): for each entry in posting order a receipt adds, an issue removes, a reconciliation entry sets the balance to its counted quantity and rate (kept in `qty_after_transaction` and `incoming_rate`); the running quantity, rate, value, value change and outgoing rate are written back only where they changed; a negative balance from the changed posting onward is refused with the item, warehouse, quantity available, quantity needed, date and voucher (never allowed for batch and serial items; no batch may go below zero); the outgoing rate of each transfer line becomes the incoming rate of its target entry (plus its share of additional costs), and the target chain is replayed; `bin` receives the final state (FIFO queue as JSON). |
-| `stock_entry_db.dart` | `StockFacts` (item facts, usable warehouses, whole-number units, precisions, `amendedName`, `postingAt`, `refuseFirst`); `StockEntryDb`: `saveStockEntry` (lines, additional costs spread, typed batches and receipt serials created), `submitStockEntry` (name from the default series or the amended name; empty batch / serial lines filled from series or by Auto Fetch; serial and batch checks; one ledger entry per line, side and batch; serial status moved), `cancelStockEntry`, `amendStockEntry`, `deleteStockEntry`, `saveBatch` (expiry rule), `createBatch`, `availableEntries`, `entriesOf`. |
+| `stock_ledger.dart` | `postLedger` (insert, then replay), `cancelLedger`, `repostChains`, `balanceAt`, `checkNotFrozen`, `syncStockEntryValues`, `rebuildBins`. After a replay, each sale line whose cost changed gets its `incoming_rate` back from its ledger rows (D-44). Replaying a chain (D-33): for each entry in posting order a receipt adds, an issue removes, a reconciliation entry sets the balance to its counted quantity and rate (kept in `qty_after_transaction` and `incoming_rate`); the running quantity, rate, value, value change and outgoing rate are written back only where they changed; a negative balance from the changed posting onward is refused with the item, warehouse, quantity available, quantity needed, date and voucher (never allowed for batch and serial items; no batch may go below zero); the outgoing rate of each transfer line becomes the incoming rate of its target entry (plus its share of additional costs), and the target chain is replayed; `bin` receives the final state (FIFO queue as JSON). |
+| `stock_entry_db.dart` | `StockFacts` (item facts, usable warehouses, whole-number units, precisions, `amendedName`, `postingAt`, `refuseFirst`); `StockEntryDb`: `saveStockEntry` (lines, additional costs spread, typed batches and receipt serials created), `submitStockEntry` (name from the default series or the amended name; empty batch / serial lines filled from series or by Auto Fetch; serial and batch checks; one ledger entry per line, side and batch; serial status moved), `cancelStockEntry`, `amendStockEntry`, `deleteStockEntry`, `saveBatch` (expiry rule), `createBatch`, `availableEntries`, `entriesOf`; `insertEntry` and `fillOutwardEntries`, shared with the Sales Invoice (D-46). |
 | `stock_reconciliation_db.dart` | `fillCurrent`, `fetchItems`, `saveStockReconciliation`, `submitStockReconciliation`, `cancelStockReconciliation`, `amendStockReconciliation`. |
 | `stock_masters.dart` | `saveWarehouse`, `deleteWarehouse` (Default Warehouse rules), `saveItemGroup`, `saveUom`, `saveBrand`, `saveItemAttribute`, `saveSerialNo`, `saveItem` (naming, frozen fields, unit lock, barcodes, child tables, opening stock and price, template propagation), `createVariants`, `saveItemPrice`, `hasLedger`, `priceFor`, `itemTaxTemplateOf`. |
 | `stock_lists.dart` | The list queries of the screens: item rows (with stock, price and barcodes), item prices, batches, serial numbers, batch stock, the item strip, the Default Valuation Method lock, `idByName`. |
@@ -786,6 +847,36 @@ A post-condition guards the rule that spans records: after a Price List save or 
 | `scan.dart` | `scanBarcode`, `ScanButton`. |
 | `stock_providers.dart` | Streams of warehouses, item groups, units, brands, attributes, item rows, item strip and image, low-stock count; `searchItems`, `itemByBarcode`, `unitsOf`. |
 
+### 6.12 Cash Register feature: `lib/features/pos/`
+
+**Logic (`logic/`), pure Dart.**
+
+| File | Contents |
+|---|---|
+| `sale.dart` | `Sale` (warehouse, price list, tax rows copied from the template, Apply Discount On, additional discount, letter head, heading, terms, lines, payments per mode, `dirty`) and `SaleLine` (item, unit and factor, quantity, Price List Rate, discount, rate, item tax rates, Serial / Batch Entries); `addToSale` (POS-R4, R21: merge into a line with the same item, unit, rate and batch; a scanned serial joins a line whose units are all chosen, once); `itemTaxJson` / `itemTaxFromJson` ("NA" for Not Applicable); `Submitted`. |
+| `totals.dart` | `computeTotals` and `totalsOf(sale, settings)`: item amounts; included taxes worked back (cumulated fractions and per-unit charges); tax rows (Actual shared by net amount with the remainder on the last line, On Net Total, On Previous Row Amount and Total, On Item Quantity), item overrides through `effectiveRate`, per-line breakdown; the additional discount spread over the lines (on Grand Total, fixed charges excluded), taxes recalculated; remainders on the last tax row (D-41); `roundToFraction` (up only when the remainder is more than half the smallest coin; whole units without one). `linePrice` (POS-R7, R8). `settle` (POS-R15: paid, change, short, card over the amount due). |
+
+**Data (`data/`).** Extensions on `AppDatabase`; every write runs in one transaction.
+
+| File | Contents |
+|---|---|
+| `pos_db.dart` | `openSessionWith`, `openSession`, `watchOpenSession` (POS-R1, R2); `formats` (the settings as `Formats`) and `saleSettingsOf`; `newSale` (POS-R2a); `watchRegisterItems` (sales items with stock in the warehouse and the stock-unit price); `newLine`, `setUnit`, `reprice` (STK-R10, R13 through `priceFor`, `itemTaxTemplateOf`); `availableSerial`; `saveSale`, `loadSale`, `deleteSale`, `watchRecentOrders` (POS-R18, R19); `saleProblems` (POS-R16, all at once); `submitSale` (POS-R17: name, entries picked or checked, ledger, serial cost, Delivered with warranty, missing price inserted, Paid). A failed save or submit restores the cart's draft id (`_keepOnFailure`), because the transaction rolled the row back. |
+| `pos_closing_db.dart` | `closingDraft` (period, invoices, totals, one reconciliation row per mode with opening, received and change), `submitClosing` (closing entry and rows, session Closed, then `takeBackup` outside the transaction; a failed backup is returned, not thrown), `cancellableClosing`, `cancelLastClosing`. |
+
+**Interface (`ui/`).**
+
+| File | Contents |
+|---|---|
+| `pos_providers.dart` | `posPath`; `posSettingsProvider`, `sellingSettingsProvider`, `openSessionProvider`, `cancellableClosingProvider`, `recentOrdersProvider`, `registerItemsProvider` (re-queried only when the warehouse or price list changes), `cartTotalsProvider`; `cartProvider` with `CartNotifier` (add with the stock check, remove, quantity, unit, `setPrice` refusing Max Discount, additional discount, payments, reset, load, Save as Draft with Validate Stock on Save, submit) (D-40). |
+| `pos_screen.dart` | `posPage`, `PosScreen`: the opening form until a session is open; then Compact (selector with a cart bar, cart, payment, summary as one body each; Back steps back), Medium (selector and a 340dp cart; detail and payment as leading side sheets) or Expanded (selector, detail, payment or summary on the left, a 400dp cart with the number pad on the right); the menu (Toggle Recent Orders, Save as Draft, Close the POS); Action on New Invoice when a held order replaces unsaved changes. |
+| `opening_form.dart` | Opening Amount per enabled mode; Open; "Cancel POS-CLO-…" when the last session can be reopened. An `AlertDialog` on Compact, a centred card otherwise. |
+| `item_selector.dart` | `SearchBar` with the scan button, Item Group `DropdownMenu` (with subgroups), item `Card` grid (2 columns on Compact, 2 to 3 on Medium, 4 or more on Expanded) or `ListTile` list with Hide images; barcode, serial number and Automatically Add Filtered Item To Cart; "No items found" with Add Item. |
+| `cart_panel.dart` | Lines (swipe to remove; tap to open), the totals block, Add Discount (percentage or amount), Checkout; on Expanded the number pad for Quantity, Discount (%) and Rate of the selected line, and Remove. |
+| `item_detail.dart` | Quantity stepper, UOM, Rate, Discount (%), Discount Amount, Price List Rate (each read-only unless allowed), Available Qty, Warehouse, the `SerialBatchEditor` with Auto Fetch for batch and serial items. |
+| `payment_panel.dart` | One card per enabled mode, the number pad, Grand Total, Rounded Total, Paid Amount, To Be Paid or Change Amount, Complete Order; `defaultMode`. |
+| `order_summary.dart`, `recent_orders.dart`, `closing_page.dart` | The submitted sale with New Order; Recent Orders; the POS Closing Entry form (cards on Compact, rows otherwise; Difference in the error colour when not zero). |
+| `pos_widgets.dart` | `LiveNumberField` (follows its value when not focused; shows "not a number" or a refused value under the field), `TotalRow`, `NumberPad` (keys at least 48dp high), `padInput`. |
+
 ---
 
 ## 7. Database design
@@ -799,7 +890,7 @@ A post-condition guards the rule that spans records: after a Price List save or 
 | File | `rx_merchant.sqlite` in the app's documents directory, private to the app |
 | Schema version | 1 |
 | At every open | `PRAGMA foreign_keys = ON` |
-| Backup | `{abbr}-backup-{YYYYMMDD-HHMMSS}.sqlite` in `backups/` beside the database, newest Number of Backups kept; Export copies one anywhere. Backups left only on the device are lost with it (section 6.9). |
+| Backup | `{abbr}-backup-{YYYYMMDD-HHMMSS}.sqlite` in `backups/` beside the database, on demand and after every POS Closing Entry; newest Number of Backups kept; Export copies one anywhere. Backups left only on the device are lost with it (section 6.9). |
 
 ### 7.2 Conventions
 
@@ -808,7 +899,7 @@ A post-condition guards the rule that spans records: after a Price List save or 
 - Date-times are `TEXT` in the form `YYYY-MM-DD HH:MM:SS`, local time.
 - Documents carry `docstatus` with `CHECK (docstatus IN (0,1,2))`.
 - Status columns hold ERPNext's English status names, constrained by `CHECK`.
-- Masters and documents (24 tables) carry `created_at` and `modified_at`, both defaulting to the time of insert. Every update written by the Setup and Stock features sets `modified_at`; for stock document drafts `modified_at` also tells whether the posting time was set by hand (D-32). Child tables, `singles`, `series` and the ledger tables have neither. See P-3.
+- Masters and documents (24 tables) carry `created_at` and `modified_at`, both defaulting to the time of insert. Every update written by the Setup, Stock and Cash Register features sets `modified_at`; for stock document drafts `modified_at` also tells whether the posting time was set by hand (D-32). Child tables, `singles`, `series` and the ledger tables have neither. See P-3.
 - Child tables reference their parent by foreign key and order their rows with `idx` where order matters.
 
 ### 7.3 Where each table is defined
@@ -1087,6 +1178,16 @@ Compact and medium: the workspace fills the screen and a link pushes the page. E
 
 The Stock destination icon and the Low Stock link carry a count badge of low-stock items while Show low-stock alerts is on. Expanded: with a record open, its list (for example the Item list) takes the left pane. Documents show a status chip (Draft, Submitted, Cancelled) in their list and app bar; Submit and Cancel ask for confirmation. Reports: a filter bar (a Filters sheet on phones), a pinned first column, a totals row, Export CSV, and rows that open their voucher.
 
+**Register destination (Cash Register).**
+
+| Window | Arrangement |
+|---|---|
+| Compact | No session: the POS Opening Entry as an `AlertDialog`. Then the item selector with a bottom bar (line count, Grand Total) that opens the cart; the item detail opens as a bottom sheet; payment and the order summary fill the screen; Back steps back. |
+| Medium | Selector on the left, a 340dp cart on the right; item detail and payment open as side sheets from the leading edge, over the selector. |
+| Expanded | Selector on the left, a 400dp cart on the right with a number pad (Quantity, Discount (%), Rate, Remove); item detail, payment and the order summary replace the selector, so the cart stays in view. |
+
+The app bar menu holds Toggle Recent Orders, Save as Draft and Close the POS. Item cards show the image (or the initial), name, price and the quantity in the warehouse, in the error colour at zero. The closing entry shows each payment mode as a card on Compact and as a row otherwise, its Difference in the error colour when it is not zero.
+
 **Forms.** A title, Delete (existing masters) and a Save button in the app bar; sections with headings; fields in two columns from 600dp of pane width. Mandatory labels end with `*`. A failed save opens a dialog listing each problem and keeps the form. A locked field shows a lock icon and its reason. Master lists have a search bar, an Add button and an empty state that offers the same action. Child rows open in a bottom sheet on phones and a side sheet on tablets.
 
 ### 8.2 Software interfaces
@@ -1110,14 +1211,14 @@ The system calls no remote service. Its interfaces to other software are the pac
 
 | Interface | Direction | Detail |
 |---|---|---|
-| App documents directory | Read, write | The database file; `backups/` with the backup files |
+| App documents directory | Read, write | The database file; `backups/` with the backup files (also written after every POS Closing Entry) |
 | App temporary directory | Write | `restore.sqlite`, a private copy of the file chosen for a restore |
 | Android file picker | In | A CSV to import; a backup to restore |
 | Android save dialog | Out | Import templates and exports (`text/csv`); exported backups |
 | App asset bundle | In | `assets/country_info.json` |
 | App cache directory | Write | `<exportName>.csv`, written before sharing |
 | Android share sheet | Out | Receives the CSV file with MIME type `text/csv` |
-| Camera | In | Barcode scan (`mobile_scanner`) and item photo (`image_picker`); the permission is asked when first used |
+| Camera | In | Barcode scan (`mobile_scanner`) in the Stock pages and the register's search, and item photo (`image_picker`); the permission is asked when first used |
 | Photo picker | In | Item photo from the gallery |
 
 ### 8.4 Android permissions
@@ -1158,7 +1259,7 @@ Run from the repository root.
 | 1. Fetch packages | `flutter pub get` | Packages resolved; localisation code generated |
 | 2. Generate database code | `dart run build_runner build` | `lib/core/db/app_database.g.dart` written; one warning (P-2) |
 | 3. Check | `flutter analyze` | `No issues found!` |
-| 4. Test | `flutter test` | `All tests passed!` (191) |
+| 4. Test | `flutter test` | `All tests passed!` (223) |
 | 5. Build | `flutter build apk --release` | `build/app/outputs/flutter-apk/app-release.apk` |
 | 6. Install | `adb install -r build/app/outputs/flutter-apk/app-release.apk` | `Success` |
 
@@ -1198,8 +1299,9 @@ The release build is signed with the debug key, as the Flutter template sets it.
 | `97bfd33` | 2026-11-15 09:49 +08:00 | Milestone M0 and its session report |
 | `d5b4836` | 2026-11-16 18:00 +08:00 | The Setup plan (issue 2) and its session report |
 | `65f427a` | 2026-11-16 22:29 +08:00 | POS Profile removal (issue 3) and its session report |
+| `6ed71b8` | 2026-11-17 | The Stock plan (issue 4) and its session report |
 
-On the date of issue, the Stock plan (issue 4) is in the working tree and **not yet committed**. The project owner commits. The session report for this issue (R10) lists every added, changed and deleted file.
+On the date of issue, the Cash Register plan (issue 5) is in the working tree and **not yet committed**. The project owner commits. The session report for this issue (R10) lists every added, changed and deleted file.
 
 ---
 
@@ -1210,16 +1312,16 @@ On the date of issue, the Stock plan (issue 4) is in the working tree and **not 
 | Check | Result |
 |---|---|
 | Static analysis, `flutter analyze` | No issues |
-| Formatting, `dart format` | All 80 files formatted |
+| Formatting, `dart format` | All 101 files formatted |
 | Fixes, `dart fix --dry-run` | Nothing to fix |
-| Automated tests, `flutter test` | 191 of 191 pass |
-| Release build | Builds; 80.4 MB APK |
+| Automated tests, `flutter test` | 223 of 223 pass |
+| Release build | Builds; 81.8 MB APK |
 | Release manifest | No `INTERNET` permission |
-| Phone emulator, 360dp wide | Issue 4: wizard; item with barcode, opening stock and price; Material Issue by typed barcode; Stock Ledger and Stock Balance; low-stock badge; Transfer defaults. Issue 3: POS Settings, Default Price List refusal. Issue 2: Setup pages, backup / wipe / restore |
-| Tablet emulator | Issue 4: Item list beside the two-column form (landscape); Stock Reconciliation with Fetch Items and the side-sheet row editor; portrait one pane. Issue 2: wizard card, Setup panes |
+| Phone emulator, 360dp wide | Issue 5: opening, a sale with VAT, item and Grand Total discounts and a split payment; a held order across an app restart; the Stock Ledger; the closing entry with its backup and its cancel; the compact opening dialog after the review. Issue 4: wizard; item with barcode, opening stock and price; Material Issue by typed barcode; Stock Ledger and Stock Balance; low-stock badge; Transfer defaults. Issue 3: POS Settings, Default Price List refusal. Issue 2: Setup pages, backup / wipe / restore |
+| Tablet emulator | Issue 5: landscape (expanded) with the number pad and the detail and payment panes; portrait (medium) after rotating mid-sale, with side sheets. Issue 4: Item list beside the two-column form (landscape); Stock Reconciliation with Fetch Items and the side-sheet row editor; portrait one pane. Issue 2: wizard card, Setup panes |
 | Real device | **Not tested** |
 
-All checks were run on 2026-11-17, after the last code change. Issue 1's checks (launcher label, 411dp phone, `aapt2` badging) were not repeated.
+All checks were run on 2026-11-17 and 2026-11-18, after the last code change (the phone emulator check of the review fixes on 2026-11-18). Issue 1's checks (launcher label, 411dp phone, `aapt2` badging) were not repeated.
 
 ### 10.2 Automated tests
 
@@ -1242,8 +1344,13 @@ All checks were run on 2026-11-17, after the last code change. Issue 1's checks 
 | `test/features/setup/data/import_backup_test.dart` | 7 | 200 items imported with price and barcode, exported, updated; SET-A17 at database level; Item Price and Item Barcode insert and update; SET-A18; SET-A19; restore onto a fresh install takes no safety backup, onto a set-up store one; Number of Backups below 1. |
 | `test/features/stock/logic/stock_logic_test.dart` | 19 | STK-A1 to A11, A13 to A15; FIFO negative layer settled; reconciliation reset; price validity and batch prices; batch status and default expiry; auto pick by FIFO, LIFO and Expiry. |
 | `test/features/stock/data/stock_db_test.dart` | 26 | FIFO costs and naming; STK-A16 to A27 (A12, A5 at database level); cancel and amend `-1`; additional costs; opening stock and price from a new item; frozen fields and unit lock (A6); fraction (A7); Default Warehouse rules; variants (A10, template refused); serial series and a range of 50; reports (ledger, balance, low stock); duplicate serial; an old negative entry does not block; price fallback and item tax up the tree; batch expiry rule. |
+| `test/core/numbers/in_words_test.dart` | 1 | In Words as Frappe writes it: hundreds with "And", thousands and millions, a fraction alone, zero. |
+| `test/features/pos/logic/totals_test.dart` | 13 | POS-A1 to A9, A11 to A14, A16; Not Applicable stored as "NA"; a typed rate below the list rate; Disable Rounded Total; the Grand Total discount remainder on the last tax row. |
+| `test/features/pos/logic/sale_test.dart` | 2 | Lines merge by item, unit and rate (POS-R4); a scanned serial joins its line once (POS-R21). |
+| `test/features/pos/data/pos_db_test.dart` | 13 | POS-A10, A15, A17 to A25 (POS-A22 with a return inserted directly, returns being R6's); STK-R22 expired batch and the retry after a refused Submit; STK-R11 price inserted once; a backdated receipt recosts the sale; STK-R26 warranty; STK-R27 auto pick; the backup after closing; cancelling the latest closing. |
+| `test/features/pos/ui/pos_ui_test.dart` | 3 | Phone: the opening gate, a barcode added, Checkout, Complete Order, the summary and the stored sale; tablet: selector, cart and number pad side by side; Medium: the item detail opens over the selector, not the cart. |
 | `test/features/stock/ui/stock_ui_test.dart` | 4 | Stock home groups (Serial and Batch hidden until enabled); empty Item list offers Add Item and Import items; a new item saves with its name from the code; low-stock badge on the Stock destination; Stock Ledger with a totals row. |
-| **Total** | **191** | |
+| **Total** | **223** | |
 
 Database tests run against an in-memory SQLite database with the real schema. Widget tests run the real widgets inside the app's theme and localisation. No test uses a mock.
 
@@ -1266,10 +1373,13 @@ Database tests run against an in-memory SQLite database with the real schema. Wi
 | C-9, C-10 | `schema_test.dart` |
 | C-2 | Release manifest inspection (10.4) |
 | STK-R1 to R43, STK-A1 to A27 | `stock_logic_test.dart`, `stock_db_test.dart`, `stock_ui_test.dart`; emulator (10.5) |
+| POS-R9 to R15, POS-A1 to A9, A11 to A14, A16 | `totals_test.dart`, `in_words_test.dart` |
+| POS-R1 to R8, R16 to R21, POS-A10, A15, A17 to A25; STK-R11, R22, R24, R26, R27 on a sale | `pos_db_test.dart`, `sale_test.dart` |
+| R4 §5 (screens and layouts) | `pos_ui_test.dart`; emulator (10.5) |
 
 ### 10.4 Build verification
 
-- `flutter build apk --release` completed and wrote `app-release.apk`, 80.4 MB (75.0 MB at issue 3, 75.3 MB at issue 2, 68.9 MB at issue 1). The growth is the barcode model and image picker now compiled in.
+- `flutter build apk --release` completed and wrote `app-release.apk`, 81.8 MB (80.4 MB at issue 4, 75.0 MB at issue 3, 75.3 MB at issue 2, 68.9 MB at issue 1).
 - The merged release manifest contains `android.permission.INTERNET` zero times. Its `uses-permission` entries are unchanged from issue 1: `ACCESS_NETWORK_STATE`, `CAMERA`, `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`.
 
 ### 10.5 Device verification
@@ -1303,7 +1413,19 @@ Issue 4 checks. Each run followed the project's emulator procedure: `emulator -a
 | `Medium_Tablet` | portrait, medium | Rail without labels; one pane; two-column form. |
 | `Medium_Phone_API_36.1` | after the review fixes | Item SMOKE with opening stock 2 and re-order level 5: the Stock destination shows the badge 1. New Stock Entry switched to Material Transfer: Source Stores, Target empty. No runtime errors (Dart Tooling Daemon). |
 
-Two defects found on the emulator were fixed before issue: the Default Unit of Measure was blank when a new item form first opened (the form now waits for its choices, D-22), and the report totals row crashed reports whose first column is a date. Camera scanning and photo capture were not exercised (no camera image on the emulator); barcodes were typed, as a hardware scanner types them.
+Issue 5 checks, with the same procedure (hardware GPU mode, the emulator's default). Taps and text through `adb`; screens through `uiautomator` and screenshots; runtime errors through logcat and the Dart Tooling Daemon.
+
+| Device | Window | Observed |
+|---|---|---|
+| `Medium_Phone_API_36.1` | 1080x2400, compact | Wizard (United States, USD, "Test Store"); item PARA500 with Opening Stock 100 at 2.00 and Standard Selling Rate 5.00; POS Settings: Allow User to Edit Rate and Discount on; Tax VAT and template "VAT 8" (8% On Net Total, Default). Register: opening cash 500; the item tapped three times is one line, 3 × $ 5.00, VAT $ 1.20, Grand Total $ 16.20. Item detail (bottom sheet): Discount 10% → Rate 4.50, Discount Amount 0.50. Add Discount 10% on Grand Total: Net Total 12.15, VAT 0.97, Additional Discount −1.46, Grand Total 13.12. Checkout: Cash pre-filled with 13.12; Credit Card 5 and Cash 10 → Change 1.88; Credit Card 20 shows the "change is given in cash only" refusal. Complete Order → `ACC-SINV-2026-00001`, Paid. |
+| `Medium_Phone_API_36.1` | same | Two units saved as draft; the app force-stopped and relaunched: the session is still open, stock 97; Recent Orders › Draft 2 › Edit; Checkout; Complete Order → `ACC-SINV-2026-00002` (no gap). Stock Ledger: two Sales Invoice rows, value change −6.00 and −4.00 at 2.00. Close the POS: period, 2 invoices, Total Quantity 5, Net Total 22.15, taxes 1.77, Grand Total 23.92; Cash expected 518.92 (500 + 10 − 1.88 + 10.80), Credit Card 5.00; counted 518 → Difference −0.92 in the error colour. Submit (confirmed) → "Session closed. Backup saved."; `backups/TS-backup-20261117-124127.sqlite` written. "Cancel POS-CLO-2026-00001" reopened the session. The top of the closing page first drew garbled until a scroll (P-1). |
+| `Medium_Tablet` | 2560x1600 landscape, expanded | Rail with labels; selector on the left, cart and number pad on the right. Item GAUZE added; the pad set Quantity 5; the line's detail replaced the selector (Rate and discounts read-only, as POS Settings were off); Checkout in the left pane; Complete Order → `ACC-SINV-2026-00001`, summary on the left, a fresh cart on the right. |
+| `Medium_Tablet` | portrait, medium | Rotated with 2 units in the cart: the cart kept them; rail without labels; selector and 340dp cart, no pad. Item detail and payment opened as side sheets (then on the trailing edge; moved to the leading edge after the spec review and checked by a widget test); Complete Order → `ACC-SINV-2026-00002`. |
+| `Medium_Phone_API_36.1` | after the review fixes | Fresh install; the POS Opening Entry shows as an `AlertDialog`; Open; an empty catalogue shows "No items found". Logcat and the Dart Tooling Daemon: no runtime errors. |
+
+Two defects found on the emulator were fixed before issue: a number field wrote to its text controller after it was disposed when a side sheet closed ("A TextEditingController was used after being disposed", four times in logcat; fixed in `LiveNumberField`, then checked with a hot reload: no errors), and the confirm dialog for cancelling a closing entry showed two "Cancel" buttons (the action now reads "Cancel POS-CLO-…"). Camera scanning was again not exercised; barcodes were typed.
+
+Issue 4: two defects found on the emulator were fixed before issue: the Default Unit of Measure was blank when a new item form first opened (the form now waits for its choices, D-22), and the report totals row crashed reports whose first column is a date. Camera scanning and photo capture were not exercised (no camera image on the emulator); barcodes were typed, as a hardware scanner types them.
 
 ### 10.6 Code review
 
@@ -1364,7 +1486,29 @@ Issue 4. `flutter analyze`, `dart fix`, a Ponytail review (six findings, about �
 | The posting-time rule was spelled out in four places; amended names in two | `postingSetByHand`, `amendedName(table, id)` |
 | `core/widgets/adaptive_shell.dart` imported the stock feature | The router passes the count (D-38) |
 
-Left as they are, with reasons: forms read their own initial values with typed drift selects (only raw SQL was moved); `ReportTable` is no longer a `DataTable` (D-31); stored option values show as stored (P-11); stock refusals live in the app's one refusal enum (D-19) and carry positional arguments; the Default Valuation Method lock and the serial checks when cancelling an Issue or Transfer go slightly beyond R3 and follow ERPNext; the two document forms' confirm-save-run helpers stay separate because they save different things.
+Left as they are (issue 4), with reasons: forms read their own initial values with typed drift selects (only raw SQL was moved); `ReportTable` is no longer a `DataTable` (D-31); stored option values show as stored (P-11); stock refusals live in the app's one refusal enum (D-19) and carry positional arguments; the Default Valuation Method lock and the serial checks when cancelling an Issue or Transfer go slightly beyond R3 and follow ERPNext; the two document forms' confirm-save-run helpers stay separate because they save different things.
+
+Issue 5. `flutter analyze`, `dart fix`, a Ponytail review (four findings, all applied: the cart re-read Stock Settings and the warehouse name from the database instead of the providers it had; an alias for redraw; a parameter of the closing page that only ever held one value; an `async` function with no `await`), and the code-review skill with a standards reviewer and a spec reviewer against `6ed71b8`. Fixes, each at the cause:
+
+| Finding | Fix |
+|---|---|
+| A refused Complete Order (an expired batch) left the cart holding the id of a draft the transaction had rolled back; every later save was refused | `_keepOnFailure` restores the draft id; test: the same cart completes after the batch is changed |
+| A discount on Grand Total put its rounding remainder on the Grand Total only, so Net Total + taxes was a cent short | The remainder goes to the last tax row (D-41); test (3 × 100, 8%, 10 off: 290.73 + 23.27 = 314.00) |
+| The selector showed no price for an Item Price stored with the stock unit's id | The query takes either form |
+| Grid columns came from the width alone (3 on a wide phone, 2 to 3 on a narrow Expanded window) | 2 on Compact, 2 to 3 on Medium, 4 or more on Expanded |
+| Medium side sheets covered the cart | Leading edge (D-47); widget test |
+| The payment panel showed the amount to pay under "Grand Total" | Grand Total and Rounded Total |
+| A discount above Max Discount was refused only at Submit | Refused as it is typed, in the fields and on the number pad, with the reason |
+| The opening was a card on Compact | An `AlertDialog` |
+| Enter with one matching item added it even with Automatically Add Filtered Item To Cart off | Removed |
+| The sale cost re-sync rounded in SQL; quantities totals were stored unrounded; some `flt` calls used the default Rounding Method | `flt` with the Rounding Method in force, everywhere in the feature |
+| Number pad keys were about 44dp high on a phone | At least 48dp |
+| The In Words test was under the POS tests | `test/core/numbers/in_words_test.dart` |
+| The UOM menu could be built before the unit names had loaded (D-22) | It waits for both |
+| A number field showed no error for text that is not a number | It shows "not a number" |
+| The merge rule lived in the cart notifier; `({Sale sale, String name})` written six times; `pad` and `_line` named vaguely | `addToSale` in `logic/sale.dart` with a test; `Submitted`; `numberPad`, `_lineRefusal` |
+
+Left as they are, with reasons: Complete Order and Open submit without a dialog (D-39); Action on New Invoice applies when a held order replaces unsaved changes, the one place ERPNext's POS starts another invoice over a changed one; tapping an empty payment mode fills the amount due (D-48); the sale cost follows the ledger after backdating (D-44); serial and batch checks report one at a time (D-49); building the payment list for `settle` appears in four places; the data layer builds its own `Formats` because it cannot read providers; the stock check exists in the cart (on add) and in the Submit checks; option texts such as "Net Total" are stored as text (D-6).
 
 ---
 
@@ -1385,8 +1529,8 @@ What the store owner can do with this build.
 
 | Destination | Today |
 |---|---|
-| Register | Shows "This screen arrives in a later milestone." |
-| Invoices | Same |
+| Register | The cash register; see below |
+| Invoices | Shows "This screen arrives in a later milestone." |
 | Stock | Items, prices, warehouses, stock movements, counts, batches, serial numbers and stock reports; see below |
 | Dashboard | Same |
 | Setup | Every setup page; see below |
@@ -1432,13 +1576,28 @@ A record that is in use cannot be deleted: disable it instead.
 | Track serial numbers | Item › Inventory: Has Serial No and a Serial Number Series, or type them on the receipt: in the line's Serial / Batch Entries, Create Serial Nos from Range takes SN-01::50. Each unit leaves stock at its own cost. |
 | See what you have | Reports: Stock Balance (by item and warehouse, with values), Quick Stock Balance (one item, scan its barcode), Stock Ledger (every movement; tap a row to open its document), and the batch, serial, price and low-stock reports. Every report exports to CSV. |
 
+**Register.** Selling at the counter.
+
+| To | Do |
+|---|---|
+| Start the day | Register: type the cash in the drawer as the Cash Opening Amount (others usually 0), tap **Open** |
+| Sell | Tap an item, type or scan its barcode into the search (a Bluetooth or USB scanner types it for you), or tap the scan button. Tapping it again adds one more. On a phone, tap the bar at the bottom to see the cart. |
+| Change a line | Tap it: quantity, unit, and (when POS Settings allows) rate and discount. Swipe a line left to remove it. On a tablet in landscape the pad under the cart changes the selected line. |
+| Discount the whole sale | **Add Discount**: a percentage or an amount, taken off the Grand Total or the Net Total as POS Settings says |
+| Take payment | **Checkout**: the default mode starts with the amount to pay. Tap another mode and type its amount to split. Change is given in cash; a card cannot be charged more than is due. **Complete Order**. |
+| Sell a serialised item | Scan its serial number, or open the line and pick the serial numbers (Auto Fetch picks them for you) |
+| Park a sale | Menu › **Save as Draft**. Menu › **Toggle Recent Orders** › Draft › Edit brings it back, at today's prices. |
+| End the day | Menu › **Close the POS**: count each payment mode and type the Closing Amount; the Difference shows any shortage. **Submit** closes the session and backs up the data. A mistake? "Cancel POS-CLO-…" on the opening screen reopens the session. |
+
+Receipts cannot be printed and sales cannot be returned yet; both arrive with Invoices.
+
 **Later starts.** The app opens on the Register destination. The Welcome screen does not appear again.
 
 **Start again from scratch.** Clear the app's storage in Android settings, or uninstall and reinstall. This deletes all data.
 
 **Dark theme.** Follows the device setting.
 
-Selling, invoices and the dashboard are not available yet.
+Invoices, printing, returns and the dashboard are not available yet.
 
 ---
 
@@ -1448,9 +1607,9 @@ Selling, invoices and the dashboard are not available yet.
 
 | ID | Problem | Effect | Status |
 |---|---|---|---|
-| P-1 | On the development machine's Android emulator in hardware GPU mode, the first app launch after the emulator boots, or after the display density changes, can draw the first screen after the wizard with text missing: once the app-bar title, twice part of the body text, once (on the tablet) rail icons and labels. It clears on the next repaint. | Cosmetic, on the emulator. | Open. Follows the emulator's GPU path: 2 of 2 trigger launches showed it in hardware mode (AMD integrated GPU); 0 of 3 trigger launches and 0 of 6 launches overall in software mode (`-gpu swiftshader_indirect`), same APK; 6 warm relaunches in hardware mode were clean. Small samples. The cause inside the emulator is not known. **Not checked on a real device.** |
+| P-1 | On the development machine's Android emulator in hardware GPU mode (seen again at issue 5 on the POS Closing Entry), the first app launch after the emulator boots, or after the display density changes, can draw the first screen after the wizard with text missing: once the app-bar title, twice part of the body text, once (on the tablet) rail icons and labels. It clears on the next repaint. | Cosmetic, on the emulator. | Open. Follows the emulator's GPU path: 2 of 2 trigger launches showed it in hardware mode (AMD integrated GPU); 0 of 3 trigger launches and 0 of 6 launches overall in software mode (`-gpu swiftshader_indirect`), same APK; 6 warm relaunches in hardware mode were clean. Small samples. The cause inside the emulator is not known. **Not checked on a real device.** |
 | P-2 | `dart run build_runner build` prints one warning: `item` cannot be found for the foreign key of the `batch` table. | None. The SQL constraint is correct and the schema test passes. | Accepted (D-3). |
-| P-3 | `modified_at` must be set by every update. | None: every update the Setup and Stock features write sets it. | Open as a rule for later milestones. |
+| P-3 | `modified_at` must be set by every update. | None: every update the Setup, Stock and Cash Register features write sets it. | Open as a rule for later milestones. |
 | P-4 | The release build carries `ACCESS_NETWORK_STATE`, added by a plugin. | None: without `INTERNET` the app cannot connect. | Accepted. Removing it risks a crash in a plugin's background job. |
 | P-5 | (Issue 1: the wizard was a placeholder.) | — | **Closed** at issue 2: the real wizard replaces it. |
 | P-6 | The release build is signed with the debug key. | It cannot be published. | By design: the app is not being published. |
@@ -1459,31 +1618,31 @@ Selling, invoices and the dashboard are not available yet.
 | P-9 | Restoring onto a fresh install needed the wizard first, because Setup is behind the wizard gate. | — | **Closed** in issue 2: the wizard's first step offers Restore from backup. |
 | P-10 | Leaving a form with unsaved changes discards them without asking. | Edits can be lost by a stray Back; at issue 4 a stray Back on the emulator lost a Stock Entry draft. | Open. |
 | P-11 | Two deviations from R1 §7.1 and §4: Setup link fields are dropdowns without "Create new" (D-20); stored option values show in English as stored. | Owner must create a master from its own page first; a second language would leave those values untranslated. | Accepted for now. |
-| P-12 | The automatic backup on POS Closing submit (SET-R17) is not wired. | Backups are taken only on demand. | Waits for M5; `takeBackup()` is ready. |
-| P-13 | Schema version 1 was edited in place at issue 3 (D-29). A database or backup made before issue 3 still has the POS Profile tables and a NOT NULL `pos_profile_id` in `pos_opening_entry`, `pos_closing_entry` and `sales_invoice`. `checkRestorable` accepts such a backup, because its schema version is 1. | Setup works on it; the first session or sale (M5) would fail. | Open. Clear the app's data on every device that ran an earlier build, and do not restore backups taken before issue 3. |
+| P-12 | The automatic backup on POS Closing submit (SET-R17) was not wired. | — | **Closed** at issue 5: `submitClosing` takes it. |
+| P-13 | Schema version 1 was edited in place at issue 3 (D-29). A database or backup made before issue 3 still has the POS Profile tables and a NOT NULL `pos_profile_id` in `pos_opening_entry`, `pos_closing_entry` and `sales_invoice`. `checkRestorable` accepts such a backup, because its schema version is 1. | Setup works on it; opening a session or selling fails. | Open. Clear the app's data on every device that ran an earlier build, and do not restore backups taken before issue 3. |
 | P-14 | Camera barcode scanning and item photos were not exercised: the emulator has no camera image. | Unverified on hardware; typed barcodes (the hardware-scanner path) were verified. | Open. Check on a real device that has never been online (the scan model is bundled). |
 | P-15 | The engine replays a chain from its first entry (D-33). | Fine for one store; slow only if one item in one warehouse reaches hundreds of thousands of entries. | Accepted (R3's stated ceiling); marked `ponytail:` in `stock_ledger.dart`. |
-| P-16 | Sale-only stock rules are not wired: auto-insert price on the first sale (STK-R11), warranty on sale (R26), refusing to sell an expired batch (R22) and choosing serials and batches on a Sales Invoice (R27), the incoming rate of a sale return. | None until the Cash Register exists. | Waits for plan 03 (D-34). |
+| P-16 | Sale-only stock rules were not wired (D-34). | — | **Closed** at issue 5 for STK-R11, R22, R26 and R27 on a sale. The incoming rate of a sale return comes with returns (section 12.3). |
 
 ### 12.2 Limits of this issue
 
 - English is the only language.
 - Backups kept only on the device are lost with it; Export copies them elsewhere.
 - No migration path exists yet (section 7.7); issue 3 changed version 1 without one (P-13).
+- Recent Orders lists the newest 200 invoices.
 
 ### 12.3 Not built yet
 
 Beyond the milestones in section 4.4, these foundation pieces were left for the milestone that first needs them:
 
 - Docstatus rules for documents (save, submit, cancel, amend)
-- Amount in words
 - Camera and Bluetooth permission declarations of the app itself
 - A thermal printing package
-- From the Setup plan, waiting on other plans: the POS Closing backup hook (M5); Print Settings, Letter Head, Print Heading and Terms and Conditions pages (R6)
-- From the Stock plan, waiting on the Cash Register: P-16
+- From the Setup plan, waiting on R6: Print Settings, Letter Head, Print Heading and Terms and Conditions pages
+- From the Cash Register plan, waiting on R6 (owner's decision): Print Receipt on the order summary and in Recent Orders, the print preview after a sale (Print Receipt on Order Complete), Return in Recent Orders, and the cost of a sale return (STK-R33); the closing entry's invoice count links to nothing until the Invoices list exists
 
 ---
 
 ## 13. Summary
 
-Rx Merchant is an offline Android point-of-sale app for one store owner, modelled on ERPNext. At this issue, milestone M0, the whole Setup plan and the whole Stock plan are complete. Setup: a first-run wizard that seeds the store; Store Profile, System Settings, Global Defaults, Selling Settings, POS Settings, Currency, Mode of Payment, Tax, Price List, both tax templates, Naming Series; Data Import and Export; Backup and Restore. Stock: the Stock destination with Warehouse and Item Group trees, UOM, Brand, Item Attribute, Items with barcodes, units, re-order levels, taxes, photos and variants, Item Prices with the price and item tax lookups, Stock Settings, Stock Entry (receipt, issue, transfer, additional costs, cancel and amend), Stock Reconciliation (opening stock and counts), batches and serial numbers with the inline Serial / Batch editor, the stock ledger engine (FIFO, Moving Average, serial cost, negative-stock, backdating and freeze rules), seven stock reports and a low-stock badge. The schema did not change. 191 automated tests pass, including every STK acceptance check; analysis is clean; the release build carries no internet permission; the main flows were checked on phone and tablet emulators, and a standards review, a spec review and a Ponytail review were acted on. Rules that only apply to a sale wait for the Cash Register (P-16). The work is not yet committed and no real device has been tested. Selling, invoices and the dashboard come next (M5 to M7).
+Rx Merchant is an offline Android point-of-sale app for one store owner, modelled on ERPNext. At this issue, milestone M0 and the whole Setup, Stock and Cash Register plans are complete (M1 to M5, M8, M9). Setup: a first-run wizard that seeds the store; every settings page and master; Data Import and Export; Backup and Restore. Stock: the item catalogue with barcodes, units, prices, taxes, photos and variants; warehouses; Stock Entry and Stock Reconciliation; batches and serial numbers; the stock ledger engine; seven reports and a low-stock badge. Cash Register: the POS Opening Entry; a POS screen built for phones, portrait tablets and landscape tablets; the totals engine with item and whole-sale discounts, all five tax types, taxes included in the rate, item tax overrides, rounding to the smallest coin and In Words; split payments with change; Submit that posts stock, costs each line, delivers serial numbers and inserts missing prices; held orders; and the POS Closing Entry with its cash count and backup. The schema did not change. 223 automated tests pass, including every POS and STK acceptance check; analysis is clean; the release build carries no internet permission; the main flows were checked on phone and tablet emulators; a Ponytail review, a standards review and a spec review were acted on. Printing, returns, the invoice list and the dashboard come next (M6, M7). The work is not yet committed and no real device has been tested.

@@ -106,6 +106,42 @@ enum Refusal {
 
   /// The document is not in the state the action needs.
   docstatus,
+
+  // ---- Cash Register (03-cash-register.md) ----
+
+  /// POS-R1: nothing is sold without an open POS Opening Entry.
+  noOpenSession,
+
+  /// POS-R2: only one POS Opening Entry can be Open at a time.
+  anotherSessionOpen,
+
+  /// POS-R16: the cart has no lines.
+  emptyCart,
+
+  /// POS-R4, R16: args are item code, warehouse, quantity available and
+  /// quantity needed.
+  itemUnavailable,
+
+  /// POS-R15: args are the amount to pay and the amount paid.
+  paymentShort,
+
+  /// POS-R15: change is cash, so card and bank payments cannot exceed what
+  /// is due.
+  nonCashOverpaid,
+
+  /// POS-R20: only the latest closing entry, with no newer session, can be
+  /// cancelled.
+  notLatestClosing,
+}
+
+/// Every problem a document has, reported together (POS-R16).
+class RefusedAll implements Exception {
+  const RefusedAll(this.all);
+
+  final List<RefusedException> all;
+
+  @override
+  String toString() => 'RefusedAll($all)';
 }
 
 class RefusedException implements Exception {

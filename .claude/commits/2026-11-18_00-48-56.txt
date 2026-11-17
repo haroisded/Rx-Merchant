@@ -1,0 +1,419 @@
+RX MERCHANT - SESSION REPORT
+============================
+
+Written:      2026-11-18 00:48 (+08:00)
+Branch:       main
+Based on:     6ed71b8 "RX MERCHANT - SESSION REPORT" (the Stock plan, issue 4)
+Committed:    nothing. Every change below is in the working tree, for you to
+              commit.
+Covers:       the whole session: the request in
+              .claude/erpnext-planner/current-user-prompt.txt to build
+              Plans/03-cash-register.md (all 9 build steps, POS-B1 to B9:
+              milestone M5 and the register part of M8), then the wrap-up
+              CLAUDE.txt asks for (Flutter and Ponytail reviews, fixes, this
+              report, the system documentation).
+
+
+1. SUGGESTED COMMIT MESSAGE
+---------------------------
+
+Build 03-cash-register: sessions, POS screen, totals engine, submit, closing
+
+- POS Opening Entry (one open session); POS screen for phone, Medium and
+  Expanded windows: item selector, cart, item detail, number pad, payment,
+  order summary, Recent Orders (POS-R1 to R8, R19, section 5)
+- Totals engine: item and additional discounts (Net / Grand Total), all five
+  tax types, taxes included in the rate, item tax overrides and Not
+  Applicable, rounding to the smallest coin, In Words (POS-R9 to R14)
+- Payment: every enabled mode, default pre-filled, split, change from cash,
+  no partial payment (POS-R15)
+- Submit: all checks together, naming, stock ledger, line cost, serial
+  delivery with warranty, missing price inserted (POS-R16, R17)
+- Held orders and Action on New Invoice (POS-R18)
+- POS Closing Entry with expected / counted amounts and backup; cancel the
+  latest closing (POS-R20)
+- Serial numbers and batches at the counter (POS-R21)
+- Sale-side stock rules wired: STK-R11, R22, R26, R27 (D-34, P-16)
+- Tests: 191 -> 223
+
+If you prefer two commits, split off "docs and tooling":
+.claude/erpnext-planner/system-documentation.md, .claude/commits/ and
+graphify-out/.
+
+
+2. RESULT IN SHORT
+------------------
+
+All 9 build steps of 03-cash-register.md are in. Schema version 1 is
+unchanged (every Cash Register table already existed).
+
+  flutter analyze               No issues found
+  dart fix --dry-run            Nothing to fix
+  dart format (check)           0 files changed (101 files)
+  flutter test                  223 of 223 pass
+  flutter build apk --release   builds, 81.8 MB
+  release manifest              INTERNET permission absent
+
+Not done, stated plainly:
+  - Left to plan 05 by your decision at the start: the Print Receipt button
+    (order summary and Recent Orders), the print preview after a sale (Print
+    Receipt on Order Complete) and Return in Recent Orders. Also left to
+    plan 05: the cost of a sale return (it comes with returns), and the
+    closing entry's invoice count is plain text until the Invoices list
+    exists.
+  - No real device was used. Phone and tablet emulators only.
+  - Camera scanning was not exercised (no camera image on the emulator);
+    barcodes were typed, as a hardware scanner types them.
+
+
+3. WHAT WAS BUILT
+-----------------
+
+3.1 Decisions you made (asked at the start)
+  - Scope: all of B1 to B9, not only M5.
+  - Plan-05 hooks (Print Receipt, print preview, Return): left out until
+    plan 05.
+
+3.2 By build step
+  POS-B1  POS Opening Entry: Opening Amount per enabled mode, named
+          POS-OPE-.YYYY.-, docstatus 1, status Open; a second Open session
+          is refused. The register shows it until a session is open (an
+          AlertDialog on phones, a centred card on tablets). When the last
+          session was closed and nothing newer exists, "Cancel POS-CLO-..."
+          reopens it.
+  POS-B2  Totals engine (logic/totals.dart), in ERPNext's taxes_and_totals
+          order: item amounts; included taxes worked back; tax rows (Actual
+          shared by net amount, On Net Total, previous row amount / total,
+          On Item Quantity) with item overrides and Not Applicable; the
+          additional discount on Net Total or Grand Total (fixed charges
+          excluded) spread over the lines; remainders on the last tax row;
+          Rounded Total by the Smallest Currency Fraction Value; In Words
+          (core/numbers/in_words.dart, Frappe's wording). Every worked
+          example of the plan is a test.
+  POS-B3  Item selector: sales items only (enabled, not templates, not past
+          End of Life) with price and stock in the sale's warehouse; search
+          by code, name, barcode; group filter with subgroups; grid of cards
+          or a list (Hide images); Hide unavailable Items; Automatically Add
+          Filtered Item To Cart; scan button; an exact barcode adds in its
+          unit. Equal lines merge; a short stock item is refused with "Item
+          is unavailable". The sale copies its defaults when it starts
+          (POS-R2a).
+  POS-B4  Item detail: quantity stepper, UOM (price looked up again), Rate,
+          Discount (%), Discount Amount, Price List Rate, each read-only
+          unless POS Settings / Selling Settings allow it; Max Discount
+          refused as typed; Available Qty and Warehouse. Add Discount
+          (percentage or amount). Number pad under the cart on landscape
+          tablets.
+  POS-B5  Payment: one card per enabled mode, number pad, Grand Total,
+          Rounded Total, Paid Amount, To Be Paid or Change Amount; the
+          default mode pre-filled (first Cash-type mode when the default is
+          missing or disabled); split payments; a card or bank amount above
+          what is due refused.
+  POS-B6  Submit in one transaction: all POS-R16 checks reported together;
+          name ACC-SINV-.YYYY.-; posting now and the current session; one
+          ledger entry per line (per batch); each line's cost
+          (incoming_rate); serial numbers Delivered with warranty expiry;
+          a missing Item Price inserted once; Paid. Order summary with New
+          Order.
+  POS-B7  Save as Draft (no name, no stock; Validate Stock on Save);
+          Action on New Invoice (Always Ask / Save / Discard) when a held
+          order replaces unsaved changes; a held order is repriced when
+          reopened and joins the session it is completed in. Recent Orders:
+          Draft / Paid / Return filters, search by name, Edit and Delete
+          for drafts.
+  POS-B8  POS Closing Entry (/pos/closing): period, sales and returns,
+          totals, one row per payment mode with Opening, Expected (opening
+          + received - change, change charged to the sale's first cash
+          payment), counted Closing Amount and Difference (error colour);
+          Remarks; held orders count. Submit closes the session, then takes
+          a backup (a failed backup is reported, the closing stands).
+  POS-B9  A scanned serial number adds its unit; the line's Serial / Batch
+          Entries in the item detail with Auto Fetch; empty lines picked at
+          Submit (or refused, by the setting); only Available serials in the
+          warehouse and unexpired batches can be sold.
+
+3.3 Shared pieces changed
+  lib/router.dart              /pos and /pos/closing (workspace route)
+  core/widgets/child_table     showRowEditor(leading:) for side sheets that
+                               must leave the cart visible
+  setup/data/refusal           7 register refusals; RefusedAll (all problems
+                               together)
+  setup/ui/form_kit            their texts; attempt shows a RefusedAll
+  stock/logic/stock_documents  3 sale line problems
+  stock/data/stock_entry_db    insertEntry and fillOutwardEntries made public
+                               and voucher-type generic (Stock Entry
+                               unchanged)
+  stock/data/stock_ledger      a sale line's cost follows its ledger rows
+                               after every replay (backdated receipts)
+  l10n/app_en.arb              526 messages (was 466)
+
+3.4 Size
+  New hand-written Dart under lib/: 3,958 lines (lib/features/pos) and 68
+  (in_words.dart). New tests: 823 lines. Changes to existing files: +340 /
+  -40.
+
+
+4. CODE REVIEW RESULTS
+----------------------
+
+CLAUDE.txt asks for "Flutter Review" and "Ponytail Review", then Ponytail
+fixes.
+
+4.1 Ponytail review (ponytail-review skill)
+  Four findings, all applied:
+   1. The cart re-read Stock Settings and the warehouse name from the
+      database; it now uses the providers it already has.
+   2. entriesChanged() only called _changed(); one public changed().
+   3. ClosingPage's "done" parameter only ever held /pos; removed.
+   4. _inWords was async with no await; now synchronous.
+
+4.2 Flutter review
+  flutter analyze, dart fix, and the code-review skill: two independent
+  reviewers of the working tree against 6ed71b8, one for standards (plan
+  00 sections 5 to 7, CLAUDE.txt, D-1 to D-38, a code-smell list), one
+  against plan 03.
+
+  Fixed (smallest change at the cause):
+   Spec
+   1. A refused Complete Order (expired batch) left the cart pointing at a
+      draft the transaction had rolled back; every later save was refused.
+      The draft id is now restored on failure. Test.
+   2. A discount on Grand Total put its rounding remainder on the Grand
+      Total only: Net Total + taxes was a cent short. It now goes to the
+      last tax row (D-41). Test.
+   3. The selector showed no price for an Item Price stored with the stock
+      unit's id; the query takes either form.
+   4. Grid columns: 2 on phones, 2 to 3 on Medium, 4+ on Expanded.
+   5. Medium side sheets covered the cart; they now open over the
+      selector (D-47). Widget test.
+   6. The payment panel showed the amount to pay as "Grand Total"; it now
+      shows Grand Total and Rounded Total.
+   7. Max Discount was refused only at Submit; now also as typed (fields
+      and number pad).
+   8. The opening on phones is now an AlertDialog, as the plan says.
+   9. Enter with one matching item added it although Automatically Add
+      Filtered Item To Cart was off; removed.
+   Standards
+  10. The sale cost re-sync rounded in SQL, quantity totals were stored
+      unrounded, some flt calls ignored the Rounding Method; all through
+      flt with the method in force now.
+  11. Number pad keys were about 44dp high on a phone; now at least 48dp.
+  12. The In Words test moved to test/core/numbers/.
+  13. The UOM menu could be built before unit names loaded (D-22); waits.
+  14. Number fields now show "not a number" under the field.
+  15. The merge rule moved from the cart notifier to logic/sale.dart
+      (addToSale) with a test; Submitted typedef; pad -> numberPad,
+      _line -> _lineRefusal.
+  Found on the emulator and fixed:
+  16. A number field wrote to its disposed controller when a side sheet
+      closed (4 errors in logcat). Fixed; checked with a hot reload.
+  17. The cancel-closing confirm had two "Cancel" buttons; the action now
+      reads "Cancel POS-CLO-...".
+
+  Left as they are, with the reason:
+   - Complete Order and Open submit without a confirmation dialog, as
+     ERPNext's POS does (D-39). The closing entry and every cancel confirm.
+   - Action on New Invoice applies when a held order replaces unsaved
+     changes: the one place ERPNext's POS loads another invoice over a
+     changed one. There is no separate "New Sale" button.
+   - Tapping an empty payment mode fills the amount still due (D-48).
+   - The sale cost follows the ledger after backdating (D-44), beyond
+     POS-R17's "at Submit"; Gross Profit (plan 04) needs it.
+   - Serial and batch problems at Submit show one at a time (D-49).
+   - The payment list for settle() is built in four places; the data
+     layer builds its own Formats (it cannot read providers); the stock
+     check exists on add and at Submit; option texts such as "Net Total"
+     stay text (D-6).
+
+
+5. VERIFICATION EVIDENCE
+------------------------
+
+All run after the last code change.
+
+  $ dart format --output=none --set-exit-if-changed lib test
+  Formatted 101 files (0 changed)
+
+  $ flutter analyze
+  No issues found!
+
+  $ dart fix --dry-run
+  Nothing to fix!
+
+  $ flutter test
+  223 tests passed (191 before; 32 added: 13 totals engine, 2 cart merge,
+  1 In Words, 13 POS database, 3 POS widget)
+
+  $ flutter build apk --release
+  Built build\app\outputs\flutter-apk\app-release.apk (81.8MB)
+  merged release manifest: android.permission.INTERNET 0 times
+
+  Acceptance checks POS-A1 to A25 each have a test (POS-A22 inserts the
+  cash-refund return directly, because returns are plan 05's).
+
+  Emulators, started and run exactly as CLAUDE.txt says (emulator
+  -no-snapshot-load, adb uninstall, flutter run --no-enable-impeller):
+
+  Phone (Medium_Phone_API_36.1, 1080x2400):
+    - Wizard (United States, USD, "Test Store"); item PARA500, opening
+      stock 100 at 2.00, selling rate 5.00; POS Settings: edit rate and
+      discount on; Tax VAT, template "VAT 8" (8% On Net Total, Default).
+    - Opening cash 500. Item tapped 3 times -> one line 3 x $ 5.00; VAT
+      1.20; Grand Total 16.20.
+    - Item detail sheet: Discount 10% -> Rate 4.50, Discount Amount 0.50.
+      Add Discount 10% on Grand Total -> Net 12.15, VAT 0.97, Additional
+      Discount -1.46, Grand Total 13.12.
+    - Checkout: Cash pre-filled 13.12; Card 5 + Cash 10 -> Change 1.88;
+      Card 20 refused ("change is given in cash only").
+      Complete Order -> ACC-SINV-2026-00001, Paid.
+    - Two units Save as Draft; app force-stopped and relaunched: session
+      still open, stock 97; Recent Orders > Draft 2 > Edit > Complete ->
+      ACC-SINV-2026-00002.
+    - Stock Ledger: two Sales Invoice rows, -6.00 and -4.00 at 2.00.
+    - Close the POS: Cash expected 518.92, Card 5.00; totals 22.15 / 1.77 /
+      23.92; counted 518 -> Difference -0.92 (red). Submit -> "Session
+      closed. Backup saved."; backups/TS-backup-20261117-124127.sqlite.
+      "Cancel POS-CLO-2026-00001" reopened the session.
+  Tablet (Medium_Tablet, 2560x1600):
+    - Landscape (expanded): selector | cart with number pad; pad Quantity 5;
+      the line's detail replaced the selector (rate and discounts
+      read-only); Checkout in the left pane; ACC-SINV-2026-00001.
+    - Portrait (medium), rotated mid-sale: cart kept; selector + 340dp
+      cart; detail and payment as side sheets; ACC-SINV-2026-00002.
+  Phone again, after the review fixes:
+    - Opening shown as an AlertDialog; Open; empty catalogue "No items
+      found". Logcat and Dart Tooling Daemon: no runtime errors.
+
+
+6. DECISIONS MADE ON YOUR BEHALF
+--------------------------------
+
+  1. No schema change. A held order gets its session and posting time
+     re-stamped at Submit.
+  2. The cart lives in memory (one Sale object in a Riverpod notifier);
+     only Save as Draft persists it, which matches the plan's "offered on
+     restart only if it was saved" (D-40).
+  3. Complete Order and Open submit without a confirmation dialog (D-39).
+  4. Rounding remainders (taxes included in the rate; a Grand Total
+     discount) go to the last tax row, so Net Total + taxes = Grand Total
+     (D-41).
+  5. Change is charged to the sale's first Cash-type payment in the
+     closing entry (D-43).
+  6. A closed session is reopened by "Cancel POS-CLO-..." on the opening
+     form; no list of closing entries (D-45).
+  7. Medium side sheets open from the leading edge, over the selector
+     (D-47); showRowEditor got a "leading" option.
+  8. Tapping an empty payment mode fills the amount still due (D-48).
+  9. A sale line's cost is re-synced when a backdated receipt recosts it
+     (D-44).
+ 10. item_wise_tax_detail is keyed by sales_invoice_item id (D-42).
+ 11. In Words uses the international scale only (marked ponytail: in
+     in_words.dart); the Indian lakh / crore are not written.
+
+
+7. SYSTEM DOCUMENTATION
+-----------------------
+
+.claude/erpnext-planner/system-documentation.md is now issue 5, same
+ISO/IEC/IEEE 15289 structure: document control and change history; scope
+and milestone state (M5 and M8 done); glossary (session, opening and
+closing entries, held order, amount to pay, additional discount, In
+Words); concept of operations; requirements STK-R11/R22/R26/R27 on a sale,
+POS-R1 to R21, R4 section 5, acceptance POS-A1 to A25 and POS-B1 to B9;
+architecture (structure, folder map, routes /pos and /pos/closing, D-34
+updated, D-39 to D-49); software design (In Words, showRowEditor, RefusedAll,
+new section 6.12 for the Cash Register); interfaces (register layouts,
+backups after closing); configuration status (6ed71b8); verification
+(tests, build, emulator runs, issue 5 review); user guide (Register);
+problems (P-12 and P-16 closed); not built yet (the plan-05 hooks);
+summary.
+
+
+8. KNOWN PROBLEMS AND OPEN ITEMS
+--------------------------------
+
+  1. Plan-05 hooks not offered yet (your decision): Print Receipt, print
+     preview after a sale, Return in Recent Orders, cost of a sale return.
+  2. No real device; camera scanning not tried (P-8, P-14).
+  3. Databases and backups from before issue 3 still have the POS Profile
+     columns (P-13): opening a session or selling fails on them. Clear the
+     app data on any device that ran an earlier build (the CLAUDE.txt
+     emulator flow uninstalls first, so it is safe).
+  4. Leaving a form with unsaved changes discards them (P-10). The
+     register's cart is not affected (it stays in memory until the app is
+     closed).
+  5. Unchanged from earlier issues: release APK signed with the debug key;
+     emulator GPU text fault (P-1, seen again on the closing page);
+     chains replayed from their first entry (P-15).
+  6. When typing with adb on the emulator, Gboard appended a suggestion
+     ("to") to a text field once. It is the emulator keyboard, not the
+     app; mentioned in case you see it when driving the emulator.
+
+
+9. FILES
+--------
+
+Added - app
+  lib/core/numbers/in_words.dart
+  lib/features/pos/data/pos_db.dart
+  lib/features/pos/data/pos_closing_db.dart
+  lib/features/pos/logic/sale.dart
+  lib/features/pos/logic/totals.dart
+  lib/features/pos/ui/cart_panel.dart
+  lib/features/pos/ui/closing_page.dart
+  lib/features/pos/ui/item_detail.dart
+  lib/features/pos/ui/item_selector.dart
+  lib/features/pos/ui/opening_form.dart
+  lib/features/pos/ui/order_summary.dart
+  lib/features/pos/ui/payment_panel.dart
+  lib/features/pos/ui/pos_providers.dart
+  lib/features/pos/ui/pos_screen.dart
+  lib/features/pos/ui/pos_widgets.dart
+  lib/features/pos/ui/recent_orders.dart
+
+Added - tests
+  test/core/numbers/in_words_test.dart
+  test/features/pos/logic/totals_test.dart
+  test/features/pos/logic/sale_test.dart
+  test/features/pos/data/pos_db_test.dart
+  test/features/pos/ui/pos_ui_test.dart
+
+Modified - app
+  lib/router.dart
+  lib/core/widgets/child_table.dart
+  lib/features/setup/data/refusal.dart
+  lib/features/setup/ui/form_kit.dart
+  lib/features/stock/data/stock_entry_db.dart
+  lib/features/stock/data/stock_ledger.dart
+  lib/features/stock/logic/stock_documents.dart
+  lib/l10n/app_en.arb
+  lib/l10n/app_localizations.dart            generated
+  lib/l10n/app_localizations_en.dart         generated
+
+Modified - documents and tooling
+  .claude/erpnext-planner/system-documentation.md
+  graphify-out/                              "graphify update .": 2,021 nodes,
+                                             3,281 edges, 97 communities (was
+                                             1,610 / 2,519 / 81); previous copy
+                                             in graphify-out/2026-11-18/
+
+Added - documents
+  .claude/commits/2026-11-18_00-48-56.txt    this report
+
+Not changed
+  lib/core/db/app_database.g.dart and every .drift file (no schema change)
+  The plans (03-cash-register.md was built as written, with the deviations
+  recorded as D-39 to D-49)
+
+Changed by you, not by me
+  .claude/erpnext-planner/current-user-prompt.txt   modified
+
+
+10. BEFORE YOU COMMIT
+---------------------
+
+  - No data clearing is needed for this build beyond P-13 (databases from
+    before issue 3).
+  - graphify-out/2026-11-18/ is a backup Graphify made; delete it if you do
+    not want it in the repository. Its community names are stale ("graphify
+    label" refreshes them with an LLM; not run).

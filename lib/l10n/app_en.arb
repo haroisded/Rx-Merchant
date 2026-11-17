@@ -865,5 +865,133 @@
         "type": "String"
       }
     }
-  }
+  },
+  "posOpeningEntry": "POS Opening Entry",
+  "posClosingEntry": "POS Closing Entry",
+  "openingAmount": "Opening Amount",
+  "openingHelp": "Count what is in the drawer for each payment mode, then open the session to start selling.",
+  "openSession": "Open",
+  "cancelLastClosing": "Cancel {name}",
+  "@cancelLastClosing": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelClosingBody": "The session it closed opens again.",
+  "searchItemHint": "Search by item code, serial number or barcode",
+  "noItemsFound": "No items found",
+  "cartEmpty": "Scan or tap an item to start a sale.",
+  "addDiscount": "Add Discount",
+  "checkout": "Checkout",
+  "grandTotal": "Grand Total",
+  "roundedTotal": "Rounded Total",
+  "roundingAdjustment": "Rounding Adjustment",
+  "discountPercentage": "Discount (%)",
+  "discountAmount": "Discount Amount",
+  "additionalDiscount": "Additional Discount",
+  "percentage": "Percentage",
+  "priceListRate": "Price List Rate",
+  "paidAmount": "Paid Amount",
+  "toBePaid": "To Be Paid",
+  "changeAmount": "Change Amount",
+  "completeOrder": "Complete Order",
+  "newOrder": "New Order",
+  "inWords": "In Words",
+  "recentOrders": "Recent Orders",
+  "toggleRecentOrders": "Toggle Recent Orders",
+  "saveAsDraft": "Save as Draft",
+  "closeThePos": "Close the POS",
+  "remove": "Remove",
+  "unsavedChangesTitle": "Unsaved changes",
+  "unsavedChangesBody": "The current sale has changes that are not saved.",
+  "saveChanges": "Save Changes",
+  "discardChanges": "Discard Changes",
+  "cartLines": "{count, plural, =1{1 item} other{{count} items}}",
+  "@cartLines": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "heldOrdersRemain": "{count, plural, =0{No held orders.} =1{1 held order remains; closing does not change it.} other{{count} held orders remain; closing does not change them.}}",
+  "@heldOrdersRemain": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "invoiceCount": "Invoices: {count}",
+  "@invoiceCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "periodStartDate": "Period Start Date",
+  "periodEndDate": "Period End Date",
+  "paymentReconciliation": "Payment Reconciliation",
+  "expectedAmount": "Expected Amount",
+  "closingAmount": "Closing Amount",
+  "difference": "Difference",
+  "totalTaxesAndCharges": "Total Taxes and Charges",
+  "closedWithBackup": "Session closed. Backup saved.",
+  "closedBackupFailed": "Session closed, but the backup failed: {error}",
+  "@closedBackupFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "draftSaved": "Saved as draft.",
+  "draftName": "Draft {id}",
+  "@draftName": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "lineNeedsEntries": "Serial / batch entries are picked at Submit.",
+  "refusedNoOpenSession": "Open a POS session (POS Opening Entry) first.",
+  "refusedAnotherSessionOpen": "A POS session is already open. Close it before opening another.",
+  "refusedEmptyCart": "Add at least one item to the cart.",
+  "refusedItemUnavailable": "Item is unavailable: {needed} of {item} needed in {warehouse}; available: {available}.",
+  "@refusedItemUnavailable": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "warehouse": {
+        "type": "String"
+      },
+      "available": {
+        "type": "String"
+      },
+      "needed": {
+        "type": "String"
+      }
+    }
+  },
+  "refusedPaymentShort": "Partial payment is not allowed: paid {paid} of {toPay}.",
+  "@refusedPaymentShort": {
+    "placeholders": {
+      "toPay": {
+        "type": "String"
+      },
+      "paid": {
+        "type": "String"
+      }
+    }
+  },
+  "refusedNonCashOverpaid": "Change is given in cash only: a card or bank payment cannot be more than the amount due.",
+  "refusedNotLatestClosing": "Only the latest POS Closing Entry can be cancelled, and only while no newer session exists.",
+  "lineNotSalesItem": "Item is not a sales item.",
+  "lineDiscountAboveMax": "Discount is above the item's Max Discount (%).",
+  "lineBelowValuationRate": "Selling rate is below the item's valuation rate."
 }

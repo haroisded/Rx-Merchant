@@ -95,6 +95,21 @@ String refusalText(AppLocalizations l, RefusedException e, Formats f) {
     Refusal.serialExists => l.refusedSerialExists(d),
     Refusal.serialMovedSince => l.refusedSerialMovedSince(d),
     Refusal.docstatus => l.refusedDocstatus,
+    Refusal.noOpenSession => l.refusedNoOpenSession,
+    Refusal.anotherSessionOpen => l.refusedAnotherSessionOpen,
+    Refusal.emptyCart => l.refusedEmptyCart,
+    Refusal.itemUnavailable => l.refusedItemUnavailable(
+      '${a[0]}',
+      '${a[1]}',
+      f.number(a[2]! as num),
+      f.number(a[3]! as num),
+    ),
+    Refusal.paymentShort => l.refusedPaymentShort(
+      f.money(a[0]! as num),
+      f.money(a[1]! as num),
+    ),
+    Refusal.nonCashOverpaid => l.refusedNonCashOverpaid,
+    Refusal.notLatestClosing => l.refusedNotLatestClosing,
   };
 }
 
@@ -123,6 +138,9 @@ String lineProblemText(AppLocalizations l, LineProblem p) => switch (p) {
   LineProblem.entriesQty => l.lineEntriesQty,
   LineProblem.batchOrSerialItem => l.lineBatchOrSerialItem,
   LineProblem.duplicateRow => l.lineDuplicateRow,
+  LineProblem.notSalesItem => l.lineNotSalesItem,
+  LineProblem.discountAboveMax => l.lineDiscountAboveMax,
+  LineProblem.belowValuationRate => l.lineBelowValuationRate,
 };
 
 /// Runs [action]. A refusal is shown with [showProblems]; on success the
@@ -143,6 +161,13 @@ Future<bool> attempt(
   } on RefusedException catch (e) {
     if (context.mounted) {
       await showProblems(context, [refusalText(l, e, formats)]);
+    }
+    return false;
+  } on RefusedAll catch (e) {
+    if (context.mounted) {
+      await showProblems(context, [
+        for (final x in e.all) refusalText(l, x, formats),
+      ]);
     }
     return false;
   } catch (e) {

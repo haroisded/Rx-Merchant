@@ -1577,4 +1577,226 @@ class AppLocalizationsEn extends AppLocalizations {
   String refusedExpiryRequired(String batch) {
     return 'Batch $batch needs an Expiry Date: its item has Has Expiry Date and no Shelf Life In Days to work it out from.';
   }
+
+  @override
+  String get posOpeningEntry => 'POS Opening Entry';
+
+  @override
+  String get posClosingEntry => 'POS Closing Entry';
+
+  @override
+  String get openingAmount => 'Opening Amount';
+
+  @override
+  String get openingHelp =>
+      'Count what is in the drawer for each payment mode, then open the session to start selling.';
+
+  @override
+  String get openSession => 'Open';
+
+  @override
+  String cancelLastClosing(String name) {
+    return 'Cancel $name';
+  }
+
+  @override
+  String get cancelClosingBody => 'The session it closed opens again.';
+
+  @override
+  String get searchItemHint => 'Search by item code, serial number or barcode';
+
+  @override
+  String get noItemsFound => 'No items found';
+
+  @override
+  String get cartEmpty => 'Scan or tap an item to start a sale.';
+
+  @override
+  String get addDiscount => 'Add Discount';
+
+  @override
+  String get checkout => 'Checkout';
+
+  @override
+  String get grandTotal => 'Grand Total';
+
+  @override
+  String get roundedTotal => 'Rounded Total';
+
+  @override
+  String get roundingAdjustment => 'Rounding Adjustment';
+
+  @override
+  String get discountPercentage => 'Discount (%)';
+
+  @override
+  String get discountAmount => 'Discount Amount';
+
+  @override
+  String get additionalDiscount => 'Additional Discount';
+
+  @override
+  String get percentage => 'Percentage';
+
+  @override
+  String get priceListRate => 'Price List Rate';
+
+  @override
+  String get paidAmount => 'Paid Amount';
+
+  @override
+  String get toBePaid => 'To Be Paid';
+
+  @override
+  String get changeAmount => 'Change Amount';
+
+  @override
+  String get completeOrder => 'Complete Order';
+
+  @override
+  String get newOrder => 'New Order';
+
+  @override
+  String get inWords => 'In Words';
+
+  @override
+  String get recentOrders => 'Recent Orders';
+
+  @override
+  String get toggleRecentOrders => 'Toggle Recent Orders';
+
+  @override
+  String get saveAsDraft => 'Save as Draft';
+
+  @override
+  String get closeThePos => 'Close the POS';
+
+  @override
+  String get remove => 'Remove';
+
+  @override
+  String get unsavedChangesTitle => 'Unsaved changes';
+
+  @override
+  String get unsavedChangesBody =>
+      'The current sale has changes that are not saved.';
+
+  @override
+  String get saveChanges => 'Save Changes';
+
+  @override
+  String get discardChanges => 'Discard Changes';
+
+  @override
+  String cartLines(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String heldOrdersRemain(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count held orders remain; closing does not change them.',
+      one: '1 held order remains; closing does not change it.',
+      zero: 'No held orders.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String invoiceCount(int count) {
+    return 'Invoices: $count';
+  }
+
+  @override
+  String get periodStartDate => 'Period Start Date';
+
+  @override
+  String get periodEndDate => 'Period End Date';
+
+  @override
+  String get paymentReconciliation => 'Payment Reconciliation';
+
+  @override
+  String get expectedAmount => 'Expected Amount';
+
+  @override
+  String get closingAmount => 'Closing Amount';
+
+  @override
+  String get difference => 'Difference';
+
+  @override
+  String get totalTaxesAndCharges => 'Total Taxes and Charges';
+
+  @override
+  String get closedWithBackup => 'Session closed. Backup saved.';
+
+  @override
+  String closedBackupFailed(String error) {
+    return 'Session closed, but the backup failed: $error';
+  }
+
+  @override
+  String get draftSaved => 'Saved as draft.';
+
+  @override
+  String draftName(int id) {
+    return 'Draft $id';
+  }
+
+  @override
+  String get lineNeedsEntries => 'Serial / batch entries are picked at Submit.';
+
+  @override
+  String get refusedNoOpenSession =>
+      'Open a POS session (POS Opening Entry) first.';
+
+  @override
+  String get refusedAnotherSessionOpen =>
+      'A POS session is already open. Close it before opening another.';
+
+  @override
+  String get refusedEmptyCart => 'Add at least one item to the cart.';
+
+  @override
+  String refusedItemUnavailable(
+    String item,
+    String warehouse,
+    String available,
+    String needed,
+  ) {
+    return 'Item is unavailable: $needed of $item needed in $warehouse; available: $available.';
+  }
+
+  @override
+  String refusedPaymentShort(String toPay, String paid) {
+    return 'Partial payment is not allowed: paid $paid of $toPay.';
+  }
+
+  @override
+  String get refusedNonCashOverpaid =>
+      'Change is given in cash only: a card or bank payment cannot be more than the amount due.';
+
+  @override
+  String get refusedNotLatestClosing =>
+      'Only the latest POS Closing Entry can be cancelled, and only while no newer session exists.';
+
+  @override
+  String get lineNotSalesItem => 'Item is not a sales item.';
+
+  @override
+  String get lineDiscountAboveMax =>
+      'Discount is above the item\'s Max Discount (%).';
+
+  @override
+  String get lineBelowValuationRate =>
+      'Selling rate is below the item\'s valuation rate.';
 }

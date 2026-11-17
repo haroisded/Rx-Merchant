@@ -2902,6 +2902,371 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Batch {batch} needs an Expiry Date: its item has Has Expiry Date and no Shelf Life In Days to work it out from.'**
   String refusedExpiryRequired(String batch);
+
+  /// No description provided for @posOpeningEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'POS Opening Entry'**
+  String get posOpeningEntry;
+
+  /// No description provided for @posClosingEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'POS Closing Entry'**
+  String get posClosingEntry;
+
+  /// No description provided for @openingAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening Amount'**
+  String get openingAmount;
+
+  /// No description provided for @openingHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Count what is in the drawer for each payment mode, then open the session to start selling.'**
+  String get openingHelp;
+
+  /// No description provided for @openSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get openSession;
+
+  /// No description provided for @cancelLastClosing.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel {name}'**
+  String cancelLastClosing(String name);
+
+  /// No description provided for @cancelClosingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The session it closed opens again.'**
+  String get cancelClosingBody;
+
+  /// No description provided for @searchItemHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by item code, serial number or barcode'**
+  String get searchItemHint;
+
+  /// No description provided for @noItemsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No items found'**
+  String get noItemsFound;
+
+  /// No description provided for @cartEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan or tap an item to start a sale.'**
+  String get cartEmpty;
+
+  /// No description provided for @addDiscount.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Discount'**
+  String get addDiscount;
+
+  /// No description provided for @checkout.
+  ///
+  /// In en, this message translates to:
+  /// **'Checkout'**
+  String get checkout;
+
+  /// No description provided for @grandTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Grand Total'**
+  String get grandTotal;
+
+  /// No description provided for @roundedTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounded Total'**
+  String get roundedTotal;
+
+  /// No description provided for @roundingAdjustment.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounding Adjustment'**
+  String get roundingAdjustment;
+
+  /// No description provided for @discountPercentage.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount (%)'**
+  String get discountPercentage;
+
+  /// No description provided for @discountAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount Amount'**
+  String get discountAmount;
+
+  /// No description provided for @additionalDiscount.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional Discount'**
+  String get additionalDiscount;
+
+  /// No description provided for @percentage.
+  ///
+  /// In en, this message translates to:
+  /// **'Percentage'**
+  String get percentage;
+
+  /// No description provided for @priceListRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Price List Rate'**
+  String get priceListRate;
+
+  /// No description provided for @paidAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid Amount'**
+  String get paidAmount;
+
+  /// No description provided for @toBePaid.
+  ///
+  /// In en, this message translates to:
+  /// **'To Be Paid'**
+  String get toBePaid;
+
+  /// No description provided for @changeAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Amount'**
+  String get changeAmount;
+
+  /// No description provided for @completeOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Order'**
+  String get completeOrder;
+
+  /// No description provided for @newOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'New Order'**
+  String get newOrder;
+
+  /// No description provided for @inWords.
+  ///
+  /// In en, this message translates to:
+  /// **'In Words'**
+  String get inWords;
+
+  /// No description provided for @recentOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Orders'**
+  String get recentOrders;
+
+  /// No description provided for @toggleRecentOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle Recent Orders'**
+  String get toggleRecentOrders;
+
+  /// No description provided for @saveAsDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as Draft'**
+  String get saveAsDraft;
+
+  /// No description provided for @closeThePos.
+  ///
+  /// In en, this message translates to:
+  /// **'Close the POS'**
+  String get closeThePos;
+
+  /// No description provided for @remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get remove;
+
+  /// No description provided for @unsavedChangesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved changes'**
+  String get unsavedChangesTitle;
+
+  /// No description provided for @unsavedChangesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The current sale has changes that are not saved.'**
+  String get unsavedChangesBody;
+
+  /// No description provided for @saveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get saveChanges;
+
+  /// No description provided for @discardChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard Changes'**
+  String get discardChanges;
+
+  /// No description provided for @cartLines.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item} other{{count} items}}'**
+  String cartLines(int count);
+
+  /// No description provided for @heldOrdersRemain.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No held orders.} =1{1 held order remains; closing does not change it.} other{{count} held orders remain; closing does not change them.}}'**
+  String heldOrdersRemain(int count);
+
+  /// No description provided for @invoiceCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoices: {count}'**
+  String invoiceCount(int count);
+
+  /// No description provided for @periodStartDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Period Start Date'**
+  String get periodStartDate;
+
+  /// No description provided for @periodEndDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Period End Date'**
+  String get periodEndDate;
+
+  /// No description provided for @paymentReconciliation.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Reconciliation'**
+  String get paymentReconciliation;
+
+  /// No description provided for @expectedAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected Amount'**
+  String get expectedAmount;
+
+  /// No description provided for @closingAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing Amount'**
+  String get closingAmount;
+
+  /// No description provided for @difference.
+  ///
+  /// In en, this message translates to:
+  /// **'Difference'**
+  String get difference;
+
+  /// No description provided for @totalTaxesAndCharges.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Taxes and Charges'**
+  String get totalTaxesAndCharges;
+
+  /// No description provided for @closedWithBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Session closed. Backup saved.'**
+  String get closedWithBackup;
+
+  /// No description provided for @closedBackupFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Session closed, but the backup failed: {error}'**
+  String closedBackupFailed(String error);
+
+  /// No description provided for @draftSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved as draft.'**
+  String get draftSaved;
+
+  /// No description provided for @draftName.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft {id}'**
+  String draftName(int id);
+
+  /// No description provided for @lineNeedsEntries.
+  ///
+  /// In en, this message translates to:
+  /// **'Serial / batch entries are picked at Submit.'**
+  String get lineNeedsEntries;
+
+  /// No description provided for @refusedNoOpenSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a POS session (POS Opening Entry) first.'**
+  String get refusedNoOpenSession;
+
+  /// No description provided for @refusedAnotherSessionOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'A POS session is already open. Close it before opening another.'**
+  String get refusedAnotherSessionOpen;
+
+  /// No description provided for @refusedEmptyCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one item to the cart.'**
+  String get refusedEmptyCart;
+
+  /// No description provided for @refusedItemUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Item is unavailable: {needed} of {item} needed in {warehouse}; available: {available}.'**
+  String refusedItemUnavailable(
+    String item,
+    String warehouse,
+    String available,
+    String needed,
+  );
+
+  /// No description provided for @refusedPaymentShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial payment is not allowed: paid {paid} of {toPay}.'**
+  String refusedPaymentShort(String toPay, String paid);
+
+  /// No description provided for @refusedNonCashOverpaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Change is given in cash only: a card or bank payment cannot be more than the amount due.'**
+  String get refusedNonCashOverpaid;
+
+  /// No description provided for @refusedNotLatestClosing.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the latest POS Closing Entry can be cancelled, and only while no newer session exists.'**
+  String get refusedNotLatestClosing;
+
+  /// No description provided for @lineNotSalesItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Item is not a sales item.'**
+  String get lineNotSalesItem;
+
+  /// No description provided for @lineDiscountAboveMax.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount is above the item\'s Max Discount (%).'**
+  String get lineDiscountAboveMax;
+
+  /// No description provided for @lineBelowValuationRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Selling rate is below the item\'s valuation rate.'**
+  String get lineBelowValuationRate;
 }
 
 class _AppLocalizationsDelegate

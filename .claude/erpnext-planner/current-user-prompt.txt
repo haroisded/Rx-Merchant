@@ -11,8 +11,7 @@
 - To gain context about the Current System - read...
   "B:\Development-Projects\rx_merchant\.claude\erpnext-planner\system-documentation.md"
 
-- very important - read word for word this file...
-  
+- very important - read this file word for word...
   ` "B:\Development-Projects\rx_merchant\.claude\commits\2026-11-16_22-00-06.txt" `
   ( this is for context about the Removal of the "POS Profile" )
 
@@ -21,9 +20,10 @@
 - Plans that has already been finished...
 * "B:\Development-Projects\erpnext-planner\Plans\00-overview-and-foundation.md"
 * "B:\Development-Projects\rx_merchant\.claude\erpnext-planner\Plans\01-setup.md"
+* "B:\Development-Projects\rx_merchant\.claude\erpnext-planner\Plans\02-stock.md"
   ( note: you can skim read all these plans, to gain more context ) 
 
 
 # user-prompt
 - once done, I request read word for word and do only...
-"B:\Development-Projects\rx_merchant\.claude\erpnext-planner\Plans\02-stock.md"
+"B:\Development-Projects\rx_merchant\.claude\erpnext-planner\Plans\03-cash-register.md"

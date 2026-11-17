@@ -10,9 +10,14 @@ const double _sideSheetRadius = 16;
 
 /// Opens a row editor the way ERPNext's pencil icon does (00-overview,
 /// section 7.1, "Child table"): a bottom sheet on a compact window, a side
-/// sheet on the trailing edge otherwise. Completes with the value the editor
-/// pops, or null when dismissed.
-Future<R?> showRowEditor<R>(BuildContext context, WidgetBuilder builder) {
+/// sheet on the trailing edge otherwise, or on the [leading] edge when what
+/// stays visible is on the trailing side (the Cash Register's cart).
+/// Completes with the value the editor pops, or null when dismissed.
+Future<R?> showRowEditor<R>(
+  BuildContext context,
+  WidgetBuilder builder, {
+  bool leading = false,
+}) {
   if (WindowSize.of(context) == WindowSize.compact) {
     return showModalBottomSheet<R>(
       context: context,
@@ -34,13 +39,19 @@ Future<R?> showRowEditor<R>(BuildContext context, WidgetBuilder builder) {
     barrierDismissible: true,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     pageBuilder: (context, _, _) => Align(
-      alignment: AlignmentDirectional.centerEnd,
+      alignment: leading
+          ? AlignmentDirectional.centerStart
+          : AlignmentDirectional.centerEnd,
       child: Material(
         color: Theme.of(context).colorScheme.surfaceContainerLow,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadiusDirectional.horizontal(
-            start: Radius.circular(_sideSheetRadius),
-          ),
+        shape: RoundedRectangleBorder(
+          borderRadius: leading
+              ? const BorderRadiusDirectional.horizontal(
+                  end: Radius.circular(_sideSheetRadius),
+                )
+              : const BorderRadiusDirectional.horizontal(
+                  start: Radius.circular(_sideSheetRadius),
+                ),
         ),
         clipBehavior: Clip.antiAlias,
         child: SafeArea(
@@ -54,7 +65,7 @@ Future<R?> showRowEditor<R>(BuildContext context, WidgetBuilder builder) {
     ),
     transitionBuilder: (context, animation, _, child) => SlideTransition(
       position: Tween(
-        begin: const Offset(1, 0),
+        begin: Offset(leading ? -1 : 1, 0),
         end: Offset.zero,
       ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
       textDirection: Directionality.of(context),

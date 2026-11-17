@@ -5,6 +5,8 @@ import 'package:material_ui/material_ui.dart';
 import 'core/db/providers.dart';
 import 'core/widgets/adaptive_shell.dart';
 import 'core/widgets/window_size.dart';
+import 'features/pos/ui/pos_providers.dart' show posPath;
+import 'features/pos/ui/pos_screen.dart';
 import 'features/setup/ui/setup_screen.dart';
 import 'features/stock/ui/stock_providers.dart';
 import 'features/stock/ui/stock_screen.dart';
@@ -13,7 +15,7 @@ import 'l10n/app_localizations.dart';
 
 const _loading = '/loading';
 const _wizard = '/wizard';
-const _home = '/pos';
+const _home = posPath;
 
 /// The five destinations, in the order of 00-overview section 7.3, each with
 /// its screen title. Each is a placeholder until its feature milestone
@@ -68,7 +70,9 @@ final routerProvider = Provider<GoRouter>((ref) {
           for (final (path, title) in _destinations)
             StatefulShellBranch(
               routes: [
-                if (path == setupPath)
+                if (path == posPath)
+                  _workspaceRoute(posPath, (page, _, _) => posPage(page))
+                else if (path == setupPath)
                   _workspaceRoute(
                     setupPath,
                     (page, id, _) => SetupScreen(page: page, id: id),
