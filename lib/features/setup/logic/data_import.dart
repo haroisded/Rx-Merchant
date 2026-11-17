@@ -1,4 +1,5 @@
 import '../../stock/logic/barcode.dart';
+import '../../stock/logic/stock_rules.dart';
 
 /// Column labels of the import templates (SET-R16). The file's header row
 /// uses these, and the import reads cells by them.
@@ -294,7 +295,7 @@ List<ImportProblem> validateImport(
           ),
           ...?filePrices[key],
         ];
-        if (others.any((p) => _overlaps(p.from, p.upto, from, upto))) {
+        if (others.any((p) => validityOverlaps(p.from, p.upto, from, upto))) {
           add(Col.validFrom, ImportProblemKind.overlappingPrice);
         }
         (filePrices[key] ??= []).add((from: from, upto: upto));
@@ -302,9 +303,3 @@ List<ImportProblem> validateImport(
   }
   return problems;
 }
-
-/// Empty bounds are open-ended. Dates are `YYYY-MM-DD`, so text order is
-/// date order.
-bool _overlaps(String? aFrom, String? aUpto, String? bFrom, String? bUpto) =>
-    (aFrom == null || bUpto == null || aFrom.compareTo(bUpto) <= 0) &&
-    (bFrom == null || aUpto == null || bFrom.compareTo(aUpto) <= 0);

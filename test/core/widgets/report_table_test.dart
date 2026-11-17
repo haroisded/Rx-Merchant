@@ -67,20 +67,45 @@ void main() {
       expect(find.byTooltip('Export CSV'), findsOneWidget);
     });
 
-    testWidgets('the table scrolls sideways on a narrow window', (
+    testWidgets('the first column stays put while the rest scroll sideways', (
       tester,
     ) async {
       await pumpInApp(tester, report());
 
-      final horizontal = find.ancestor(
-        of: find.byType(DataTable),
+      Finder sideways(String text) => find.ancestor(
+        of: find.text(text),
         matching: find.byWidgetPredicate(
           (w) =>
               w is SingleChildScrollView &&
               w.scrollDirection == Axis.horizontal,
         ),
       );
-      expect(horizontal, findsOneWidget);
+      expect(sideways('Qty'), findsOneWidget);
+      expect(sideways('Item'), findsNothing);
+    });
+
+    testWidgets('rows beyond the columns are hidden; a totals row; row tap', (
+      tester,
+    ) async {
+      List<Object?>? tapped;
+      await pumpInApp(
+        tester,
+        ReportTable(
+          columns: const ['Item', 'Qty'],
+          rows: const [
+            ['Paracetamol', 2, 'hidden'],
+          ],
+          totals: const ['Total', 2],
+          cell: (c, v) => c == 1 && v is num ? '$v pcs' : '${v ?? ''}',
+          exportName: 'x',
+          onRowTap: (row) => tapped = row,
+        ),
+      );
+      expect(find.text('hidden'), findsNothing);
+      expect(find.text('Total'), findsOneWidget);
+      expect(find.text('2 pcs'), findsNWidgets(2));
+      await tester.tap(find.text('Paracetamol'));
+      expect(tapped, ['Paracetamol', 2, 'hidden']);
     });
   });
 }

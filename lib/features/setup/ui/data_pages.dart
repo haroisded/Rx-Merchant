@@ -35,6 +35,31 @@ Future<bool> saveOutside(
 
 List<int> _csvBytes(List<List<String>> rows) => utf8.encode(Csv().encode(rows));
 
+/// Saves [rows] as a CSV file wherever the owner chooses. True when saved.
+Future<bool> saveCsv(String fileName, List<List<String>> rows) =>
+    saveOutside(fileName, _csvBytes(rows), 'text/csv');
+
+/// Lets the owner pick a CSV file and returns its name and rows as text;
+/// null when none was picked.
+Future<(String, List<List<String>>)?> pickCsv() async {
+  final picked = await FilePicker.pickFiles(
+    type: FileType.custom,
+    allowedExtensions: ['csv'],
+  );
+  if (picked.isEmpty) return null;
+  final text = utf8.decode(
+    await picked.single.readAsBytes(),
+    allowMalformed: true,
+  );
+  return (
+    picked.single.name,
+    [
+      for (final row in Csv().decode(text.replaceFirst('﻿', '')))
+        [for (final cell in row) '${cell ?? ''}'],
+    ],
+  );
+}
+
 String importProblemText(AppLocalizations l, ImportProblemKind kind) =>
     switch (kind) {
       ImportProblemKind.missing => l.importMissing,
@@ -97,22 +122,12 @@ class _DataImportPageState extends ConsumerState<DataImportPage> {
   }
 
   Future<void> _chooseFile() async {
-    final picked = await FilePicker.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['csv'],
-    );
-    if (picked.isEmpty) return;
-    final text = utf8.decode(
-      await picked.single.readAsBytes(),
-      allowMalformed: true,
-    );
-    final table = [
-      for (final row in Csv().decode(text.replaceFirst('﻿', '')))
-        [for (final cell in row) '${cell ?? ''}'],
-    ];
+    final picked = await pickCsv();
+    if (picked == null) return;
+    final (name, table) = picked;
     setState(() {
       _reset();
-      _fileName = picked.single.name;
+      _fileName = name;
       if (table.isEmpty) return;
       _header = table.first;
       _body = table.skip(1).toList();

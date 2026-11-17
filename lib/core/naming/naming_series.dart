@@ -57,3 +57,15 @@ extension NamingSeries on AppDatabase {
         return '$key${next.toString().padLeft(digits, '0')}$suffix';
       });
 }
+
+extension DefaultSeries on AppDatabase {
+  /// The default pattern of [doctype]: its first Naming Series option
+  /// (SET-R7). The wizard seeds one for every document.
+  Future<String> defaultSeries(String doctype) =>
+      (select(namingSeriesOption)
+            ..where((o) => o.doctype.equals(doctype))
+            ..orderBy([(o) => OrderingTerm(expression: o.idx)])
+            ..limit(1))
+          .map((o) => o.pattern)
+          .getSingle();
+}

@@ -4,13 +4,14 @@ import 'package:material_ui/material_ui.dart';
 import '../../../core/db/providers.dart';
 import '../../../core/db/singles.dart';
 import '../../../core/numbers/formats.dart';
+import '../../../core/widgets/date_field.dart';
 import '../../../core/widgets/spacing.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/country_info.dart';
 import '../data/setup_queries.dart';
 import 'form_kit.dart';
 
-enum FieldKind { text, money, wholeNumber, check, choice, info }
+enum FieldKind { text, money, wholeNumber, check, choice, date, info }
 
 /// One field of a settings page. [read] gives its current text from the
 /// stored values, applying the default (`singles.dart`); checks are '1'/'0'.
@@ -163,6 +164,14 @@ class _SinglesFormState extends ConsumerState<SinglesForm> {
           for (final o in f.options)
             DropdownMenuEntry(value: o, label: f.optionLabel?.call(o) ?? o),
         ],
+      ),
+      // Stored as YYYY-MM-DD; blank is none.
+      FieldKind.date => DateField(
+        label: f.label,
+        value: value.isEmpty ? null : value,
+        formats: formats,
+        enabled: !locked,
+        onChanged: (v) => set(v ?? ''),
       ),
       FieldKind.text ||
       FieldKind.money ||

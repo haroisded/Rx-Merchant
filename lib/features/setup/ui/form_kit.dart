@@ -1,8 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../core/db/providers.dart';
+import '../../../core/numbers/formats.dart';
 import '../../../core/widgets/spacing.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../stock/logic/stock_documents.dart';
 import '../data/refusal.dart';
 
 // The pieces every Setup page is built from (00-overview, section 7.1).
@@ -36,16 +39,91 @@ Future<void> showProblems(BuildContext context, List<String> problems) =>
       ),
     );
 
-String refusalText(AppLocalizations l, RefusedException e) =>
-    switch (e.reason) {
-      Refusal.duplicateName => l.refusedDuplicateName,
-      Refusal.referenced => l.refusedReferenced,
-      Refusal.defaultPriceList => l.refusedDefaultPriceList,
-      Refusal.seriesBelowUsed => l.refusedSeriesBelowUsed(e.detail ?? ''),
-      Refusal.notABackup => l.refusedNotABackup,
-      Refusal.backupTooNew => l.refusedBackupTooNew,
-      Refusal.sessionOpen => l.refusedSessionOpen,
-    };
+String refusalText(AppLocalizations l, RefusedException e, Formats f) {
+  final d = e.detail ?? '';
+  final a = e.args;
+  String when(Object? at) => at == null
+      ? ''
+      : '${f.date(DateTime.parse('$at'))} ${f.time(DateTime.parse('$at'))}';
+  return switch (e.reason) {
+    Refusal.duplicateName => l.refusedDuplicateName,
+    Refusal.referenced => l.refusedReferenced,
+    Refusal.defaultPriceList => l.refusedDefaultPriceList,
+    Refusal.seriesBelowUsed => l.refusedSeriesBelowUsed(d),
+    Refusal.notABackup => l.refusedNotABackup,
+    Refusal.backupTooNew => l.refusedBackupTooNew,
+    Refusal.sessionOpen => l.refusedSessionOpen,
+    Refusal.negativeStock => l.refusedNegativeStock(
+      '${a[0]}',
+      '${a[1]}',
+      f.number(a[2]! as num),
+      f.number(a[3]! as num),
+      when(a[4]),
+      '${a[5]}',
+    ),
+    Refusal.negativeBatch => l.refusedNegativeBatch(
+      '${a[0]}',
+      '${a[1]}',
+      '${a[2]}',
+      when(a[3]),
+      '${a[4]}',
+    ),
+    Refusal.stockFrozen => l.refusedStockFrozen(
+      d.isEmpty ? d : f.date(DateTime.parse(d)),
+    ),
+    Refusal.frozenField => l.lockedAfterStock,
+    Refusal.hasVariantsLocked => l.refusedHasVariantsLocked,
+    Refusal.template => l.refusedTemplate(d),
+    Refusal.unitInUse => l.refusedUnitInUse(d),
+    Refusal.barcodeTaken => l.refusedBarcodeTaken(d),
+    Refusal.badBarcode => l.refusedBadBarcode(d),
+    Refusal.overlappingPrice => l.importOverlappingPrice,
+    Refusal.defaultWarehouse => l.refusedDefaultWarehouse,
+    Refusal.warehouseHasLedger => l.refusedWarehouseHasLedger,
+    Refusal.lineProblem => lineProblemMessage(
+      l,
+      a[0]! as int,
+      a[1]! as LineProblem,
+    ),
+    Refusal.batchRequired => l.refusedBatchRequired(d),
+    Refusal.serialRequired => l.refusedSerialRequired(d),
+    Refusal.notEnoughEntries => l.refusedNotEnoughEntries(d),
+    Refusal.expiredBatch => l.refusedExpiredBatch(d),
+    Refusal.batchNotFound => l.refusedBatchNotFound(d),
+    Refusal.expiryRequired => l.refusedExpiryRequired(d),
+    Refusal.serialNotAvailable => l.refusedSerialNotAvailable(d),
+    Refusal.serialExists => l.refusedSerialExists(d),
+    Refusal.serialMovedSince => l.refusedSerialMovedSince(d),
+    Refusal.docstatus => l.refusedDocstatus,
+  };
+}
+
+/// A line problem with its row; a fraction in ERPNext's own words (STK-R3).
+String lineProblemMessage(AppLocalizations l, int row, LineProblem p) =>
+    p == LineProblem.fraction
+    ? l.lineFractionAt(row)
+    : l.rowProblem(row, lineProblemText(l, p));
+
+/// STK-R3, R6, R14, R23, R33, R38, R42: what is wrong with a document line.
+String lineProblemText(AppLocalizations l, LineProblem p) => switch (p) {
+  LineProblem.missingItem => l.lineMissingItem,
+  LineProblem.qtyNotPositive => l.lineQtyNotPositive,
+  LineProblem.sourceRequired => l.lineSourceRequired,
+  LineProblem.targetRequired => l.lineTargetRequired,
+  LineProblem.sameWarehouse => l.lineSameWarehouse,
+  LineProblem.groupWarehouse => l.lineGroupWarehouse,
+  LineProblem.fraction => l.lineFraction,
+  LineProblem.itemDisabled => l.lineItemDisabled,
+  LineProblem.itemEndOfLife => l.lineItemEndOfLife,
+  LineProblem.itemTemplate => l.lineItemTemplate,
+  LineProblem.itemNotStock => l.lineItemNotStock,
+  LineProblem.zeroRate => l.lineZeroRate,
+  LineProblem.serialCount => l.lineSerialCount,
+  LineProblem.duplicateSerial => l.lineDuplicateSerial,
+  LineProblem.entriesQty => l.lineEntriesQty,
+  LineProblem.batchOrSerialItem => l.lineBatchOrSerialItem,
+  LineProblem.duplicateRow => l.lineDuplicateRow,
+};
 
 /// Runs [action]. A refusal is shown with [showProblems]; on success the
 /// [done] message, if any, is shown in a SnackBar; any other error is shown
@@ -56,10 +134,16 @@ Future<bool> attempt(
   String? done,
 }) async {
   final l = AppLocalizations.of(context);
+  final formats = ProviderScope.containerOf(
+    context,
+    listen: false,
+  ).read(formatsProvider);
   try {
     await action();
   } on RefusedException catch (e) {
-    if (context.mounted) await showProblems(context, [refusalText(l, e)]);
+    if (context.mounted) {
+      await showProblems(context, [refusalText(l, e, formats)]);
+    }
     return false;
   } catch (e) {
     // Anything else is shown too, so a failed save never passes silently.
@@ -224,6 +308,7 @@ class MasterList<T> extends StatefulWidget {
     required this.onAdd,
     this.subtitleOf,
     this.isDisabled,
+    this.trailingOf,
   });
 
   final String title;
@@ -231,6 +316,9 @@ class MasterList<T> extends StatefulWidget {
   final String Function(T) labelOf;
   final String? Function(T)? subtitleOf;
   final bool Function(T)? isDisabled;
+
+  /// A trailing widget, such as a document's status chip.
+  final Widget Function(T)? trailingOf;
   final ValueChanged<T> onOpen;
   final VoidCallback onAdd;
 
@@ -296,7 +384,7 @@ class _MasterListState<T> extends State<MasterList<T>> {
                       },
                       trailing: (widget.isDisabled?.call(r) ?? false)
                           ? Chip(label: Text(l.disabled))
-                          : null,
+                          : widget.trailingOf?.call(r),
                       onTap: () => widget.onOpen(r),
                     ),
                 ],

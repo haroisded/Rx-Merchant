@@ -124,8 +124,9 @@ class _CurrencyPageState extends ConsumerState<CurrencyPage> {
   }
 }
 
-/// A form for a master that is a name, a few switches and at most one
-/// dropdown. Saving or deleting returns to the list at [listPath].
+/// A form for a master that is a name, a few switches, at most one dropdown
+/// and at most one more text field. Saving or deleting returns to the list
+/// at [listPath].
 class NamedMasterForm extends StatefulWidget {
   const NamedMasterForm({
     super.key,
@@ -135,6 +136,7 @@ class NamedMasterForm extends StatefulWidget {
     required this.switches,
     required this.onSave,
     this.choice,
+    this.text,
     this.onDelete,
   });
 
@@ -143,7 +145,13 @@ class NamedMasterForm extends StatefulWidget {
   final String name;
   final List<(String label, bool value)> switches;
   final (String label, List<String> options, String value)? choice;
-  final Future<void> Function(String name, List<bool> switches, String? choice)
+  final (String label, String value)? text;
+  final Future<void> Function(
+    String name,
+    List<bool> switches,
+    String? choice,
+    String? text,
+  )
   onSave;
   final Future<void> Function()? onDelete;
 
@@ -156,10 +164,12 @@ class _NamedMasterFormState extends State<NamedMasterForm> {
   late final _name = TextEditingController(text: widget.name);
   late final _switches = [for (final s in widget.switches) s.$2];
   late var _choice = widget.choice?.$3;
+  late final _text = TextEditingController(text: widget.text?.$2);
 
   @override
   void dispose() {
     _name.dispose();
+    _text.dispose();
     super.dispose();
   }
 
@@ -176,7 +186,12 @@ class _NamedMasterFormState extends State<NamedMasterForm> {
         }
         final ok = await attempt(
           context,
-          () => widget.onSave(_name.text.trim(), _switches, _choice),
+          () => widget.onSave(
+            _name.text.trim(),
+            _switches,
+            _choice,
+            _text.text.trim().isEmpty ? null : _text.text.trim(),
+          ),
           done: l.saved,
         );
         if (ok && context.mounted) context.go(widget.listPath);
@@ -212,6 +227,11 @@ class _NamedMasterFormState extends State<NamedMasterForm> {
                   for (final o in options)
                     DropdownMenuEntry(value: o, label: o),
                 ],
+              ),
+            if (widget.text case (final label, _))
+              TextFormField(
+                controller: _text,
+                decoration: InputDecoration(labelText: label),
               ),
             for (final (i, (label, _)) in widget.switches.indexed)
               SwitchListTile(
@@ -284,7 +304,7 @@ class ModeOfPaymentPage extends ConsumerWidget {
         m?.type ?? 'General',
       ),
       switches: [(l.enabled, (m?.enabled ?? 1) == 1)],
-      onSave: (name, s, type) => db.saveModeOfPayment(
+      onSave: (name, s, type, _) => db.saveModeOfPayment(
         ModeOfPaymentCompanion(
           id: m == null ? const Value.absent() : Value(m.id),
           name: Value(name),
@@ -329,7 +349,7 @@ class TaxPage extends ConsumerWidget {
       listPath: path,
       name: t?.name ?? '',
       switches: [(l.disabled, t?.disabled == 1)],
-      onSave: (name, s, _) => db.saveTax(
+      onSave: (name, s, _, _) => db.saveTax(
         TaxCompanion(
           id: t == null ? const Value.absent() : Value(t.id),
           name: Value(name),
@@ -376,7 +396,7 @@ class PriceListPage extends ConsumerWidget {
         // factor for other units.
         (l.priceNotUomDependent, p?.priceNotUomDependent == 1),
       ],
-      onSave: (name, s, _) => db.savePriceList(
+      onSave: (name, s, _, _) => db.savePriceList(
         PriceListCompanion(
           id: p == null ? const Value.absent() : Value(p.id),
           name: Value(name),

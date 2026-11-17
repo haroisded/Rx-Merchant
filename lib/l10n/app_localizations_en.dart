@@ -716,4 +716,865 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get restoreFromBackup => 'Restore from backup';
+
+  @override
+  String get groupItemsAndPricing => 'Items and Pricing';
+
+  @override
+  String get groupStockTransactions => 'Stock Transactions';
+
+  @override
+  String get groupSerialAndBatch => 'Serial No and Batch';
+
+  @override
+  String get groupSettings => 'Settings';
+
+  @override
+  String get groupReports => 'Reports';
+
+  @override
+  String get item => 'Item';
+
+  @override
+  String get itemGroup => 'Item Group';
+
+  @override
+  String get itemPrice => 'Item Price';
+
+  @override
+  String get brand => 'Brand';
+
+  @override
+  String get itemAttribute => 'Item Attribute';
+
+  @override
+  String get stockEntry => 'Stock Entry';
+
+  @override
+  String get stockReconciliation => 'Stock Reconciliation';
+
+  @override
+  String get serialNo => 'Serial No';
+
+  @override
+  String get batch => 'Batch';
+
+  @override
+  String get warehouse => 'Warehouse';
+
+  @override
+  String get uom => 'UOM';
+
+  @override
+  String get reportStockLedger => 'Stock Ledger';
+
+  @override
+  String get reportStockBalance => 'Stock Balance';
+
+  @override
+  String get reportQuickStockBalance => 'Quick Stock Balance';
+
+  @override
+  String get reportBatchBalance => 'Batch-wise Balance History';
+
+  @override
+  String get reportSerialNoLedger => 'Serial No Ledger';
+
+  @override
+  String get reportItemPriceStock => 'Item Price Stock';
+
+  @override
+  String get reportLowStock => 'Low Stock';
+
+  @override
+  String get all => 'All';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get create => 'Create';
+
+  @override
+  String get download => 'Download';
+
+  @override
+  String get upload => 'Upload';
+
+  @override
+  String get scan => 'Scan';
+
+  @override
+  String get scanBarcode => 'Scan Barcode';
+
+  @override
+  String get filters => 'Filters';
+
+  @override
+  String get fromDate => 'From Date';
+
+  @override
+  String get toDate => 'To Date';
+
+  @override
+  String get date => 'Date';
+
+  @override
+  String get status => 'Status';
+
+  @override
+  String get note => 'Note';
+
+  @override
+  String get rate => 'Rate';
+
+  @override
+  String get qty => 'Qty';
+
+  @override
+  String get quantity => 'Quantity';
+
+  @override
+  String get items => 'Items';
+
+  @override
+  String get totals => 'Totals';
+
+  @override
+  String get purpose => 'Purpose';
+
+  @override
+  String get remarks => 'Remarks';
+
+  @override
+  String get moreInformation => 'More Information';
+
+  @override
+  String get submit => 'Submit';
+
+  @override
+  String get submitTitle => 'Submit this document?';
+
+  @override
+  String get submitBody =>
+      'A submitted document changes stock and cannot be edited. To change it later, cancel and amend it.';
+
+  @override
+  String get cancelDocument => 'Cancel';
+
+  @override
+  String get cancelTitle => 'Cancel this document?';
+
+  @override
+  String get cancelBody =>
+      'Its stock movements are reversed. The document stays, marked Cancelled.';
+
+  @override
+  String get amend => 'Amend';
+
+  @override
+  String get noItems => 'Add at least one item.';
+
+  @override
+  String get noEntries => 'No entries for these filters';
+
+  @override
+  String get treeView => 'Tree view';
+
+  @override
+  String get listView => 'List view';
+
+  @override
+  String get addChild => 'Add Child';
+
+  @override
+  String get isGroup => 'Is Group';
+
+  @override
+  String get image => 'Image';
+
+  @override
+  String get takePhoto => 'Take photo';
+
+  @override
+  String get choosePhoto => 'Choose photo';
+
+  @override
+  String get chooseWarehouseFirst => 'Choose the Default Warehouse first.';
+
+  @override
+  String get csvRowInvalid =>
+      'Item Code, Warehouse or Quantity is missing or not found.';
+
+  @override
+  String get validFrom => 'Valid From';
+
+  @override
+  String get validUpto => 'Valid Upto';
+
+  @override
+  String get validUptoBeforeFrom => 'Valid Upto is before Valid From.';
+
+  @override
+  String get inLabel => 'In';
+
+  @override
+  String get outLabel => 'Out';
+
+  @override
+  String draftNumber(int id) {
+    return 'Draft $id';
+  }
+
+  @override
+  String pageOf(int page, int pages) {
+    return '$page of $pages';
+  }
+
+  @override
+  String barcodeNotFound(String code) {
+    return 'No item has the barcode $code.';
+  }
+
+  @override
+  String csvHeadersChanged(String columns) {
+    return 'The file must have these columns, spelled exactly: $columns.';
+  }
+
+  @override
+  String rowsLoaded(String count) {
+    return '$count rows loaded';
+  }
+
+  @override
+  String get itemCode => 'Item Code';
+
+  @override
+  String get itemCodeBySeries =>
+      'Item Code (set on save from the naming series)';
+
+  @override
+  String get itemName => 'Item Name';
+
+  @override
+  String get defaultUom => 'Default Unit of Measure';
+
+  @override
+  String get maintainStock => 'Maintain Stock';
+
+  @override
+  String get hasVariants => 'Has Variants';
+
+  @override
+  String get openingStock => 'Opening Stock';
+
+  @override
+  String get valuationRate => 'Valuation Rate';
+
+  @override
+  String get standardSellingRate => 'Standard Selling Rate';
+
+  @override
+  String get barcodes => 'Barcodes';
+
+  @override
+  String get barcode => 'Barcode';
+
+  @override
+  String get barcodeType => 'Barcode Type';
+
+  @override
+  String get badBarcodeHelp =>
+      'EAN needs 13 digits with a valid check digit; UPC needs 12 digits.';
+
+  @override
+  String get shelfLifeInDays => 'Shelf Life In Days';
+
+  @override
+  String get endOfLife => 'End of Life';
+
+  @override
+  String get warrantyPeriodDays => 'Warranty Period (in days)';
+
+  @override
+  String get valuationMethod => 'Valuation Method';
+
+  @override
+  String get asInStockSettings => 'As in Stock Settings';
+
+  @override
+  String get allowNegativeStock => 'Allow Negative Stock';
+
+  @override
+  String get defaultWarehouse => 'Default Warehouse';
+
+  @override
+  String get unitsOfMeasure => 'Units of Measure';
+
+  @override
+  String get conversionFactor => 'Conversion Factor';
+
+  @override
+  String get autoReorder => 'Auto Reorder';
+
+  @override
+  String get reorderLevel => 'Re-order Level';
+
+  @override
+  String get reorderQty => 'Re-order Qty';
+
+  @override
+  String get hasBatchNo => 'Has Batch No';
+
+  @override
+  String get createNewBatch => 'Automatically Create New Batch';
+
+  @override
+  String get batchNumberSeries => 'Batch Number Series';
+
+  @override
+  String get hasExpiryDate => 'Has Expiry Date';
+
+  @override
+  String get hasSerialNo => 'Has Serial No';
+
+  @override
+  String get serialNoSeries => 'Serial Number Series';
+
+  @override
+  String get defaultSalesUom => 'Default Sales Unit of Measure';
+
+  @override
+  String get maxDiscount => 'Max Discount (%)';
+
+  @override
+  String get isSalesItem => 'Is Sales Item';
+
+  @override
+  String get tabDetails => 'Details';
+
+  @override
+  String get tabInventory => 'Inventory';
+
+  @override
+  String get tabVariants => 'Variants';
+
+  @override
+  String get tabSales => 'Sales';
+
+  @override
+  String get tabTax => 'Tax';
+
+  @override
+  String get lockedAfterStock =>
+      'Read-only: this item already has stock ledger entries.';
+
+  @override
+  String get addItem => 'Add Item';
+
+  @override
+  String get importItems => 'Import items';
+
+  @override
+  String get searchItems => 'Item Code, Item Name or barcode';
+
+  @override
+  String get addPrice => 'Add price';
+
+  @override
+  String get stockLevels => 'Stock Levels';
+
+  @override
+  String get itemTaxHelp =>
+      'The template whose Valid From is the latest on or before the sale applies; without one, the Item Group\'s template applies.';
+
+  @override
+  String get itemCodificationTitle => 'Item Codification';
+
+  @override
+  String get itemCodificationHelp =>
+      'For a small catalogue, keep the Item Code and Item Name the same. For a large one, use a meaningful code scheme, for example a group prefix and a running number, and keep the description in the Item Name.';
+
+  @override
+  String get variantOf => 'Variant Of';
+
+  @override
+  String get variants => 'Variants';
+
+  @override
+  String get attributes => 'Attributes';
+
+  @override
+  String get singleVariant => 'Single Variant';
+
+  @override
+  String get multipleVariants => 'Multiple Variants';
+
+  @override
+  String get variantsHelp =>
+      'Turn on Has Variants to make this item a template, then add its attributes.';
+
+  @override
+  String variantsCreated(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count variants created',
+      one: '1 variant created',
+      zero: 'No new variants: they all exist',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String variantsToCreate(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count variants',
+      one: '1 variant',
+      zero: 'Tick at least one value per attribute',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get attributeName => 'Attribute Name';
+
+  @override
+  String get numericValues => 'Numeric Values';
+
+  @override
+  String get fromRange => 'From Range';
+
+  @override
+  String get toRange => 'To Range';
+
+  @override
+  String get increment => 'Increment';
+
+  @override
+  String get attributeValues => 'Item Attribute Values';
+
+  @override
+  String get attributeValue => 'Attribute Value';
+
+  @override
+  String get badNumericRange =>
+      'The range must give at least one value: Increment above 0 and To Range at or above From Range.';
+
+  @override
+  String get attributeNeedsValues => 'Add at least one value.';
+
+  @override
+  String get mustBeWholeNumber => 'Must be Whole Number';
+
+  @override
+  String get warehouseName => 'Warehouse Name';
+
+  @override
+  String get parentWarehouse => 'Parent Warehouse';
+
+  @override
+  String get warehouseType => 'Warehouse Type';
+
+  @override
+  String get itemGroupName => 'Item Group Name';
+
+  @override
+  String get parentItemGroup => 'Parent Item Group';
+
+  @override
+  String get itemNamingBy => 'Item Naming By';
+
+  @override
+  String get defaultItemGroup => 'Default Item Group';
+
+  @override
+  String get defaultStockUom => 'Default Stock UOM';
+
+  @override
+  String get defaultValuationMethod => 'Default Valuation Method';
+
+  @override
+  String get lockedValuationMethod =>
+      'Locked: items that follow this method already have stock.';
+
+  @override
+  String get sectionStockTransactions => 'Stock Transactions Settings';
+
+  @override
+  String get showBarcodeField => 'Show Barcode Field';
+
+  @override
+  String get autoInsertPriceListRate =>
+      'Auto insert Price List rate if missing';
+
+  @override
+  String get showLowStockAlerts => 'Show low-stock alerts';
+
+  @override
+  String get stockFrozenUpto => 'Stock Frozen Upto';
+
+  @override
+  String get enableSerialAndBatch => 'Enable Serial and Batch No for Item';
+
+  @override
+  String get pickSerialBatchBasedOn => 'Pick Serial / Batch Based On';
+
+  @override
+  String get autoCreateBundleForOutward =>
+      'Auto Create Serial and Batch Bundle For Outward';
+
+  @override
+  String get batchId => 'Batch ID';
+
+  @override
+  String get manufacturingDate => 'Manufacturing Date';
+
+  @override
+  String get expiryDate => 'Expiry Date';
+
+  @override
+  String get batchNotSet => 'Not Set';
+
+  @override
+  String get batchNotExpired => 'Not Expired';
+
+  @override
+  String get batchExpired => 'Expired';
+
+  @override
+  String get warrantyExpiryDate => 'Warranty Expiry Date';
+
+  @override
+  String get serialBatchEntries => 'Serial / Batch Entries';
+
+  @override
+  String get autoFetch => 'Auto Fetch';
+
+  @override
+  String get createSerialsFromRange => 'Create Serial Nos from Range';
+
+  @override
+  String get serialRange => 'Range';
+
+  @override
+  String get badSerialRange => 'Type a range such as SN-01::10.';
+
+  @override
+  String serialScannedTwice(String serial) {
+    return '$serial is already in the list.';
+  }
+
+  @override
+  String serialStatus(String status) {
+    String _temp0 = intl.Intl.selectLogic(status, {
+      'Inactive': 'Inactive',
+      'Available': 'Available',
+      'Delivered': 'Delivered',
+      'other': '$status',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get materialReceipt => 'Material Receipt';
+
+  @override
+  String get materialIssue => 'Material Issue';
+
+  @override
+  String get materialTransfer => 'Material Transfer';
+
+  @override
+  String get editPostingDateTime => 'Edit Posting Date and Time';
+
+  @override
+  String get postingDateTime => 'Posting Date and Time';
+
+  @override
+  String get defaultSourceWarehouse => 'Default Source Warehouse';
+
+  @override
+  String get defaultTargetWarehouse => 'Default Target Warehouse';
+
+  @override
+  String get sourceWarehouse => 'Source Warehouse';
+
+  @override
+  String get targetWarehouse => 'Target Warehouse';
+
+  @override
+  String get stockQty => 'Qty as per Stock UOM';
+
+  @override
+  String get basicRatePerStockUom => 'Basic Rate (as per Stock UOM)';
+
+  @override
+  String get allowZeroValuationRate => 'Allow Zero Valuation Rate';
+
+  @override
+  String get additionalCosts => 'Additional Costs';
+
+  @override
+  String get totalOutgoingValue => 'Total Outgoing Value';
+
+  @override
+  String get totalIncomingValue => 'Total Incoming Value';
+
+  @override
+  String get totalAdditionalCosts => 'Total Additional Costs';
+
+  @override
+  String get totalAmount => 'Total Amount';
+
+  @override
+  String get isOpening => 'Is Opening';
+
+  @override
+  String get scanMode => 'Scan Mode';
+
+  @override
+  String get fetchItems => 'Fetch Items from Warehouse';
+
+  @override
+  String get currentQty => 'Current Qty';
+
+  @override
+  String get currentValuationRate => 'Current Valuation Rate';
+
+  @override
+  String get quantityDifference => 'Quantity Difference';
+
+  @override
+  String get amountDifference => 'Amount Difference';
+
+  @override
+  String get differenceAmount => 'Difference Amount';
+
+  @override
+  String get stockUom => 'Stock UOM';
+
+  @override
+  String get inQty => 'In Qty';
+
+  @override
+  String get outQty => 'Out Qty';
+
+  @override
+  String get balanceQty => 'Balance Qty';
+
+  @override
+  String get incomingRate => 'Incoming Rate';
+
+  @override
+  String get balanceValue => 'Balance Value';
+
+  @override
+  String get valueChange => 'Value Change';
+
+  @override
+  String get voucherType => 'Voucher Type';
+
+  @override
+  String get voucherNo => 'Voucher #';
+
+  @override
+  String get openingQty => 'Opening Qty';
+
+  @override
+  String get openingValue => 'Opening Value';
+
+  @override
+  String get inValue => 'In Value';
+
+  @override
+  String get outValue => 'Out Value';
+
+  @override
+  String get inOrOut => 'In / Out';
+
+  @override
+  String get availableQty => 'Available Qty';
+
+  @override
+  String get actualQty => 'Actual Qty';
+
+  @override
+  String get shortage => 'Shortage';
+
+  @override
+  String get lineMissingItem => 'Item is missing.';
+
+  @override
+  String get lineQtyNotPositive => 'Quantity must be above zero.';
+
+  @override
+  String get lineSourceRequired => 'Source Warehouse is mandatory.';
+
+  @override
+  String get lineTargetRequired => 'Target Warehouse is mandatory.';
+
+  @override
+  String get lineSameWarehouse =>
+      'Source and Target Warehouse cannot be the same.';
+
+  @override
+  String get lineGroupWarehouse =>
+      'A group or disabled warehouse cannot be used in a transaction.';
+
+  @override
+  String get lineFraction => 'Quantity cannot be a fraction.';
+
+  @override
+  String get lineItemDisabled => 'Item is disabled.';
+
+  @override
+  String get lineItemEndOfLife => 'Item has reached its End of Life.';
+
+  @override
+  String get lineItemTemplate =>
+      'Item is a template: choose one of its variants.';
+
+  @override
+  String get lineItemNotStock => 'Item does not maintain stock.';
+
+  @override
+  String get lineZeroRate =>
+      'Valuation Rate is mandatory. Tick Allow Zero Valuation Rate to receive at zero.';
+
+  @override
+  String get lineSerialCount =>
+      'The quantity must be a whole number equal to the number of serial numbers.';
+
+  @override
+  String get lineEntriesQty =>
+      'The Serial / Batch Entries must add up to the quantity.';
+
+  @override
+  String get lineBatchOrSerialItem =>
+      'Batch and serial items are counted with a Stock Entry (Material Receipt or Issue), not here.';
+
+  @override
+  String get lineDuplicateRow =>
+      'This item and warehouse are already on another row.';
+
+  @override
+  String lineFractionAt(int row) {
+    return 'Quantity cannot be a fraction at row $row';
+  }
+
+  @override
+  String refusedNegativeStock(
+    String item,
+    String warehouse,
+    String available,
+    String needed,
+    String date,
+    String voucher,
+  ) {
+    return '$needed units of $item needed in $warehouse on $date for $voucher to complete this transaction. Available then: $available.';
+  }
+
+  @override
+  String refusedNegativeBatch(
+    String batch,
+    String item,
+    String warehouse,
+    String date,
+    String voucher,
+  ) {
+    return 'Batch $batch of $item would go below zero in $warehouse on $date for $voucher.';
+  }
+
+  @override
+  String refusedStockFrozen(String date) {
+    return 'Stock is frozen up to $date: nothing on or before it can be submitted or cancelled.';
+  }
+
+  @override
+  String get refusedHasVariantsLocked =>
+      'Has Variants cannot change once the item has variants or stock.';
+
+  @override
+  String refusedTemplate(String item) {
+    return '$item is a template: it has no price and cannot be moved.';
+  }
+
+  @override
+  String refusedUnitInUse(String uom) {
+    return '$uom is used on a document: it cannot be removed or have its Conversion Factor changed.';
+  }
+
+  @override
+  String refusedBarcodeTaken(String item) {
+    return 'This barcode belongs to item $item.';
+  }
+
+  @override
+  String refusedBadBarcode(String barcode) {
+    return '$barcode is not a valid barcode for its type.';
+  }
+
+  @override
+  String get refusedDefaultWarehouse =>
+      'This is the Default Warehouse in Stock Settings, which the Cash Register sells from. It must stay enabled and cannot be a group. Choose another Default Warehouse first.';
+
+  @override
+  String get refusedWarehouseHasLedger =>
+      'A warehouse with stock ledger entries cannot become a group.';
+
+  @override
+  String refusedBatchRequired(String item) {
+    return 'Enter a Batch for $item, or turn on Automatically Create New Batch.';
+  }
+
+  @override
+  String refusedSerialRequired(String item) {
+    return 'Enter the serial numbers of $item, or set its Serial Number Series.';
+  }
+
+  @override
+  String refusedNotEnoughEntries(String item) {
+    return 'Not enough serial numbers or batches of $item in the source warehouse. Choose them in Serial / Batch Entries.';
+  }
+
+  @override
+  String refusedExpiredBatch(String batch) {
+    return 'Batch $batch has expired: it can leave stock only through a Material Issue.';
+  }
+
+  @override
+  String refusedBatchNotFound(String batch) {
+    return 'Batch $batch does not exist for this item.';
+  }
+
+  @override
+  String refusedSerialNotAvailable(String serial) {
+    return 'Serial No $serial is not Available in the source warehouse.';
+  }
+
+  @override
+  String refusedSerialExists(String serial) {
+    return 'Serial No $serial already exists in stock.';
+  }
+
+  @override
+  String refusedSerialMovedSince(String serial) {
+    return 'Serial No $serial has moved since this entry. Cancel the later documents first.';
+  }
+
+  @override
+  String get refusedDocstatus =>
+      'This document has changed since it was opened. Open it again.';
+
+  @override
+  String get lineDuplicateSerial =>
+      'A serial number is listed twice. Each serial number is one unit and can be on one line only.';
+
+  @override
+  String refusedExpiryRequired(String batch) {
+    return 'Batch $batch needs an Expiry Date: its item has Has Expiry Date and no Shelf Life In Days to work it out from.';
+  }
 }

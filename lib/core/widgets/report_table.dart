@@ -12,18 +12,31 @@ import 'spacing.dart';
 String toCsv(List<String> columns, List<List<Object?>> rows) =>
     csv.encode([columns, ...rows]);
 
-/// A report (00-overview, section 7.1): a filter bar, a table that scrolls
-/// sideways on a narrow window, and a CSV export action.
+const double _rowHeight = 48;
+const double _firstWidth = 160;
+const double _width = 128;
+
+/// A report (00-overview, section 7.1): a filter bar, a table, a totals row
+/// and a CSV export action.
 ///
-/// Each row holds one value per column. Columns whose values are all numbers
-/// are right-aligned. Needs a bounded height, e.g. the body of a Scaffold.
-class ReportTable extends StatelessWidget {
+/// Each row holds one value per column; values beyond the last column are
+/// carried for [onRowTap] and are neither shown nor exported. Rows are built
+/// as they scroll into view, so thousands stay smooth. The first column stays
+/// put while the others scroll sideways. Columns whose values are all
+/// numbers are right-aligned. [cell] gives the text shown for a value (the
+/// export keeps the raw value). Needs a bounded height, e.g. the body of a
+/// Scaffold.
+class ReportTable extends StatefulWidget {
   const ReportTable({
     super.key,
     required this.columns,
     required this.rows,
     this.filters,
     required this.exportName,
+    this.totals,
+    this.cell,
+    this.onRowTap,
+    this.emptyText,
   });
 
   final List<String> columns;
@@ -33,22 +46,124 @@ class ReportTable extends StatelessWidget {
   /// File name of the export, without `.csv`.
   final String exportName;
 
+  /// One value per column (null where nothing is totalled).
+  final List<Object?>? totals;
+  final String Function(int column, Object? value)? cell;
+  final ValueChanged<List<Object?>>? onRowTap;
+  final String? emptyText;
+
+  @override
+  State<ReportTable> createState() => _ReportTableState();
+}
+
+class _ReportTableState extends State<ReportTable> {
+  final _pinned = ScrollController();
+  final _body = ScrollController();
+  var _syncing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // The pinned column and the body scroll up and down together.
+    void follow(ScrollController from, ScrollController to) =>
+        from.addListener(() {
+          if (_syncing || !to.hasClients) return;
+          _syncing = true;
+          to.jumpTo(from.offset);
+          _syncing = false;
+        });
+    follow(_pinned, _body);
+    follow(_body, _pinned);
+  }
+
+  @override
+  void dispose() {
+    _pinned.dispose();
+    _body.dispose();
+    super.dispose();
+  }
+
+  List<Object?> _shown(List<Object?> row) =>
+      row.take(widget.columns.length).toList();
+
   // Writes the CSV to the cache folder and hands it to Android's share sheet.
   Future<void> _export() async {
     final directory = await getTemporaryDirectory();
-    final file = File('${directory.path}/$exportName.csv');
-    await file.writeAsString(toCsv(columns, rows));
+    final file = File('${directory.path}/${widget.exportName}.csv');
+    await file.writeAsString(
+      toCsv(widget.columns, [for (final r in widget.rows) _shown(r)]),
+    );
     await SharePlus.instance.share(
       ShareParams(files: [XFile(file.path, mimeType: 'text/csv')]),
     );
   }
 
   bool _isNumeric(int column) =>
-      rows.any((row) => row[column] is num) &&
-      rows.every((row) => row[column] == null || row[column] is num);
+      widget.rows.any((row) => row[column] is num) &&
+      widget.rows.every((row) => row[column] == null || row[column] is num);
+
+  String _text(int column, Object? value) =>
+      widget.cell?.call(column, value) ?? value?.toString() ?? '';
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final columns = widget.columns;
+    final numeric = [for (var i = 0; i < columns.length; i++) _isNumeric(i)];
+    final restWidth = _width * (columns.length - 1);
+    final header = theme.textTheme.titleSmall;
+    final divider = BorderSide(color: theme.colorScheme.outlineVariant);
+
+    Widget cellBox(int column, String text, {TextStyle? style}) => Container(
+      width: column == 0 ? _firstWidth : _width,
+      height: _rowHeight,
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+      alignment: numeric[column]
+          ? AlignmentDirectional.centerEnd
+          : AlignmentDirectional.centerStart,
+      decoration: BoxDecoration(border: Border(bottom: divider)),
+      child: Text(
+        text,
+        style: style,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+
+    Widget line(List<Object?> row, {required bool first, TextStyle? style}) =>
+        Row(
+          children: [
+            for (var c = first ? 0 : 1; c < (first ? 1 : columns.length); c++)
+              cellBox(c, _text(c, row[c]), style: style),
+          ],
+        );
+
+    Widget rows({required bool first}) => ListView.builder(
+      controller: first ? _pinned : _body,
+      itemExtent: _rowHeight,
+      itemCount: widget.rows.length,
+      itemBuilder: (context, i) => InkWell(
+        onTap: widget.onRowTap == null
+            ? null
+            : () => widget.onRowTap!(widget.rows[i]),
+        child: line(widget.rows[i], first: first),
+      ),
+    );
+
+    Widget part({required bool first}) => Column(
+      children: [
+        Row(
+          children: [
+            for (var c = first ? 0 : 1; c < (first ? 1 : columns.length); c++)
+              cellBox(c, columns[c], style: header),
+          ],
+        ),
+        Expanded(child: rows(first: first)),
+        if (widget.totals case final totals?)
+          line(totals, first: first, style: header),
+      ],
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -59,7 +174,7 @@ class ReportTable extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Expanded(child: filters ?? const SizedBox.shrink()),
+              Expanded(child: widget.filters ?? const SizedBox.shrink()),
               IconButton(
                 tooltip: AppLocalizations.of(context).exportCsv,
                 icon: const Icon(Icons.download),
@@ -69,26 +184,27 @@ class ReportTable extends StatelessWidget {
           ),
         ),
         Expanded(
-          child: SingleChildScrollView(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: DataTable(
-                columns: [
-                  for (final (i, column) in columns.indexed)
-                    DataColumn(label: Text(column), numeric: _isNumeric(i)),
-                ],
-                rows: [
-                  for (final row in rows)
-                    DataRow(
-                      cells: [
-                        for (final value in row)
-                          DataCell(Text(value?.toString() ?? '')),
-                      ],
+          child: widget.rows.isEmpty && widget.emptyText != null
+              ? Center(child: Text(widget.emptyText!))
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SizedBox(width: _firstWidth, child: part(first: true)),
+                    VerticalDivider(
+                      width: 1,
+                      color: theme.colorScheme.outlineVariant,
                     ),
-                ],
-              ),
-            ),
-          ),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: SizedBox(
+                          width: restWidth,
+                          child: part(first: false),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
         ),
       ],
     );

@@ -1389,6 +1389,1519 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Restore from backup'**
   String get restoreFromBackup;
+
+  /// No description provided for @groupItemsAndPricing.
+  ///
+  /// In en, this message translates to:
+  /// **'Items and Pricing'**
+  String get groupItemsAndPricing;
+
+  /// No description provided for @groupStockTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock Transactions'**
+  String get groupStockTransactions;
+
+  /// No description provided for @groupSerialAndBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Serial No and Batch'**
+  String get groupSerialAndBatch;
+
+  /// No description provided for @groupSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get groupSettings;
+
+  /// No description provided for @groupReports.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports'**
+  String get groupReports;
+
+  /// No description provided for @item.
+  ///
+  /// In en, this message translates to:
+  /// **'Item'**
+  String get item;
+
+  /// No description provided for @itemGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Item Group'**
+  String get itemGroup;
+
+  /// No description provided for @itemPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Item Price'**
+  String get itemPrice;
+
+  /// No description provided for @brand.
+  ///
+  /// In en, this message translates to:
+  /// **'Brand'**
+  String get brand;
+
+  /// No description provided for @itemAttribute.
+  ///
+  /// In en, this message translates to:
+  /// **'Item Attribute'**
+  String get itemAttribute;
+
+  /// No description provided for @stockEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock Entry'**
+  String get stockEntry;
+
+  /// No description provided for @stockReconciliation.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock Reconciliation'**
+  String get stockReconciliation;
+
+  /// No description provided for @serialNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Serial No'**
+  String get serialNo;
+
+  /// No description provided for @batch.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch'**
+  String get batch;
+
+  /// No description provided for @warehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Warehouse'**
+  String get warehouse;
+
+  /// No description provided for @uom.
+  ///
+  /// In en, this message translates to:
+  /// **'UOM'**
+  String get uom;
+
+  /// No description provided for @reportStockLedger.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock Ledger'**
+  String get reportStockLedger;
+
+  /// No description provided for @reportStockBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock Balance'**
+  String get reportStockBalance;
+
+  /// No description provided for @reportQuickStockBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Stock Balance'**
+  String get reportQuickStockBalance;
+
+  /// No description provided for @reportBatchBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch-wise Balance History'**
+  String get reportBatchBalance;
+
+  /// No description provided for @reportSerialNoLedger.
+  ///
+  /// In en, this message translates to:
+  /// **'Serial No Ledger'**
+  String get reportSerialNoLedger;
+
+  /// No description provided for @reportItemPriceStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Item Price Stock'**
+  String get reportItemPriceStock;
+
+  /// No description provided for @reportLowStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Low Stock'**
+  String get reportLowStock;
+
+  /// No description provided for @all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get all;
+
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// No description provided for @create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get create;
+
+  /// No description provided for @download.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get download;
+
+  /// No description provided for @upload.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload'**
+  String get upload;
+
+  /// No description provided for @scan.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan'**
+  String get scan;
+
+  /// No description provided for @scanBarcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan Barcode'**
+  String get scanBarcode;
+
+  /// No description provided for @filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get filters;
+
+  /// No description provided for @fromDate.
+  ///
+  /// In en, this message translates to:
+  /// **'From Date'**
+  String get fromDate;
+
+  /// No description provided for @toDate.
+  ///
+  /// In en, this message translates to:
+  /// **'To Date'**
+  String get toDate;
+
+  /// No description provided for @date.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get date;
+
+  /// No description provided for @status.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get status;
+
+  /// No description provided for @note.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get note;
+
+  /// No description provided for @rate.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate'**
+  String get rate;
+
+  /// No description provided for @qty.
+  ///
+  /// In en, this message translates to:
+  /// **'Qty'**
+  String get qty;
+
+  /// No description provided for @quantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get quantity;
+
+  /// No description provided for @items.
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get items;
+
+  /// No description provided for @totals.
+  ///
+  /// In en, this message translates to:
+  /// **'Totals'**
+  String get totals;
+
+  /// No description provided for @purpose.
+  ///
+  /// In en, this message translates to:
+  /// **'Purpose'**
+  String get purpose;
+
+  /// No description provided for @remarks.
+  ///
+  /// In en, this message translates to:
+  /// **'Remarks'**
+  String get remarks;
+
+  /// No description provided for @moreInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'More Information'**
+  String get moreInformation;
+
+  /// No description provided for @submit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get submit;
+
+  /// No description provided for @submitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit this document?'**
+  String get submitTitle;
+
+  /// No description provided for @submitBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A submitted document changes stock and cannot be edited. To change it later, cancel and amend it.'**
+  String get submitBody;
+
+  /// No description provided for @cancelDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancelDocument;
+
+  /// No description provided for @cancelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel this document?'**
+  String get cancelTitle;
+
+  /// No description provided for @cancelBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Its stock movements are reversed. The document stays, marked Cancelled.'**
+  String get cancelBody;
+
+  /// No description provided for @amend.
+  ///
+  /// In en, this message translates to:
+  /// **'Amend'**
+  String get amend;
+
+  /// No description provided for @noItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one item.'**
+  String get noItems;
+
+  /// No description provided for @noEntries.
+  ///
+  /// In en, this message translates to:
+  /// **'No entries for these filters'**
+  String get noEntries;
+
+  /// No description provided for @treeView.
+  ///
+  /// In en, this message translates to:
+  /// **'Tree view'**
+  String get treeView;
+
+  /// No description provided for @listView.
+  ///
+  /// In en, this message translates to:
+  /// **'List view'**
+  String get listView;
+
+  /// No description provided for @addChild.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Child'**
+  String get addChild;
+
+  /// No description provided for @isGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Is Group'**
+  String get isGroup;
+
+  /// No description provided for @image.
+  ///
+  /// In en, this message translates to:
+  /// **'Image'**
+  String get image;
+
+  /// No description provided for @takePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get takePhoto;
+
+  /// No description provided for @choosePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose photo'**
+  String get choosePhoto;
+
+  /// No description provided for @chooseWarehouseFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the Default Warehouse first.'**
+  String get chooseWarehouseFirst;
+
+  /// No description provided for @csvRowInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Item Code, Warehouse or Quantity is missing or not found.'**
+  String get csvRowInvalid;
+
+  /// No description provided for @validFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid From'**
+  String get validFrom;
+
+  /// No description provided for @validUpto.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid Upto'**
+  String get validUpto;
+
+  /// No description provided for @validUptoBeforeFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid Upto is before Valid From.'**
+  String get validUptoBeforeFrom;
+
+  /// No description provided for @inLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'In'**
+  String get inLabel;
+
+  /// No description provided for @outLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Out'**
+  String get outLabel;
+
+  /// No description provided for @draftNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft {id}'**
+  String draftNumber(int id);
+
+  /// No description provided for @pageOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{page} of {pages}'**
+  String pageOf(int page, int pages);
+
+  /// No description provided for @barcodeNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No item has the barcode {code}.'**
+  String barcodeNotFound(String code);
+
+  /// No description provided for @csvHeadersChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'The file must have these columns, spelled exactly: {columns}.'**
+  String csvHeadersChanged(String columns);
+
+  /// No description provided for @rowsLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} rows loaded'**
+  String rowsLoaded(String count);
+
+  /// No description provided for @itemCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Item Code'**
+  String get itemCode;
+
+  /// No description provided for @itemCodeBySeries.
+  ///
+  /// In en, this message translates to:
+  /// **'Item Code (set on save from the naming series)'**
+  String get itemCodeBySeries;
+
+  /// No description provided for @itemName.
+  ///
+  /// In en, this message translates to:
+  /// **'Item Name'**
+  String get itemName;
+
+  /// No description provided for @defaultUom.
+  ///
+  /// In en, this message translates to:
+  /// **'Default Unit of Measure'**
+  String get defaultUom;
+
+  /// No description provided for @maintainStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintain Stock'**
+  String get maintainStock;
+
+  /// No description provided for @hasVariants.
+  ///
+  /// In en, this message translates to:
+  /// **'Has Variants'**
+  String get hasVariants;
+
+  /// No description provided for @openingStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening Stock'**
+  String get openingStock;
+
+  /// No description provided for @valuationRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Valuation Rate'**
+  String get valuationRate;
+
+  /// No description provided for @standardSellingRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard Selling Rate'**
+  String get standardSellingRate;
+
+  /// No description provided for @barcodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Barcodes'**
+  String get barcodes;
+
+  /// No description provided for @barcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode'**
+  String get barcode;
+
+  /// No description provided for @barcodeType.
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode Type'**
+  String get barcodeType;
+
+  /// No description provided for @badBarcodeHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'EAN needs 13 digits with a valid check digit; UPC needs 12 digits.'**
+  String get badBarcodeHelp;
+
+  /// No description provided for @shelfLifeInDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Shelf Life In Days'**
+  String get shelfLifeInDays;
+
+  /// No description provided for @endOfLife.
+  ///
+  /// In en, this message translates to:
+  /// **'End of Life'**
+  String get endOfLife;
+
+  /// No description provided for @warrantyPeriodDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Warranty Period (in days)'**
+  String get warrantyPeriodDays;
+
+  /// No description provided for @valuationMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Valuation Method'**
+  String get valuationMethod;
+
+  /// No description provided for @asInStockSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'As in Stock Settings'**
+  String get asInStockSettings;
+
+  /// No description provided for @allowNegativeStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow Negative Stock'**
+  String get allowNegativeStock;
+
+  /// No description provided for @defaultWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Default Warehouse'**
+  String get defaultWarehouse;
+
+  /// No description provided for @unitsOfMeasure.
+  ///
+  /// In en, this message translates to:
+  /// **'Units of Measure'**
+  String get unitsOfMeasure;
+
+  /// No description provided for @conversionFactor.
+  ///
+  /// In en, this message translates to:
+  /// **'Conversion Factor'**
+  String get conversionFactor;
+
+  /// No description provided for @autoReorder.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto Reorder'**
+  String get autoReorder;
+
+  /// No description provided for @reorderLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-order Level'**
+  String get reorderLevel;
+
+  /// No description provided for @reorderQty.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-order Qty'**
+  String get reorderQty;
+
+  /// No description provided for @hasBatchNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Has Batch No'**
+  String get hasBatchNo;
+
+  /// No description provided for @createNewBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically Create New Batch'**
+  String get createNewBatch;
+
+  /// No description provided for @batchNumberSeries.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch Number Series'**
+  String get batchNumberSeries;
+
+  /// No description provided for @hasExpiryDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Has Expiry Date'**
+  String get hasExpiryDate;
+
+  /// No description provided for @hasSerialNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Has Serial No'**
+  String get hasSerialNo;
+
+  /// No description provided for @serialNoSeries.
+  ///
+  /// In en, this message translates to:
+  /// **'Serial Number Series'**
+  String get serialNoSeries;
+
+  /// No description provided for @defaultSalesUom.
+  ///
+  /// In en, this message translates to:
+  /// **'Default Sales Unit of Measure'**
+  String get defaultSalesUom;
+
+  /// No description provided for @maxDiscount.
+  ///
+  /// In en, this message translates to:
+  /// **'Max Discount (%)'**
+  String get maxDiscount;
+
+  /// No description provided for @isSalesItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Is Sales Item'**
+  String get isSalesItem;
+
+  /// No description provided for @tabDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get tabDetails;
+
+  /// No description provided for @tabInventory.
+  ///
+  /// In en, this message translates to:
+  /// **'Inventory'**
+  String get tabInventory;
+
+  /// No description provided for @tabVariants.
+  ///
+  /// In en, this message translates to:
+  /// **'Variants'**
+  String get tabVariants;
+
+  /// No description provided for @tabSales.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales'**
+  String get tabSales;
+
+  /// No description provided for @tabTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax'**
+  String get tabTax;
+
+  /// No description provided for @lockedAfterStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only: this item already has stock ledger entries.'**
+  String get lockedAfterStock;
+
+  /// No description provided for @addItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Item'**
+  String get addItem;
+
+  /// No description provided for @importItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Import items'**
+  String get importItems;
+
+  /// No description provided for @searchItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Item Code, Item Name or barcode'**
+  String get searchItems;
+
+  /// No description provided for @addPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Add price'**
+  String get addPrice;
+
+  /// No description provided for @stockLevels.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock Levels'**
+  String get stockLevels;
+
+  /// No description provided for @itemTaxHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'The template whose Valid From is the latest on or before the sale applies; without one, the Item Group\'s template applies.'**
+  String get itemTaxHelp;
+
+  /// No description provided for @itemCodificationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Item Codification'**
+  String get itemCodificationTitle;
+
+  /// No description provided for @itemCodificationHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'For a small catalogue, keep the Item Code and Item Name the same. For a large one, use a meaningful code scheme, for example a group prefix and a running number, and keep the description in the Item Name.'**
+  String get itemCodificationHelp;
+
+  /// No description provided for @variantOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Variant Of'**
+  String get variantOf;
+
+  /// No description provided for @variants.
+  ///
+  /// In en, this message translates to:
+  /// **'Variants'**
+  String get variants;
+
+  /// No description provided for @attributes.
+  ///
+  /// In en, this message translates to:
+  /// **'Attributes'**
+  String get attributes;
+
+  /// No description provided for @singleVariant.
+  ///
+  /// In en, this message translates to:
+  /// **'Single Variant'**
+  String get singleVariant;
+
+  /// No description provided for @multipleVariants.
+  ///
+  /// In en, this message translates to:
+  /// **'Multiple Variants'**
+  String get multipleVariants;
+
+  /// No description provided for @variantsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on Has Variants to make this item a template, then add its attributes.'**
+  String get variantsHelp;
+
+  /// No description provided for @variantsCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No new variants: they all exist} =1{1 variant created} other{{count} variants created}}'**
+  String variantsCreated(int count);
+
+  /// No description provided for @variantsToCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Tick at least one value per attribute} =1{1 variant} other{{count} variants}}'**
+  String variantsToCreate(int count);
+
+  /// No description provided for @attributeName.
+  ///
+  /// In en, this message translates to:
+  /// **'Attribute Name'**
+  String get attributeName;
+
+  /// No description provided for @numericValues.
+  ///
+  /// In en, this message translates to:
+  /// **'Numeric Values'**
+  String get numericValues;
+
+  /// No description provided for @fromRange.
+  ///
+  /// In en, this message translates to:
+  /// **'From Range'**
+  String get fromRange;
+
+  /// No description provided for @toRange.
+  ///
+  /// In en, this message translates to:
+  /// **'To Range'**
+  String get toRange;
+
+  /// No description provided for @increment.
+  ///
+  /// In en, this message translates to:
+  /// **'Increment'**
+  String get increment;
+
+  /// No description provided for @attributeValues.
+  ///
+  /// In en, this message translates to:
+  /// **'Item Attribute Values'**
+  String get attributeValues;
+
+  /// No description provided for @attributeValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Attribute Value'**
+  String get attributeValue;
+
+  /// No description provided for @badNumericRange.
+  ///
+  /// In en, this message translates to:
+  /// **'The range must give at least one value: Increment above 0 and To Range at or above From Range.'**
+  String get badNumericRange;
+
+  /// No description provided for @attributeNeedsValues.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one value.'**
+  String get attributeNeedsValues;
+
+  /// No description provided for @mustBeWholeNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Must be Whole Number'**
+  String get mustBeWholeNumber;
+
+  /// No description provided for @warehouseName.
+  ///
+  /// In en, this message translates to:
+  /// **'Warehouse Name'**
+  String get warehouseName;
+
+  /// No description provided for @parentWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent Warehouse'**
+  String get parentWarehouse;
+
+  /// No description provided for @warehouseType.
+  ///
+  /// In en, this message translates to:
+  /// **'Warehouse Type'**
+  String get warehouseType;
+
+  /// No description provided for @itemGroupName.
+  ///
+  /// In en, this message translates to:
+  /// **'Item Group Name'**
+  String get itemGroupName;
+
+  /// No description provided for @parentItemGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent Item Group'**
+  String get parentItemGroup;
+
+  /// No description provided for @itemNamingBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Item Naming By'**
+  String get itemNamingBy;
+
+  /// No description provided for @defaultItemGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Default Item Group'**
+  String get defaultItemGroup;
+
+  /// No description provided for @defaultStockUom.
+  ///
+  /// In en, this message translates to:
+  /// **'Default Stock UOM'**
+  String get defaultStockUom;
+
+  /// No description provided for @defaultValuationMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Default Valuation Method'**
+  String get defaultValuationMethod;
+
+  /// No description provided for @lockedValuationMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked: items that follow this method already have stock.'**
+  String get lockedValuationMethod;
+
+  /// No description provided for @sectionStockTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock Transactions Settings'**
+  String get sectionStockTransactions;
+
+  /// No description provided for @showBarcodeField.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Barcode Field'**
+  String get showBarcodeField;
+
+  /// No description provided for @autoInsertPriceListRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto insert Price List rate if missing'**
+  String get autoInsertPriceListRate;
+
+  /// No description provided for @showLowStockAlerts.
+  ///
+  /// In en, this message translates to:
+  /// **'Show low-stock alerts'**
+  String get showLowStockAlerts;
+
+  /// No description provided for @stockFrozenUpto.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock Frozen Upto'**
+  String get stockFrozenUpto;
+
+  /// No description provided for @enableSerialAndBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Serial and Batch No for Item'**
+  String get enableSerialAndBatch;
+
+  /// No description provided for @pickSerialBatchBasedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick Serial / Batch Based On'**
+  String get pickSerialBatchBasedOn;
+
+  /// No description provided for @autoCreateBundleForOutward.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto Create Serial and Batch Bundle For Outward'**
+  String get autoCreateBundleForOutward;
+
+  /// No description provided for @batchId.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch ID'**
+  String get batchId;
+
+  /// No description provided for @manufacturingDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Manufacturing Date'**
+  String get manufacturingDate;
+
+  /// No description provided for @expiryDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiry Date'**
+  String get expiryDate;
+
+  /// No description provided for @batchNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Set'**
+  String get batchNotSet;
+
+  /// No description provided for @batchNotExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Expired'**
+  String get batchNotExpired;
+
+  /// No description provided for @batchExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get batchExpired;
+
+  /// No description provided for @warrantyExpiryDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Warranty Expiry Date'**
+  String get warrantyExpiryDate;
+
+  /// No description provided for @serialBatchEntries.
+  ///
+  /// In en, this message translates to:
+  /// **'Serial / Batch Entries'**
+  String get serialBatchEntries;
+
+  /// No description provided for @autoFetch.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto Fetch'**
+  String get autoFetch;
+
+  /// No description provided for @createSerialsFromRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Serial Nos from Range'**
+  String get createSerialsFromRange;
+
+  /// No description provided for @serialRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Range'**
+  String get serialRange;
+
+  /// No description provided for @badSerialRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a range such as SN-01::10.'**
+  String get badSerialRange;
+
+  /// No description provided for @serialScannedTwice.
+  ///
+  /// In en, this message translates to:
+  /// **'{serial} is already in the list.'**
+  String serialScannedTwice(String serial);
+
+  /// No description provided for @serialStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'{status, select, Inactive{Inactive} Available{Available} Delivered{Delivered} other{{status}}}'**
+  String serialStatus(String status);
+
+  /// No description provided for @materialReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Material Receipt'**
+  String get materialReceipt;
+
+  /// No description provided for @materialIssue.
+  ///
+  /// In en, this message translates to:
+  /// **'Material Issue'**
+  String get materialIssue;
+
+  /// No description provided for @materialTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Material Transfer'**
+  String get materialTransfer;
+
+  /// No description provided for @editPostingDateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Posting Date and Time'**
+  String get editPostingDateTime;
+
+  /// No description provided for @postingDateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Posting Date and Time'**
+  String get postingDateTime;
+
+  /// No description provided for @defaultSourceWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Default Source Warehouse'**
+  String get defaultSourceWarehouse;
+
+  /// No description provided for @defaultTargetWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Default Target Warehouse'**
+  String get defaultTargetWarehouse;
+
+  /// No description provided for @sourceWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Source Warehouse'**
+  String get sourceWarehouse;
+
+  /// No description provided for @targetWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Warehouse'**
+  String get targetWarehouse;
+
+  /// No description provided for @stockQty.
+  ///
+  /// In en, this message translates to:
+  /// **'Qty as per Stock UOM'**
+  String get stockQty;
+
+  /// No description provided for @basicRatePerStockUom.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic Rate (as per Stock UOM)'**
+  String get basicRatePerStockUom;
+
+  /// No description provided for @allowZeroValuationRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow Zero Valuation Rate'**
+  String get allowZeroValuationRate;
+
+  /// No description provided for @additionalCosts.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional Costs'**
+  String get additionalCosts;
+
+  /// No description provided for @totalOutgoingValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Outgoing Value'**
+  String get totalOutgoingValue;
+
+  /// No description provided for @totalIncomingValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Incoming Value'**
+  String get totalIncomingValue;
+
+  /// No description provided for @totalAdditionalCosts.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Additional Costs'**
+  String get totalAdditionalCosts;
+
+  /// No description provided for @totalAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Amount'**
+  String get totalAmount;
+
+  /// No description provided for @isOpening.
+  ///
+  /// In en, this message translates to:
+  /// **'Is Opening'**
+  String get isOpening;
+
+  /// No description provided for @scanMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan Mode'**
+  String get scanMode;
+
+  /// No description provided for @fetchItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch Items from Warehouse'**
+  String get fetchItems;
+
+  /// No description provided for @currentQty.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Qty'**
+  String get currentQty;
+
+  /// No description provided for @currentValuationRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Valuation Rate'**
+  String get currentValuationRate;
+
+  /// No description provided for @quantityDifference.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity Difference'**
+  String get quantityDifference;
+
+  /// No description provided for @amountDifference.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount Difference'**
+  String get amountDifference;
+
+  /// No description provided for @differenceAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Difference Amount'**
+  String get differenceAmount;
+
+  /// No description provided for @stockUom.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock UOM'**
+  String get stockUom;
+
+  /// No description provided for @inQty.
+  ///
+  /// In en, this message translates to:
+  /// **'In Qty'**
+  String get inQty;
+
+  /// No description provided for @outQty.
+  ///
+  /// In en, this message translates to:
+  /// **'Out Qty'**
+  String get outQty;
+
+  /// No description provided for @balanceQty.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance Qty'**
+  String get balanceQty;
+
+  /// No description provided for @incomingRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Incoming Rate'**
+  String get incomingRate;
+
+  /// No description provided for @balanceValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance Value'**
+  String get balanceValue;
+
+  /// No description provided for @valueChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Value Change'**
+  String get valueChange;
+
+  /// No description provided for @voucherType.
+  ///
+  /// In en, this message translates to:
+  /// **'Voucher Type'**
+  String get voucherType;
+
+  /// No description provided for @voucherNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Voucher #'**
+  String get voucherNo;
+
+  /// No description provided for @openingQty.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening Qty'**
+  String get openingQty;
+
+  /// No description provided for @openingValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening Value'**
+  String get openingValue;
+
+  /// No description provided for @inValue.
+  ///
+  /// In en, this message translates to:
+  /// **'In Value'**
+  String get inValue;
+
+  /// No description provided for @outValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Out Value'**
+  String get outValue;
+
+  /// No description provided for @inOrOut.
+  ///
+  /// In en, this message translates to:
+  /// **'In / Out'**
+  String get inOrOut;
+
+  /// No description provided for @availableQty.
+  ///
+  /// In en, this message translates to:
+  /// **'Available Qty'**
+  String get availableQty;
+
+  /// No description provided for @actualQty.
+  ///
+  /// In en, this message translates to:
+  /// **'Actual Qty'**
+  String get actualQty;
+
+  /// No description provided for @shortage.
+  ///
+  /// In en, this message translates to:
+  /// **'Shortage'**
+  String get shortage;
+
+  /// No description provided for @lineMissingItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Item is missing.'**
+  String get lineMissingItem;
+
+  /// No description provided for @lineQtyNotPositive.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity must be above zero.'**
+  String get lineQtyNotPositive;
+
+  /// No description provided for @lineSourceRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Source Warehouse is mandatory.'**
+  String get lineSourceRequired;
+
+  /// No description provided for @lineTargetRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Warehouse is mandatory.'**
+  String get lineTargetRequired;
+
+  /// No description provided for @lineSameWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Source and Target Warehouse cannot be the same.'**
+  String get lineSameWarehouse;
+
+  /// No description provided for @lineGroupWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'A group or disabled warehouse cannot be used in a transaction.'**
+  String get lineGroupWarehouse;
+
+  /// No description provided for @lineFraction.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity cannot be a fraction.'**
+  String get lineFraction;
+
+  /// No description provided for @lineItemDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Item is disabled.'**
+  String get lineItemDisabled;
+
+  /// No description provided for @lineItemEndOfLife.
+  ///
+  /// In en, this message translates to:
+  /// **'Item has reached its End of Life.'**
+  String get lineItemEndOfLife;
+
+  /// No description provided for @lineItemTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Item is a template: choose one of its variants.'**
+  String get lineItemTemplate;
+
+  /// No description provided for @lineItemNotStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Item does not maintain stock.'**
+  String get lineItemNotStock;
+
+  /// No description provided for @lineZeroRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Valuation Rate is mandatory. Tick Allow Zero Valuation Rate to receive at zero.'**
+  String get lineZeroRate;
+
+  /// No description provided for @lineSerialCount.
+  ///
+  /// In en, this message translates to:
+  /// **'The quantity must be a whole number equal to the number of serial numbers.'**
+  String get lineSerialCount;
+
+  /// No description provided for @lineEntriesQty.
+  ///
+  /// In en, this message translates to:
+  /// **'The Serial / Batch Entries must add up to the quantity.'**
+  String get lineEntriesQty;
+
+  /// No description provided for @lineBatchOrSerialItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch and serial items are counted with a Stock Entry (Material Receipt or Issue), not here.'**
+  String get lineBatchOrSerialItem;
+
+  /// No description provided for @lineDuplicateRow.
+  ///
+  /// In en, this message translates to:
+  /// **'This item and warehouse are already on another row.'**
+  String get lineDuplicateRow;
+
+  /// No description provided for @lineFractionAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity cannot be a fraction at row {row}'**
+  String lineFractionAt(int row);
+
+  /// No description provided for @refusedNegativeStock.
+  ///
+  /// In en, this message translates to:
+  /// **'{needed} units of {item} needed in {warehouse} on {date} for {voucher} to complete this transaction. Available then: {available}.'**
+  String refusedNegativeStock(
+    String item,
+    String warehouse,
+    String available,
+    String needed,
+    String date,
+    String voucher,
+  );
+
+  /// No description provided for @refusedNegativeBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch {batch} of {item} would go below zero in {warehouse} on {date} for {voucher}.'**
+  String refusedNegativeBatch(
+    String batch,
+    String item,
+    String warehouse,
+    String date,
+    String voucher,
+  );
+
+  /// No description provided for @refusedStockFrozen.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock is frozen up to {date}: nothing on or before it can be submitted or cancelled.'**
+  String refusedStockFrozen(String date);
+
+  /// No description provided for @refusedHasVariantsLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Has Variants cannot change once the item has variants or stock.'**
+  String get refusedHasVariantsLocked;
+
+  /// No description provided for @refusedTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'{item} is a template: it has no price and cannot be moved.'**
+  String refusedTemplate(String item);
+
+  /// No description provided for @refusedUnitInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'{uom} is used on a document: it cannot be removed or have its Conversion Factor changed.'**
+  String refusedUnitInUse(String uom);
+
+  /// No description provided for @refusedBarcodeTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'This barcode belongs to item {item}.'**
+  String refusedBarcodeTaken(String item);
+
+  /// No description provided for @refusedBadBarcode.
+  ///
+  /// In en, this message translates to:
+  /// **'{barcode} is not a valid barcode for its type.'**
+  String refusedBadBarcode(String barcode);
+
+  /// No description provided for @refusedDefaultWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'This is the Default Warehouse in Stock Settings, which the Cash Register sells from. It must stay enabled and cannot be a group. Choose another Default Warehouse first.'**
+  String get refusedDefaultWarehouse;
+
+  /// No description provided for @refusedWarehouseHasLedger.
+  ///
+  /// In en, this message translates to:
+  /// **'A warehouse with stock ledger entries cannot become a group.'**
+  String get refusedWarehouseHasLedger;
+
+  /// No description provided for @refusedBatchRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a Batch for {item}, or turn on Automatically Create New Batch.'**
+  String refusedBatchRequired(String item);
+
+  /// No description provided for @refusedSerialRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the serial numbers of {item}, or set its Serial Number Series.'**
+  String refusedSerialRequired(String item);
+
+  /// No description provided for @refusedNotEnoughEntries.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough serial numbers or batches of {item} in the source warehouse. Choose them in Serial / Batch Entries.'**
+  String refusedNotEnoughEntries(String item);
+
+  /// No description provided for @refusedExpiredBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch {batch} has expired: it can leave stock only through a Material Issue.'**
+  String refusedExpiredBatch(String batch);
+
+  /// No description provided for @refusedBatchNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch {batch} does not exist for this item.'**
+  String refusedBatchNotFound(String batch);
+
+  /// No description provided for @refusedSerialNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Serial No {serial} is not Available in the source warehouse.'**
+  String refusedSerialNotAvailable(String serial);
+
+  /// No description provided for @refusedSerialExists.
+  ///
+  /// In en, this message translates to:
+  /// **'Serial No {serial} already exists in stock.'**
+  String refusedSerialExists(String serial);
+
+  /// No description provided for @refusedSerialMovedSince.
+  ///
+  /// In en, this message translates to:
+  /// **'Serial No {serial} has moved since this entry. Cancel the later documents first.'**
+  String refusedSerialMovedSince(String serial);
+
+  /// No description provided for @refusedDocstatus.
+  ///
+  /// In en, this message translates to:
+  /// **'This document has changed since it was opened. Open it again.'**
+  String get refusedDocstatus;
+
+  /// No description provided for @lineDuplicateSerial.
+  ///
+  /// In en, this message translates to:
+  /// **'A serial number is listed twice. Each serial number is one unit and can be on one line only.'**
+  String get lineDuplicateSerial;
+
+  /// No description provided for @refusedExpiryRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch {batch} needs an Expiry Date: its item has Has Expiry Date and no Shelf Life In Days to work it out from.'**
+  String refusedExpiryRequired(String batch);
 }
 
 class _AppLocalizationsDelegate

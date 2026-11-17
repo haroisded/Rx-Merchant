@@ -403,5 +403,467 @@
     }
   },
   "wizardRestoreHint": "Moving from another device? Restore a backup instead of setting up again.",
-  "restoreFromBackup": "Restore from backup"
+  "restoreFromBackup": "Restore from backup",
+  "groupItemsAndPricing": "Items and Pricing",
+  "groupStockTransactions": "Stock Transactions",
+  "groupSerialAndBatch": "Serial No and Batch",
+  "groupSettings": "Settings",
+  "groupReports": "Reports",
+  "item": "Item",
+  "itemGroup": "Item Group",
+  "itemPrice": "Item Price",
+  "brand": "Brand",
+  "itemAttribute": "Item Attribute",
+  "stockEntry": "Stock Entry",
+  "stockReconciliation": "Stock Reconciliation",
+  "serialNo": "Serial No",
+  "batch": "Batch",
+  "warehouse": "Warehouse",
+  "uom": "UOM",
+  "reportStockLedger": "Stock Ledger",
+  "reportStockBalance": "Stock Balance",
+  "reportQuickStockBalance": "Quick Stock Balance",
+  "reportBatchBalance": "Batch-wise Balance History",
+  "reportSerialNoLedger": "Serial No Ledger",
+  "reportItemPriceStock": "Item Price Stock",
+  "reportLowStock": "Low Stock",
+  "all": "All",
+  "edit": "Edit",
+  "create": "Create",
+  "download": "Download",
+  "upload": "Upload",
+  "scan": "Scan",
+  "scanBarcode": "Scan Barcode",
+  "filters": "Filters",
+  "fromDate": "From Date",
+  "toDate": "To Date",
+  "date": "Date",
+  "status": "Status",
+  "note": "Note",
+  "rate": "Rate",
+  "qty": "Qty",
+  "quantity": "Quantity",
+  "items": "Items",
+  "totals": "Totals",
+  "purpose": "Purpose",
+  "remarks": "Remarks",
+  "moreInformation": "More Information",
+  "submit": "Submit",
+  "submitTitle": "Submit this document?",
+  "submitBody": "A submitted document changes stock and cannot be edited. To change it later, cancel and amend it.",
+  "cancelDocument": "Cancel",
+  "cancelTitle": "Cancel this document?",
+  "cancelBody": "Its stock movements are reversed. The document stays, marked Cancelled.",
+  "amend": "Amend",
+  "noItems": "Add at least one item.",
+  "noEntries": "No entries for these filters",
+  "treeView": "Tree view",
+  "listView": "List view",
+  "addChild": "Add Child",
+  "isGroup": "Is Group",
+  "image": "Image",
+  "takePhoto": "Take photo",
+  "choosePhoto": "Choose photo",
+  "chooseWarehouseFirst": "Choose the Default Warehouse first.",
+  "csvRowInvalid": "Item Code, Warehouse or Quantity is missing or not found.",
+  "validFrom": "Valid From",
+  "validUpto": "Valid Upto",
+  "validUptoBeforeFrom": "Valid Upto is before Valid From.",
+  "inLabel": "In",
+  "outLabel": "Out",
+  "draftNumber": "Draft {id}",
+  "@draftNumber": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "pageOf": "{page} of {pages}",
+  "@pageOf": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      },
+      "pages": {
+        "type": "int"
+      }
+    }
+  },
+  "barcodeNotFound": "No item has the barcode {code}.",
+  "@barcodeNotFound": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "csvHeadersChanged": "The file must have these columns, spelled exactly: {columns}.",
+  "@csvHeadersChanged": {
+    "placeholders": {
+      "columns": {
+        "type": "String"
+      }
+    }
+  },
+  "rowsLoaded": "{count} rows loaded",
+  "@rowsLoaded": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "itemCode": "Item Code",
+  "itemCodeBySeries": "Item Code (set on save from the naming series)",
+  "itemName": "Item Name",
+  "defaultUom": "Default Unit of Measure",
+  "maintainStock": "Maintain Stock",
+  "hasVariants": "Has Variants",
+  "openingStock": "Opening Stock",
+  "valuationRate": "Valuation Rate",
+  "standardSellingRate": "Standard Selling Rate",
+  "barcodes": "Barcodes",
+  "barcode": "Barcode",
+  "barcodeType": "Barcode Type",
+  "badBarcodeHelp": "EAN needs 13 digits with a valid check digit; UPC needs 12 digits.",
+  "shelfLifeInDays": "Shelf Life In Days",
+  "endOfLife": "End of Life",
+  "warrantyPeriodDays": "Warranty Period (in days)",
+  "valuationMethod": "Valuation Method",
+  "asInStockSettings": "As in Stock Settings",
+  "allowNegativeStock": "Allow Negative Stock",
+  "defaultWarehouse": "Default Warehouse",
+  "unitsOfMeasure": "Units of Measure",
+  "conversionFactor": "Conversion Factor",
+  "autoReorder": "Auto Reorder",
+  "reorderLevel": "Re-order Level",
+  "reorderQty": "Re-order Qty",
+  "hasBatchNo": "Has Batch No",
+  "createNewBatch": "Automatically Create New Batch",
+  "batchNumberSeries": "Batch Number Series",
+  "hasExpiryDate": "Has Expiry Date",
+  "hasSerialNo": "Has Serial No",
+  "serialNoSeries": "Serial Number Series",
+  "defaultSalesUom": "Default Sales Unit of Measure",
+  "maxDiscount": "Max Discount (%)",
+  "isSalesItem": "Is Sales Item",
+  "tabDetails": "Details",
+  "tabInventory": "Inventory",
+  "tabVariants": "Variants",
+  "tabSales": "Sales",
+  "tabTax": "Tax",
+  "lockedAfterStock": "Read-only: this item already has stock ledger entries.",
+  "addItem": "Add Item",
+  "importItems": "Import items",
+  "searchItems": "Item Code, Item Name or barcode",
+  "addPrice": "Add price",
+  "stockLevels": "Stock Levels",
+  "itemTaxHelp": "The template whose Valid From is the latest on or before the sale applies; without one, the Item Group's template applies.",
+  "itemCodificationTitle": "Item Codification",
+  "itemCodificationHelp": "For a small catalogue, keep the Item Code and Item Name the same. For a large one, use a meaningful code scheme, for example a group prefix and a running number, and keep the description in the Item Name.",
+  "variantOf": "Variant Of",
+  "variants": "Variants",
+  "attributes": "Attributes",
+  "singleVariant": "Single Variant",
+  "multipleVariants": "Multiple Variants",
+  "variantsHelp": "Turn on Has Variants to make this item a template, then add its attributes.",
+  "variantsCreated": "{count, plural, =0{No new variants: they all exist} =1{1 variant created} other{{count} variants created}}",
+  "@variantsCreated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "variantsToCreate": "{count, plural, =0{Tick at least one value per attribute} =1{1 variant} other{{count} variants}}",
+  "@variantsToCreate": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "attributeName": "Attribute Name",
+  "numericValues": "Numeric Values",
+  "fromRange": "From Range",
+  "toRange": "To Range",
+  "increment": "Increment",
+  "attributeValues": "Item Attribute Values",
+  "attributeValue": "Attribute Value",
+  "badNumericRange": "The range must give at least one value: Increment above 0 and To Range at or above From Range.",
+  "attributeNeedsValues": "Add at least one value.",
+  "mustBeWholeNumber": "Must be Whole Number",
+  "warehouseName": "Warehouse Name",
+  "parentWarehouse": "Parent Warehouse",
+  "warehouseType": "Warehouse Type",
+  "itemGroupName": "Item Group Name",
+  "parentItemGroup": "Parent Item Group",
+  "itemNamingBy": "Item Naming By",
+  "defaultItemGroup": "Default Item Group",
+  "defaultStockUom": "Default Stock UOM",
+  "defaultValuationMethod": "Default Valuation Method",
+  "lockedValuationMethod": "Locked: items that follow this method already have stock.",
+  "sectionStockTransactions": "Stock Transactions Settings",
+  "showBarcodeField": "Show Barcode Field",
+  "autoInsertPriceListRate": "Auto insert Price List rate if missing",
+  "showLowStockAlerts": "Show low-stock alerts",
+  "stockFrozenUpto": "Stock Frozen Upto",
+  "enableSerialAndBatch": "Enable Serial and Batch No for Item",
+  "pickSerialBatchBasedOn": "Pick Serial / Batch Based On",
+  "autoCreateBundleForOutward": "Auto Create Serial and Batch Bundle For Outward",
+  "batchId": "Batch ID",
+  "manufacturingDate": "Manufacturing Date",
+  "expiryDate": "Expiry Date",
+  "batchNotSet": "Not Set",
+  "batchNotExpired": "Not Expired",
+  "batchExpired": "Expired",
+  "warrantyExpiryDate": "Warranty Expiry Date",
+  "serialBatchEntries": "Serial / Batch Entries",
+  "autoFetch": "Auto Fetch",
+  "createSerialsFromRange": "Create Serial Nos from Range",
+  "serialRange": "Range",
+  "badSerialRange": "Type a range such as SN-01::10.",
+  "serialScannedTwice": "{serial} is already in the list.",
+  "@serialScannedTwice": {
+    "placeholders": {
+      "serial": {
+        "type": "String"
+      }
+    }
+  },
+  "serialStatus": "{status, select, Inactive{Inactive} Available{Available} Delivered{Delivered} other{{status}}}",
+  "@serialStatus": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "materialReceipt": "Material Receipt",
+  "materialIssue": "Material Issue",
+  "materialTransfer": "Material Transfer",
+  "editPostingDateTime": "Edit Posting Date and Time",
+  "postingDateTime": "Posting Date and Time",
+  "defaultSourceWarehouse": "Default Source Warehouse",
+  "defaultTargetWarehouse": "Default Target Warehouse",
+  "sourceWarehouse": "Source Warehouse",
+  "targetWarehouse": "Target Warehouse",
+  "stockQty": "Qty as per Stock UOM",
+  "basicRatePerStockUom": "Basic Rate (as per Stock UOM)",
+  "allowZeroValuationRate": "Allow Zero Valuation Rate",
+  "additionalCosts": "Additional Costs",
+  "totalOutgoingValue": "Total Outgoing Value",
+  "totalIncomingValue": "Total Incoming Value",
+  "totalAdditionalCosts": "Total Additional Costs",
+  "totalAmount": "Total Amount",
+  "isOpening": "Is Opening",
+  "scanMode": "Scan Mode",
+  "fetchItems": "Fetch Items from Warehouse",
+  "currentQty": "Current Qty",
+  "currentValuationRate": "Current Valuation Rate",
+  "quantityDifference": "Quantity Difference",
+  "amountDifference": "Amount Difference",
+  "differenceAmount": "Difference Amount",
+  "stockUom": "Stock UOM",
+  "inQty": "In Qty",
+  "outQty": "Out Qty",
+  "balanceQty": "Balance Qty",
+  "incomingRate": "Incoming Rate",
+  "balanceValue": "Balance Value",
+  "valueChange": "Value Change",
+  "voucherType": "Voucher Type",
+  "voucherNo": "Voucher #",
+  "openingQty": "Opening Qty",
+  "openingValue": "Opening Value",
+  "inValue": "In Value",
+  "outValue": "Out Value",
+  "inOrOut": "In / Out",
+  "availableQty": "Available Qty",
+  "actualQty": "Actual Qty",
+  "shortage": "Shortage",
+  "lineMissingItem": "Item is missing.",
+  "lineQtyNotPositive": "Quantity must be above zero.",
+  "lineSourceRequired": "Source Warehouse is mandatory.",
+  "lineTargetRequired": "Target Warehouse is mandatory.",
+  "lineSameWarehouse": "Source and Target Warehouse cannot be the same.",
+  "lineGroupWarehouse": "A group or disabled warehouse cannot be used in a transaction.",
+  "lineFraction": "Quantity cannot be a fraction.",
+  "lineItemDisabled": "Item is disabled.",
+  "lineItemEndOfLife": "Item has reached its End of Life.",
+  "lineItemTemplate": "Item is a template: choose one of its variants.",
+  "lineItemNotStock": "Item does not maintain stock.",
+  "lineZeroRate": "Valuation Rate is mandatory. Tick Allow Zero Valuation Rate to receive at zero.",
+  "lineSerialCount": "The quantity must be a whole number equal to the number of serial numbers.",
+  "lineEntriesQty": "The Serial / Batch Entries must add up to the quantity.",
+  "lineBatchOrSerialItem": "Batch and serial items are counted with a Stock Entry (Material Receipt or Issue), not here.",
+  "lineDuplicateRow": "This item and warehouse are already on another row.",
+  "lineFractionAt": "Quantity cannot be a fraction at row {row}",
+  "@lineFractionAt": {
+    "placeholders": {
+      "row": {
+        "type": "int"
+      }
+    }
+  },
+  "refusedNegativeStock": "{needed} units of {item} needed in {warehouse} on {date} for {voucher} to complete this transaction. Available then: {available}.",
+  "@refusedNegativeStock": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "warehouse": {
+        "type": "String"
+      },
+      "available": {
+        "type": "String"
+      },
+      "needed": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "voucher": {
+        "type": "String"
+      }
+    }
+  },
+  "refusedNegativeBatch": "Batch {batch} of {item} would go below zero in {warehouse} on {date} for {voucher}.",
+  "@refusedNegativeBatch": {
+    "placeholders": {
+      "batch": {
+        "type": "String"
+      },
+      "item": {
+        "type": "String"
+      },
+      "warehouse": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "voucher": {
+        "type": "String"
+      }
+    }
+  },
+  "refusedStockFrozen": "Stock is frozen up to {date}: nothing on or before it can be submitted or cancelled.",
+  "@refusedStockFrozen": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "refusedHasVariantsLocked": "Has Variants cannot change once the item has variants or stock.",
+  "refusedTemplate": "{item} is a template: it has no price and cannot be moved.",
+  "@refusedTemplate": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "refusedUnitInUse": "{uom} is used on a document: it cannot be removed or have its Conversion Factor changed.",
+  "@refusedUnitInUse": {
+    "placeholders": {
+      "uom": {
+        "type": "String"
+      }
+    }
+  },
+  "refusedBarcodeTaken": "This barcode belongs to item {item}.",
+  "@refusedBarcodeTaken": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "refusedBadBarcode": "{barcode} is not a valid barcode for its type.",
+  "@refusedBadBarcode": {
+    "placeholders": {
+      "barcode": {
+        "type": "String"
+      }
+    }
+  },
+  "refusedDefaultWarehouse": "This is the Default Warehouse in Stock Settings, which the Cash Register sells from. It must stay enabled and cannot be a group. Choose another Default Warehouse first.",
+  "refusedWarehouseHasLedger": "A warehouse with stock ledger entries cannot become a group.",
+  "refusedBatchRequired": "Enter a Batch for {item}, or turn on Automatically Create New Batch.",
+  "@refusedBatchRequired": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "refusedSerialRequired": "Enter the serial numbers of {item}, or set its Serial Number Series.",
+  "@refusedSerialRequired": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "refusedNotEnoughEntries": "Not enough serial numbers or batches of {item} in the source warehouse. Choose them in Serial / Batch Entries.",
+  "@refusedNotEnoughEntries": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "refusedExpiredBatch": "Batch {batch} has expired: it can leave stock only through a Material Issue.",
+  "@refusedExpiredBatch": {
+    "placeholders": {
+      "batch": {
+        "type": "String"
+      }
+    }
+  },
+  "refusedBatchNotFound": "Batch {batch} does not exist for this item.",
+  "@refusedBatchNotFound": {
+    "placeholders": {
+      "batch": {
+        "type": "String"
+      }
+    }
+  },
+  "refusedSerialNotAvailable": "Serial No {serial} is not Available in the source warehouse.",
+  "@refusedSerialNotAvailable": {
+    "placeholders": {
+      "serial": {
+        "type": "String"
+      }
+    }
+  },
+  "refusedSerialExists": "Serial No {serial} already exists in stock.",
+  "@refusedSerialExists": {
+    "placeholders": {
+      "serial": {
+        "type": "String"
+      }
+    }
+  },
+  "refusedSerialMovedSince": "Serial No {serial} has moved since this entry. Cancel the later documents first.",
+  "@refusedSerialMovedSince": {
+    "placeholders": {
+      "serial": {
+        "type": "String"
+      }
+    }
+  },
+  "refusedDocstatus": "This document has changed since it was opened. Open it again.",
+  "lineDuplicateSerial": "A serial number is listed twice. Each serial number is one unit and can be on one line only.",
+  "refusedExpiryRequired": "Batch {batch} needs an Expiry Date: its item has Has Expiry Date and no Shelf Life In Days to work it out from.",
+  "@refusedExpiryRequired": {
+    "placeholders": {
+      "batch": {
+        "type": "String"
+      }
+    }
+  }
 }

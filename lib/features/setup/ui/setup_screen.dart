@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../../core/widgets/list_detail_pane.dart';
 import '../../../core/widgets/spacing.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../stock/ui/stock_masters_pages.dart';
 import 'data_pages.dart';
 import 'naming_series_page.dart';
 import 'settings_pages.dart';
@@ -28,6 +29,7 @@ Widget? setupPage(String slug, String? id) {
     'tax' => TaxPage(path: path, id: id),
     'sales-taxes-template' => SalesTaxesTemplatePage(path: path, id: id),
     'item-tax-template' => ItemTaxTemplatePage(path: path, id: id),
+    'stock-settings' => const StockSettingsPage(),
     'naming-series' => const NamingSeriesPage(),
     'data-import' => const DataImportPage(),
     'data-export' => const DataExportPage(),
@@ -68,7 +70,7 @@ class SetupHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    // A null slug is a page built by 02-stock or 05-invoices-and-receipts.
+    // A null slug is a page built by 05-invoices-and-receipts.
     final groups = <(String, List<(String?, String)>)>[
       (
         l.groupStore,
@@ -96,7 +98,7 @@ class SetupHome extends StatelessWidget {
           ('item-tax-template', l.itemTaxTemplate),
         ],
       ),
-      (l.groupStock, [(null, l.stockSettings)]),
+      (l.groupStock, [('stock-settings', l.stockSettings)]),
       (
         l.groupPrinting,
         [

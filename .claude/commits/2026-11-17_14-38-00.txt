@@ -1,0 +1,456 @@
+RX MERCHANT - SESSION REPORT
+============================
+
+Written:      2026-11-17 14:38 (+08:00)
+Branch:       main
+Based on:     65f427a "RX MERCHANT - SESSION REPORT" (the POS Profile removal,
+              issue 3)
+Committed:    nothing. Every change below is in the working tree, for you to
+              commit.
+Covers:       the whole session: the request in
+              .claude/erpnext-planner/current-user-prompt.txt to build
+              Plans/02-stock.md (all 13 build steps, STK-B1 to B13: milestones
+              M2, M3 and the stock part of M8), then the wrap-up CLAUDE.txt
+              asks for (Flutter and Ponytail reviews, fixes, this report, the
+              system documentation).
+
+
+1. SUGGESTED COMMIT MESSAGE
+---------------------------
+
+Build 02-stock: items, prices, ledger engine, stock documents, reports
+
+- Stock destination: workspace of grouped cards, list beside form on tablets
+- Warehouse and Item Group trees, UOM, Brand, Item Attribute (STK-R1, R2,
+  R3, R15); Default Warehouse guarded and renamed with Stock Settings
+- Item list and form: barcodes with EAN/UPC check, units, re-order, tax,
+  image, opening stock and selling rate on create, frozen fields once
+  stocked (STK-R4 to R9, R13)
+- Item Price with validity and the price lookup incl. default-list
+  fallback; item tax lookup up the group tree (STK-R10, R13)
+- Stock Settings page, also reachable from Setup
+- Ledger engine: FIFO, Moving Average, serial cost, negative-stock and
+  backdating checks, chain recompute, transfer rate pass-on, stock freeze,
+  bin (STK-R28 to R37)
+- Stock Entry (Receipt, Issue, Transfer, additional costs, submit, cancel,
+  amend) and Stock Reconciliation (Opening Stock, counts, Fetch Items,
+  Scan Mode, CSV) (STK-R38 to R42)
+- Seven reports with filters, totals, pinned first column, CSV (STK-R43);
+  low-stock badge (STK-R12)
+- Variants, batches, serial numbers and the inline Serial / Batch editor
+  (STK-R14 to R27)
+- Tests: 141 -> 191
+
+If you prefer two commits, split off "docs and tooling":
+.claude/erpnext-planner/system-documentation.md, .claude/commits/ and
+graphify-out/.
+
+
+2. RESULT IN SHORT
+------------------
+
+All 13 build steps of 02-stock.md are in. Schema version 1 is unchanged:
+every stock table already existed, so no data needs clearing for this
+build (P-13 from issue 3 still applies to older databases).
+
+  flutter analyze               No issues found
+  dart fix --dry-run            Nothing to fix
+  dart format (check)           0 files changed (80 files)
+  flutter test                  191 of 191 pass
+  flutter build apk --release   builds, 80.4 MB
+  release manifest              INTERNET permission absent
+
+Not done, stated plainly:
+  - Rules that only apply to a sale wait for the Cash Register plan, by your
+    decision at the start: STK-R11 (auto insert price on the first sale),
+    STK-R26 (warranty on sale), the sale side of STK-R22 (an expired batch
+    cannot be sold) and STK-R27 on a Sales Invoice, and the incoming rate of
+    a sale return. The engine is voucher-type generic and priceFor /
+    itemTaxTemplateOf are ready for the register.
+  - No real device was used. Phone and tablet emulators only.
+  - Camera scanning was not exercised on the emulator (no camera image);
+    barcodes were typed into the scan fields, which is how a Bluetooth or
+    USB scanner works.
+
+
+3. WHAT WAS BUILT
+-----------------
+
+3.1 Decision you made (asked at the start)
+  - Scope: all 13 build steps (B1 to B13), not only M2 and M3.
+
+3.2 By build step
+  STK-B1  Warehouse and Item Group as trees (nested ExpansionTiles, Add
+          Child, flat-list switch), UOM and Brand.
+          Rules: a warehouse with ledger entries cannot become a group
+          (STK-R1); the Default Warehouse of Stock Settings stays enabled
+          and non-group and cannot be deleted; renaming it renames it in
+          Stock Settings (same pattern as the Default Price List, SET-R13).
+          Whole-number units refuse fractions with ERPNext's message
+          "Quantity cannot be a fraction at row 1" (STK-R3).
+  STK-B2  Item list (search by code, name or barcode; scan button; filter
+          chips Item Group, Disabled, Has Variants; thumbnail, stock dot,
+          price) and Item form (strip with Stock Levels and Item Prices;
+          tabs Details, Inventory, Variants, Sales, Tax). Item Code or
+          Naming Series (STK-R4, with the Item Codification help text);
+          Item Name pre-filled from the code; barcodes checked and owned by
+          one item (STK-R8); units with conversion factors, locked once used
+          on a document (STK-R9); re-order table; item tax table; image from
+          camera or gallery at 512 px. On create, Standard Selling Rate
+          becomes an Item Price and Opening Stock a submitted Material
+          Receipt (Is Opening) (STK-R5). Maintain Stock, Has Batch No, Has
+          Serial No, Valuation Method and Default UOM lock once the item has
+          stock, with the reason shown (STK-R7).
+  STK-B3  Item Price list and form (unit, batch, validity, note); overlapping
+          validity refused; a template has no price. Pure price pick
+          (STK-R10 steps 1-2) and priceFor with the default-list fallback
+          (step 3); item tax pick and itemTaxTemplateOf up the group tree
+          (STK-R13).
+  STK-B4  Stock Settings page (SinglesForm, plus a new date field kind for
+          Stock Frozen Upto). Setup > Stock now links to it. Defaults flow
+          into new items. The Default Valuation Method locks once an item
+          following it has stock (as ERPNext does).
+  STK-B5  Engine (data/stock_ledger.dart, logic/valuation.dart): FIFO queue
+          with ERPNext's negative-layer rules, Moving Average at 9 decimals,
+          serial cost; each item-warehouse chain is replayed from its first
+          entry; negative stock refused from the changed point on (batch and
+          serial items never negative; no batch below zero); transfer-in
+          rate = out rate + additional cost share, passed on to the target
+          chain; Stock Frozen Upto; bin kept in step and rebuildable.
+  STK-B6  Stock Entry: three purposes, Edit Posting Date and Time, scan
+          field, row editor, additional costs spread by basic amount
+          (STK-R39), Save / Submit / Cancel / Amend (name-1, -2), Stock
+          Ledger link; opening stock from the item form.
+  STK-B7  Stock Reconciliation: Opening Stock and Stock Reconciliation,
+          current values as of the posting time, unchanged rows dropped,
+          Fetch Items, Scan Mode, CSV download/upload (exact headers), batch
+          and serial items refused with a pointer to Stock Entry.
+  STK-B8  Backdated postings and cancellations recompute the chain or are
+          refused with a message naming item, warehouse, quantity available,
+          date and voucher.
+  STK-B9  Reports: Stock Ledger, Stock Balance, Quick Stock Balance,
+          Batch-wise Balance History, Serial No Ledger, Item Price Stock,
+          Low Stock. Filter bar (a sheet on phones), totals row, CSV export,
+          rows open their voucher. Low-stock badge on the Stock destination
+          and the Low Stock link (switch: Show low-stock alerts).
+  STK-B10 Item Attribute (text values with abbreviations, or a numeric
+          range); templates; Create > Single Variant / Multiple Variants
+          (codes such as TSHIRT-RED-S, existing combinations skipped);
+          saving a template updates its variants, frozen fields skipped on
+          stocked variants (STK-R14 to R17).
+  STK-B11 Batches: master with derived status; batch on receipt (typed,
+          or from the Batch Number Series); expiry mandatory for items with
+          Has Expiry Date, defaulting to manufacturing date + shelf life;
+          per-batch ledger; Material Issue may take expired batches,
+          Transfer may not (STK-R18 to R22).
+  STK-B12 Serial numbers: master (Inactive / Available / Delivered), series
+          (PB2L.##### -> PB2L00001), status moved by stock documents only,
+          each unit at its own cost, a receipt whose serials moved since
+          cannot be cancelled (STK-R23 to R25, R32, R41).
+  STK-B13 Inline Serial / Batch editor: add, edit, delete, Auto Fetch
+          (FIFO / LIFO / Expiry), Scan (batch +1, serial twice refused),
+          Create Serial Nos from Range (SN-01::10), CSV download/upload, 10
+          per page, draft only; empty outgoing lines filled at submit when
+          the setting is on (STK-R27).
+
+3.3 Shared pieces changed
+  lib/router.dart              one workspace route for /setup and /stock
+                               (/stock/:page/:id, report filters as query
+                               parameters); passes the low-stock count to
+                               the shell
+  core/widgets/adaptive_shell  optional count badge on Stock
+  core/widgets/report_table    rows built lazily, pinned first column,
+                               totals row, row tap, hidden trailing values
+  core/widgets/date_field      new: date or date-time picker field
+  core/naming/naming_series    defaultSeries(doctype)
+  setup/data/setup_queries     exists() made public (shared)
+  setup/data/refusal           25 stock refusal codes; RefusedException
+                               carries args the UI formats
+  setup/ui/form_kit            refusal and line-problem texts; MasterList
+                               trailingOf; formats passed to refusals
+  setup/ui/settings_pages      FieldKind.date
+  setup/ui/simple_masters      NamedMasterForm optional text field (Brand)
+  setup/ui/data_pages          saveCsv / pickCsv helpers (reused by stock)
+  setup/logic/data_import      price overlap check now shared with stock
+  l10n/app_en.arb              466 messages (was 216)
+
+3.4 Size
+  New hand-written Dart under lib/: 9,266 lines (stock feature 9,190).
+  New tests: 1,184 lines. Changes to existing files: +524 / -108.
+
+
+4. CODE REVIEW RESULTS
+----------------------
+
+CLAUDE.txt asks for "Flutter Review" and "Ponytail Review", then Ponytail
+fixes.
+
+4.1 Ponytail review (ponytail-review skill)
+  Six findings, about -105 lines; all applied:
+   1. Unused helper nameOf deleted.
+   2. StockFilters.copyWith with nine thunk parameters replaced by plain
+      mutable fields.
+   3. DocumentList (MasterList plus a status chip) deleted; MasterList got
+      an optional trailingOf.
+   4. The variant list's own stream replaced by ItemRow.variantOf.
+   5. A second _exists helper removed; setup's became public exists().
+   6. ValuationMethod.setting field removed.
+
+4.2 Flutter review
+  flutter analyze, dart fix, and the code-review skill: two independent
+  reviewers of the working tree against 65f427a, one for standards (plan
+  00 sections 5 to 7, CLAUDE.txt, decisions D-1 to D-30, a code-smell
+  list), one against plan 02.
+
+  Fixed (smallest change at the cause):
+   Spec
+   1. Duplicate serial numbers were accepted (one serial listed twice, or
+      on two lines). Now refused (LineProblem.duplicateSerial). Test.
+   2. An old negative entry blocked every later posting on that item and
+      warehouse. Negative stock is now refused only from the changed
+      posting onward (STK-R36 "any later entry"). Test.
+   3. Auto Fetch ordered serials by modified_at, which an edit changes.
+      Now by when the unit came into the warehouse.
+   4. STK-R10 step 3 (default-list fallback) and STK-R13's group walk had
+      no database caller. Added priceFor and itemTaxTemplateOf. Test.
+   5. STK-R19: expiry was neither mandatory nor defaulted for Has Expiry
+      Date items, and the batch form offered non-batch items. saveBatch now
+      defaults it or refuses; the pickers list batch / serial items only.
+      Test.
+   6. A new Material Transfer started with source = target. The target is
+      cleared when switching to Transfer.
+   Standards
+   7. Screens ran raw SQL. The queries moved to data/stock_lists.dart; the
+      item strip became a provider (it re-subscribed on every rebuild).
+   8. Submit was a TextButton; now a FilledButton (tonal, beside Save).
+   9. Reconciliation quantity difference rounded at 9 decimals; now at
+      Float Precision.
+  10. A recost rewrote a Stock Entry's totals without setting modified_at;
+      now set.
+  11. The "posting time not edited" rule (posting = modified) was spelled
+      out in four places; now one named function, postingSetByHand.
+  12. Amended-name code existed twice; now one amendedName(table, id).
+  13. core/widgets/adaptive_shell imported the stock feature and tested
+      index == 2; the router now passes the count in.
+  Found on the emulator and fixed earlier in the session:
+  14. Default Unit of Measure blank on a new item: the form now waits for
+      its choices (D-22). Item Price form likewise.
+  15. The report totals row crashed reports whose first column is a date
+      ("Total" parsed as a date). Widget test added.
+
+  Left as they are, with the reason:
+   - Forms read their own initial values with typed drift selects (item
+     form, Stock Entry rate), as setup forms read through providers; only
+     raw SQL was moved.
+   - ReportTable is no longer a DataTable: plan 02 asks for a pinned first
+     column and smooth scrolling of 5,000 rows, which DataTable cannot do.
+     Recorded as design decision D-31.
+   - Stored option values (FIFO, Moving Average) show as stored, as all
+     option values do (P-11).
+   - Stock refusal codes live in setup/data/refusal.dart, the app's one
+     refusal mechanism (D-19); RefusedException.args is a positional list.
+   - Default Valuation Method lock and the serial checks when cancelling an
+     Issue or Transfer go slightly beyond the plan; both protect the
+     ledger and follow ERPNext.
+   - _act (confirm, save, run) is similar in the two document forms; the
+     two differ in what they save.
+
+
+5. VERIFICATION EVIDENCE
+------------------------
+
+All run on 2026-11-17, after the last code change.
+
+  $ dart format --output=none --set-exit-if-changed lib test
+  Formatted 80 files (0 changed)
+
+  $ flutter analyze
+  No issues found!
+
+  $ dart fix --dry-run
+  Nothing to fix!
+
+  $ flutter test
+  191 tests passed (141 before; 50 added: 19 stock logic, 26 stock
+  database, 4 stock widget, 1 report table)
+
+  $ flutter build apk --release
+  Built build\app\outputs\flutter-apk\app-release.apk (80.4MB)
+  merged release manifest: android.permission.INTERNET 0 times
+
+  Acceptance checks STK-A1 to A27 each have a test (A21 is tested on the
+  A20 receipts without the backdated one: with it, cancelling the day-1
+  receipt leaves enough stock, so nothing would be refused).
+
+  Emulators, started and run exactly as CLAUDE.txt says (emulator
+  -no-snapshot-load, adb uninstall, flutter run --no-enable-impeller):
+
+  Phone (Medium_Phone_API_36.1, 1080x2400):
+    - Wizard (United States, USD, "Test Store") -> "Add your first item"
+      lands on Stock home.
+    - New item PARA500: Item Name pre-filled; Default UOM Nos (after fix
+      14); barcode 4006381333932 as EAN shows the check-digit error,
+      ...931 accepted; Opening Stock 100 @ 2, Standard Selling 5. Saved:
+      strip "Stores: 100.000", "Standard Selling · Nos: $ 5.00"; Default
+      UOM and Maintain Stock locked with the reason.
+    - Item list row: PARA500, $ 5.00, 100.000.
+    - Material Issue: typed the barcode into Scan Barcode, row added at
+      $ 2.00; qty 30; Submit -> MAT-STE-2026-00002, Total Outgoing Value
+      $ 60.00.
+    - Stock Ledger (from the entry, filtered by voucher): one row, pinned
+      Date column, sideways scroll (after fix 15).
+    - Stock Balance: opening 0, in 100 / $200, out 30 / $60, balance
+      70 / $140, rate 2.00.
+  Tablet (Medium_Tablet, 2560x1600):
+    - Landscape (expanded): rail with labels; Item list on the left, item
+      form in two columns on the right.
+    - Item GAUZE with opening stock; Stock Reconciliation: Fetch Items,
+      row edited in the side sheet (live differences), Submit ->
+      MAT-RECO-2026-00001, Difference Amount $ 20.00.
+    - Portrait (medium): rail without labels, one pane, two-column form.
+  Phone again, after all review fixes:
+    - Item SMOKE with opening stock 2 and re-order level 5 for Stores:
+      the Stock destination shows the badge "1".
+    - New Stock Entry switched to Material Transfer: Source Stores, Target
+      empty.
+  Runtime errors (Dart Tooling Daemon): none on any run after the fixes.
+
+
+6. DECISIONS MADE ON YOUR BEHALF
+--------------------------------
+
+  1. No schema change. "Edit Posting Date and Time" has no column: a draft
+     saved with it off stores the save time as both posting and modified
+     time, so posting != modified means "set by hand"; Submit moves an
+     unedited posting to the submit moment (postingSetByHand).
+  2. A template's numeric range is narrowed by ticking values in Create >
+     Multiple Variants (no extra columns on item_variant_attribute).
+  3. Opening stock from the item form is a Material Receipt (Is Opening),
+     as STK-R5 says, also for plain items (STK-R40 names reconciliation for
+     the Opening Stock purpose; both work).
+  4. Material Issue may take expired batches (the write-off path of
+     STK-R22); Material Transfer may not.
+  5. Every item-warehouse chain is replayed from its first entry (the
+     plan's own stated ceiling, marked "ponytail:" in stock_ledger.dart).
+  6. Reconciliation rows keep the differences computed at submit; later
+     reposts do not rewrite them (the ledger is the truth).
+  7. A batch created by Automatically Create New Batch without a series
+     uses "<item code>-.#####".
+  8. Price and tax lookups for the register (priceFor,
+     itemTaxTemplateOf) were built now, so plan 02's rules are complete;
+     the register calls them.
+  9. Batch and serial FIFO: a batch by when it was created, a serial by
+     when it came into the warehouse.
+ 10. ReportTable rewritten without DataTable (D-31).
+
+
+7. SYSTEM DOCUMENTATION
+-----------------------
+
+.claude/erpnext-planner/system-documentation.md is now issue 4, same
+ISO/IEC/IEEE 15289 structure: document control and change history; scope
+and milestone state (M2, M3 done; M8 stock part done); concept of
+operations; requirements STK-R1 to R43 and acceptance STK-A1 to A27;
+architecture (folder map, routes, D-31 to D-38); software design (stock
+feature, engine, providers, widgets); settings keys; interfaces (camera,
+image picker now used); verification (tests, emulator runs, reviews); user
+guide (Stock); problems P-14 to P-16; summary.
+
+
+8. KNOWN PROBLEMS AND OPEN ITEMS
+--------------------------------
+
+  1. Sale-only stock rules wait for the Cash Register (section 2).
+  2. No real device; camera scanning and photo capture not tried on a
+     device (P-8, P-14).
+  3. Leaving a form with unsaved changes discards them (P-10): on the
+     emulator a stray Back lost a Stock Entry draft.
+  4. Chains are replayed from their first entry (decision 5): fine for one
+     store; revisit if an item ever has hundreds of thousands of entries.
+  5. Unchanged from earlier issues: release APK signed with the debug key;
+     emulator GPU text fault (P-1); databases from before issue 3 (P-13).
+
+
+9. FILES
+--------
+
+Added - app
+  lib/core/widgets/date_field.dart
+  lib/features/stock/data/stock_entry_db.dart
+  lib/features/stock/data/stock_ledger.dart
+  lib/features/stock/data/stock_lists.dart
+  lib/features/stock/data/stock_masters.dart
+  lib/features/stock/data/stock_reconciliation_db.dart
+  lib/features/stock/data/stock_reports.dart
+  lib/features/stock/logic/serials.dart
+  lib/features/stock/logic/stock_documents.dart
+  lib/features/stock/logic/stock_rules.dart
+  lib/features/stock/logic/valuation.dart
+  lib/features/stock/logic/variants.dart
+  lib/features/stock/ui/item_pages.dart
+  lib/features/stock/ui/report_pages.dart
+  lib/features/stock/ui/scan.dart
+  lib/features/stock/ui/serial_batch_editor.dart
+  lib/features/stock/ui/stock_entry_page.dart
+  lib/features/stock/ui/stock_masters_pages.dart
+  lib/features/stock/ui/stock_providers.dart
+  lib/features/stock/ui/stock_reconciliation_page.dart
+  lib/features/stock/ui/stock_screen.dart
+  lib/features/stock/ui/tree_masters.dart
+
+Added - tests
+  test/features/stock/logic/stock_logic_test.dart
+  test/features/stock/data/stock_db_test.dart
+  test/features/stock/ui/stock_ui_test.dart
+
+Modified - app
+  lib/router.dart
+  lib/core/naming/naming_series.dart
+  lib/core/widgets/adaptive_shell.dart
+  lib/core/widgets/report_table.dart
+  lib/features/setup/data/refusal.dart
+  lib/features/setup/data/setup_queries.dart
+  lib/features/setup/logic/data_import.dart
+  lib/features/setup/ui/data_pages.dart
+  lib/features/setup/ui/form_kit.dart
+  lib/features/setup/ui/settings_pages.dart
+  lib/features/setup/ui/setup_screen.dart
+  lib/features/setup/ui/simple_masters.dart
+  lib/l10n/app_en.arb
+  lib/l10n/app_localizations.dart            generated
+  lib/l10n/app_localizations_en.dart         generated
+
+Modified - tests
+  test/app_test.dart                         Stock Settings link now live
+  test/core/widgets/report_table_test.dart   pinned column, totals, tap
+
+Modified - documents and tooling
+  .claude/erpnext-planner/system-documentation.md
+  graphify-out/                              "graphify update .": 1,610 nodes,
+                                             2,519 edges, 81 communities (was
+                                             860 / 1,177 / 46); previous copy
+                                             in graphify-out/2026-11-17/
+
+Added - documents
+  .claude/commits/2026-11-17_14-38-00.txt    this report
+
+Not changed
+  lib/core/db/app_database.g.dart and every .drift file (no schema change)
+  The plans (02-stock.md was built as written)
+
+Changed by you, not by me
+  .claude/erpnext-planner/current-user-prompt.txt   modified
+  CLAUDE.md -> CLAUDE.txt                            renamed
+
+
+10. BEFORE YOU COMMIT
+---------------------
+
+  - CLAUDE.md shows as deleted and CLAUDE.txt as new: stage both if the
+    rename is intended.
+  - No data clearing is needed for this build beyond P-13 (databases from
+    before issue 3).
+  - graphify-out/2026-11-16/ and graphify-out/2026-11-17/ are backups
+    Graphify made; delete them if you do not want them in the repository.
+    Its community names are stale ("graphify label" refreshes them with an
+    LLM; not run).

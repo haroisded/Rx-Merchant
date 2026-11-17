@@ -1,0 +1,80 @@
+# Codebase Navigation
+For Codebase Navigation, use [Graphify]
+
+
+# Tool Calling
+For tool calling, always use [Context Mode]
+
+
+# Expected AI Response
+When Reporting information to me, be extremely concise
+and sacrifice grammar for the sake of concision
+
+
+# Code Review
+Once done coding...
+use both "Flutter Review" and "Ponytail Review",
+once done on the reviews - use [Ponytail] to fix any problems reported
+
+
+# Emulator Operations
+When running the application through the emulator 
+( for both Mobile and Tablet ), do this in-order...
+
+```flow
+> emulator -avd <Your_AVD_Name> -no-snapshot-load 
+  ( this is to open the emulator - Mobile or Tablet )
+
+> once done booting, do: adb uninstall com.rx_merchant.rx_merchant 
+  ( proceed regardless of success or not )
+
+> then open another CMD terminal in this project folder...
+  
+  [project folder]: B:\Development-Projects\rx_merchant
+  
+  and do: flutter run --no-enable-impeller
+  ( to run the application - this is because I have no GPU )
+```
+
+( note ):
+do this flow everytime running the application through the emulator,
+as for the "<Your_AVD_Name>" the only options are...
+* Medium_Phone_API_36.1
+* Medium_Tablet
+
+
+# Finalization
+
+## Commits
+Once "Done Coding" and "Code Review", write a "Detailed Report",
+of what was done in this "current-session" in a .txt file
+
+the name of the .txt file, is the current date and timestamp
+
+the .txt file is stored in...
+"B:\Development-Projects\rx_merchant\.claude\commits"
+
+( the user will do the commit )
+
+## Documentation
+Write a detailed "System Documentation" based on what the current system has,
+which can be checked through...
+
+* the current codebase
+* git commit history
+* what was just implemented today
+
+using the "ISO/IEC/IEEE 15289" as the standard writing
+of the "System Documentation"
+
+write it in the 
+"B:\Development-Projects\rx_merchant\.claude\erpnext-planner\system-documentation.md"
+
+( note ):
+markdown filepath: 
+"B:\Development-Projects\rx_merchant\.claude\erpnext-planner\system-documentation.md"
+
+if the [markdown filepath] currently has contents, then just update
+the current file if there were any changes in the codebase
+
+rather than making a new one

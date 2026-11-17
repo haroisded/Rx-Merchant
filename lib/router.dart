@@ -6,6 +6,8 @@ import 'core/db/providers.dart';
 import 'core/widgets/adaptive_shell.dart';
 import 'core/widgets/window_size.dart';
 import 'features/setup/ui/setup_screen.dart';
+import 'features/stock/ui/stock_providers.dart';
+import 'features/stock/ui/stock_screen.dart';
 import 'features/setup/ui/wizard_screen.dart';
 import 'l10n/app_localizations.dart';
 
@@ -19,7 +21,7 @@ const _home = '/pos';
 final _destinations = <(String, String Function(AppLocalizations))>[
   (_home, (l) => l.titleCashRegister),
   ('/invoices', (l) => l.navInvoices),
-  ('/stock', (l) => l.navStock),
+  (stockPath, (l) => l.navStock),
   ('/dashboard', (l) => l.navDashboard),
   (setupPath, (l) => l.navSetup),
 ];
@@ -53,13 +55,30 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: _loading, builder: (_, _) => const _LoadingScreen()),
       GoRoute(path: _wizard, builder: (_, _) => const WizardScreen()),
       StatefulShellRoute.indexedStack(
-        builder: (_, _, shell) => AdaptiveShell(navigationShell: shell),
+        // STK-R12: the low-stock count on the Stock destination.
+        builder: (_, _, shell) => Consumer(
+          builder: (_, ref, _) => AdaptiveShell(
+            navigationShell: shell,
+            stockBadge: ref.watch(stockSettingsProvider).autoIndent
+                ? ref.watch(lowStockCountProvider).value ?? 0
+                : 0,
+          ),
+        ),
         branches: [
           for (final (path, title) in _destinations)
             StatefulShellBranch(
               routes: [
                 if (path == setupPath)
-                  _setupRoute()
+                  _workspaceRoute(
+                    setupPath,
+                    (page, id, _) => SetupScreen(page: page, id: id),
+                  )
+                else if (path == stockPath)
+                  _workspaceRoute(
+                    stockPath,
+                    (page, id, query) =>
+                        StockScreen(page: page, id: id, query: query),
+                  )
                 else
                   GoRoute(
                     path: path,
@@ -80,14 +99,19 @@ final routerProvider = Provider<GoRouter>((ref) {
   return router;
 });
 
-/// `/setup`, `/setup/:page` and `/setup/:page/:id` (`id` is `new` for a new
-/// record). On an expanded window the workspace list stays put beside the
-/// page, so moving between them does not animate.
-GoRoute _setupRoute() {
+/// A workspace destination: `[path]`, `[path]/:page` and `[path]/:page/:id`
+/// (`id` is `new` for a new record; report filters come as query
+/// parameters). On an expanded window the list stays put beside the page,
+/// so moving between them does not animate.
+GoRoute _workspaceRoute(
+  String path,
+  Widget Function(String? page, String? id, Map<String, String> query) build,
+) {
   Page<void> page(BuildContext context, GoRouterState state) {
-    final child = SetupScreen(
-      page: state.pathParameters['page'],
-      id: state.pathParameters['id'],
+    final child = build(
+      state.pathParameters['page'],
+      state.pathParameters['id'],
+      state.uri.queryParameters,
     );
     return WindowSize.of(context) == WindowSize.expanded
         ? NoTransitionPage(key: state.pageKey, child: child)
@@ -95,7 +119,7 @@ GoRoute _setupRoute() {
   }
 
   return GoRoute(
-    path: setupPath,
+    path: path,
     pageBuilder: page,
     routes: [
       GoRoute(

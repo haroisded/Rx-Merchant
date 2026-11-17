@@ -98,11 +98,18 @@ void main() {
       await pumpApp(tester, width: 400);
       await openSetup(tester);
       expect(find.text('Store Profile'), findsOneWidget);
-      // Pages owned by other plans are listed but not reachable yet.
-      await tester.scrollUntilVisible(find.text('Stock Settings'), 200);
+      // Stock Settings arrived with the Stock plan; pages of plans not
+      // built yet are listed but not reachable.
+      await tester.scrollUntilVisible(find.text('Print Settings'), 200);
       expect(
         tester
             .widget<ListTile>(find.widgetWithText(ListTile, 'Stock Settings'))
+            .enabled,
+        isTrue,
+      );
+      expect(
+        tester
+            .widget<ListTile>(find.widgetWithText(ListTile, 'Print Settings'))
             .enabled,
         isFalse,
       );

@@ -7,8 +7,8 @@
 | Title | Rx Merchant: System Documentation |
 | System | Rx Merchant, an offline Android point-of-sale app |
 | System version | 1.0.0+1 (`pubspec.yaml`) |
-| Date of issue | 2026-11-16 |
-| Status | Issued. Describes the system at the end of the Setup plan (R2): build steps SET-B1 to SET-B9, which are milestones M1, M4 and M9, on top of milestone M0, after the POS Profile was removed (issue 3). |
+| Date of issue | 2026-11-17 |
+| Status | Issued. Describes the system at the end of the Stock plan (R3), build steps STK-B1 to STK-B13 (milestones M2, M3 and the stock part of M8), on top of M0 and the whole Setup plan (M1, M4, M9) with the POS Profile removed (issue 3). |
 | Issuing organization | The Rx Merchant project (one owner, who is also the developer) |
 | Prepared by | Claude (AI assistant), for the project owner |
 | Approval | Pending the project owner's review |
@@ -21,6 +21,7 @@
 | 1 | 2026-11-15 | First issue. Covers milestone M0: project setup, database schema version 1, settings access, rounding and formatting, naming series, theme, adaptive shell, wizard gate, shared widgets. |
 | 2 | 2026-11-16 | Covers the Setup plan (R2), SET-B1 to B9: first-run wizard and seed, the Setup destination, settings pages, Currency, Price List, Naming Series, Mode of Payment, taxes, POS Profile, Data Import and Export, Backup and Restore, and "Restore from backup" on the wizard's first step. Sections 1, 3 to 6 and 8 to 13 updated; section 6.9 rewritten; section 7 changed only in 7.1, 7.2 and 7.6. |
 | 3 | 2026-11-16 | POS Profile removed: the app serves one owner with one register. Tables `pos_profile`, `pos_profile_payment` and `pos_profile_item_group` and the `pos_profile_id` columns of `pos_opening_entry`, `pos_closing_entry` and `sales_invoice` deleted from schema version 1 in place (no migration, by the owner's decision). The register's options moved to a new **POS Settings** page (`singles`); its warehouse, price list, taxes and letter head are the store defaults. The Default Price List of Selling Settings must stay enabled and follows a rename. Plans 00, 01, 02, 03 and 05 updated to match. Sections 0, 2.2, 3, 4, 5.3, 5.6, 5.7, 6.3, 6.9, 6.10, 7, 8.1, 9, 10, 11, 12 and 13 updated. |
+| 4 | 2026-11-17 | The Stock plan (R3), STK-B1 to B13: the Stock destination; Warehouse and Item Group trees, UOM, Brand, Item Attribute; Item with barcodes, units, re-order, tax, image, variants; Item Price and the price and item tax lookups; Stock Settings; the stock ledger engine (FIFO, Moving Average, serial cost, negative-stock, backdating, freeze); Stock Entry; Stock Reconciliation; batches and serial numbers with the inline Serial / Batch editor; seven stock reports and the low-stock badge. Schema unchanged. Every section updated except 2.3, 5.5, 6.1 to 6.7 and 7.7; new section 6.11. |
 
 ### How this document follows ISO/IEC/IEEE 15289
 
@@ -60,13 +61,13 @@ It describes the current state only. Planned behaviour is listed in section 4.4 
 | Version | 1.0.0, build 1 |
 | Platform | Android only. Minimum SDK 24 (Android 7.0), target and compile SDK 36. |
 | Form factors | Phones and tablets, portrait and landscape |
-| Milestone state | M0 Foundation and the whole Setup plan (M1, M4, M9) complete. M2, M3 and M5 to M8 not started. |
+| Milestone state | M0, the whole Setup plan (M1, M4, M9) and the whole Stock plan (M2, M3, and the stock part of M8) complete. M5 to M7, and the Cash Register part of M8 (POS-B9), not started. |
 
 ### 1.2 What the system is
 
 An Android app for one store run by one owner. It works with no internet connection. When complete it will keep the item catalogue and stock, sell at a cash register, print receipts and invoices, and show a sales dashboard. Its screens, field names and rules follow ERPNext, reduced to what one store owner needs.
 
-At this issue the store can be set up completely. A first-run wizard creates the store and its default records; the Setup destination holds every settings page and master of the Setup plan; items can be imported from CSV; the data can be backed up and restored. The Register, Invoices, Stock and Dashboard destinations are still empty.
+At this issue the store can be set up completely and its stock kept. A first-run wizard creates the store and its default records; the Setup destination holds every settings page and master of the Setup plan; the Stock destination holds the item catalogue, prices, warehouses, stock movements (receipts, issues, transfers, counts), batches, serial numbers and the stock reports; items can be imported from CSV; the data can be backed up and restored. The Register, Invoices and Dashboard destinations are still empty.
 
 ---
 
@@ -85,7 +86,7 @@ At this issue the store can be set up completely. A first-run wizard creates the
 | R7 | ERPNext documentation, merged | `.claude/erpnext-planner/erpnext-docs-merged.md` |
 | R8 | ISO/IEC/IEEE 15289:2019, Content of life-cycle information items (documentation) | Published standard |
 | R9 | Material Design 3 guidelines (window size classes, navigation, sheets) | m3.material.io |
-| R10 | Session reports: issue 1 `2026-11-15_09-47-00.txt`, issue 2 `2026-11-16_17-26-13.txt` | `.claude/commits/` |
+| R10 | Session reports: issue 1 `2026-11-15_09-47-00.txt`, issue 2 `2026-11-16_17-26-13.txt`, issue 3 `2026-11-16_22-00-06.txt`, issue 4 `2026-11-17_14-38-00.txt` | `.claude/commits/` |
 | R11 | Frappe `frappe/geo/country_info.json` (MIT licence), source of `assets/country_info.json` | github.com/frappe/frappe |
 
 ### 2.2 Glossary
@@ -112,6 +113,14 @@ At this issue the store can be set up completely. A first-run wizard creates the
 | dp | Density-independent pixel, Android's unit of layout size. |
 | SLE | Stock Ledger Entry: one row per stock movement. |
 | Bin | The current quantity and value of one item in one warehouse. |
+| Chain | All ledger entries of one item in one warehouse, in posting order. The engine replays a chain to recompute its balances (section 6.11). |
+| FIFO | First In, First Out valuation: stock is a queue of layers `[qty, rate]`; an issue consumes the oldest layers first (STK-R30). |
+| Moving Average | Valuation by one average rate per item and warehouse, recomputed on every receipt (STK-R31). |
+| Stock Entry | A stock movement document: Material Receipt, Material Issue or Material Transfer (STK-R38). |
+| Stock Reconciliation | A document that sets the balance to a counted quantity and rate, also used for opening stock (STK-R42). |
+| Serial / Batch Entries | The serial numbers and batches chosen for one document line (ERPNext's Serial and Batch Bundle), rows of `serial_and_batch_entry`. |
+| Template, Variant | An item with Has Variants is a template that is never transacted; its variants are the sellable items, one per combination of attribute values (STK-R14 to R17). |
+| Low stock | An item whose quantity in a warehouse is at or below its Re-order Level (STK-R12). |
 
 ### 2.3 Notation
 
@@ -134,7 +143,8 @@ One person: the store owner. The owner sets the system up, maintains items and s
 - One Android phone or tablet. The data lives on that device only.
 - No network. The release build does not hold the Android `INTERNET` permission, so it cannot open a connection even if a library tries.
 - Android's file picker and save dialog, for CSV import and export and for backups.
-- Peripherals planned for later milestones: the device camera for barcode scanning, and a receipt printer.
+- The device camera, for barcode scanning and item photos. A Bluetooth or USB barcode scanner works as a keyboard.
+- Planned for a later milestone: a receipt printer.
 
 ### 3.3 Intended operation (when complete)
 
@@ -147,14 +157,15 @@ One person: the store owner. The owner sets the system up, maintains items and s
 
 ### 3.4 Operation at this issue
 
-Steps 1 and 2 of the flow exist:
+Steps 1, 2 and 3 of the flow exist:
 
 1. The app starts and reads System Settings.
 2. On a fresh install it shows the first-run wizard. Nothing else is reachable. On its first step **Restore from backup** brings in another device's data instead, and the app opens on the restored store.
 3. The owner picks the language, country and currency (the format preview shows how dates and numbers will look) and names the store.
 4. On the last step the owner taps **Open Cash Register** or **Add your first item**. The app writes every seed record and marks setup complete in one transaction, then lands on the chosen destination.
 5. In **Setup** the owner adjusts the store and formats, defines payment modes, taxes, tax templates, price lists and POS Settings, edits naming series, imports or exports items, prices and barcodes, and backs up or restores the data.
-6. Register, Invoices, Stock and Dashboard still show "This screen arrives in a later milestone."
+6. In **Stock** the owner keeps the catalogue (items, groups, units, brands, attributes and variants, prices, barcodes), the warehouses and Stock Settings; brings stock in, moves it and writes it off with Stock Entries; counts it with Stock Reconciliations; tracks batches and serial numbers; and reads the stock reports. A badge on Stock counts the items at or below their re-order level.
+7. Register, Invoices and Dashboard still show "This screen arrives in a later milestone."
 
 ### 3.5 What the system deliberately leaves out
 
@@ -186,9 +197,9 @@ Taken from R1, section 2. Each exclusion applies to every screen and table.
 | C-3 | SQLite is the only data store | `lib/core/db/app_database.dart` | Met |
 | C-4 | Phones and tablets from the first build, in three window size classes | `WindowSize`, `AdaptiveShell`, `ListDetailPane`, `showRowEditor` | Met, verified (sections 10.2, 10.5) |
 | C-5 | Material 3 only. Colours come from `ColorScheme` roles; the seed colour is the only literal. | `AppTheme` in `lib/app.dart` | Met |
-| C-6 | Every user-visible label goes through localisation | `lib/l10n/app_en.arb`, generated `AppLocalizations` | Met for labels and messages. Stored option values (charge types, Mode of Payment types, Rounding Method) show as stored, in ERPNext's English (P-11). |
+| C-6 | Every user-visible label goes through localisation | `lib/l10n/app_en.arb`, generated `AppLocalizations` | Met for labels and messages. Stored option values (charge types, Mode of Payment types, Rounding Method, valuation methods, purposes in lists) show as stored, in ERPNext's English (P-11). |
 | C-7 | Three hops at most: screen, provider, query or pure function. No repository interfaces, use-case classes or mapper layers. | Code structure (section 5) | Met |
-| C-8 | Numeric columns are `REAL`. Every calculated value is rounded by `flt` before it is stored. | Schema; `lib/core/numbers/flt.dart` | Met. The only calculation so far, the tax "Try it" panel, rounds every row with `flt`; it stores nothing. |
+| C-8 | Numeric columns are `REAL`. Every calculated value is rounded by `flt` before it is stored. | Schema; `lib/core/numbers/flt.dart` | Met. Stock values round to Currency Precision, quantities to Float Precision, valuation rates to 9 decimals (`logic/valuation.dart`). |
 | C-9 | Foreign keys are enforced | `PRAGMA foreign_keys = ON` at every open | Met, verified |
 | C-10 | Schema version 1 contains every table of every feature plan | 45 tables, 14 indexes | Met, verified |
 | C-11 | ERPNext's labels and status names are used as is | Status values in the schema; localisation keys | Met for what exists |
@@ -217,6 +228,26 @@ Taken from R1, section 2. Each exclusion applies to every screen and table.
 | R1 §7.2, §7.3 | Navigation is a bottom bar on compact windows, a rail on medium windows, a rail with labels on expanded windows; five destinations in fixed order | `lib/core/widgets/adaptive_shell.dart` | `test/app_test.dart`, group "adaptive shell" |
 | R1 §7.1 | Shared form building blocks: list and detail panes, link field, child table with row editor, status chip, report table with CSV export | `lib/core/widgets/` | `test/core/widgets/` |
 | R2 §5 | Setup workspace of grouped cards; one pane on phones, list beside page on expanded windows | `ui/setup_screen.dart`, `_setupRoute` in `lib/router.dart` | `test/app_test.dart`, group "Setup destination" |
+| STK-R1 | Warehouse tree; a group holds no stock; a warehouse with ledger entries cannot become a group; the Default Warehouse stays enabled and non-group, cannot be deleted, and a rename follows into Stock Settings | `saveWarehouse`, `deleteWarehouse` in `stock/data/stock_masters.dart`; `ui/tree_masters.dart` | `stock_db_test.dart` |
+| STK-R2 | Item Group tree; unique names; a group in use cannot be deleted (foreign keys) | `saveItemGroup`; `deleteMaster` | Emulator |
+| STK-R3 | A fraction in a whole-number unit is refused: "Quantity cannot be a fraction at row 1" | `checkEntryLines` in `logic/stock_documents.dart`; `lineProblemMessage` | `stock_db_test.dart` (STK-A7) |
+| STK-R4, R5 | Item Code or Naming Series; Item Name pre-filled; on create, Standard Selling Rate becomes an Item Price and Opening Stock a submitted Material Receipt (Is Opening); defaults from Stock Settings | `saveItem`, `_openItem`; `ui/item_pages.dart` | `stock_db_test.dart`; `stock_ui_test.dart`; emulator |
+| STK-R6 | Disabled, past End of Life, template or non-stock items cannot be moved | `checkEntryLines` | `stock_db_test.dart` (template) |
+| STK-R7 | Maintain Stock, Has Batch No, Has Serial No, Valuation Method and Default UOM freeze after the first ledger entry | `_checkItemChange`; form locks | `stock_db_test.dart`; emulator |
+| STK-R8 | Barcode: EAN 13 digits with check digit, UPC 12; owned by one item; may name a unit; found by scan or typing | `validBarcode`, `_checkBarcodes`, `itemByBarcode`; `ui/scan.dart` | `stock_logic_test.dart` (STK-A14); emulator |
+| STK-R9 | Units with conversion factors; a unit used on a document keeps its factor | `stockQty`; `_checkItemChange` | `stock_db_test.dart` (STK-A6, unit lock) |
+| STK-R10 | Price lookup: exact unit and batch, then the stock-unit price (times the factor when Price Not UOM Dependent), then the default list when the fallback is on; no overlapping validity | `pickPrice`, `validityOverlaps` (`logic/stock_rules.dart`); `priceFor`, `saveItemPrice` | `stock_logic_test.dart` (STK-A13); `stock_db_test.dart` |
+| STK-R12 | Low stock by re-order level; badge on Stock and on the Low Stock link | `lowStockReport`, `watchLowStockCount`; router, `AdaptiveShell.stockBadge` | `stock_db_test.dart`; `stock_ui_test.dart`; emulator |
+| STK-R13 | Item tax: the item's row with the latest Valid From, else up the item group tree | `itemTaxTemplateFor`; `itemTaxTemplateOf` | `stock_logic_test.dart` (STK-A15); `stock_db_test.dart` |
+| STK-R14 to R17 | Templates are never transacted and have no price; numeric and text attributes; Single and Multiple Variants with codes such as TSHIRT-RED-S, existing combinations skipped; template saves update variants | `logic/variants.dart`; `createVariants`, `_updateVariants`; item form Variants tab | `stock_logic_test.dart` (STK-A9, A10); `stock_db_test.dart` (STK-A10) |
+| STK-R18 to R22 | Batches when enabled; status derived from expiry; expiry mandatory and defaulted for Has Expiry Date; batch from a series on receipt; batches required on every movement; an expired batch leaves only by Material Issue | `saveBatch`, `createBatch`, `_fillEntries`, `_checkEntries`; `batchStatus` | `stock_db_test.dart` (STK-A12, A18, A25, expiry) |
+| STK-R23 to R25, R32 | Serial numbers: one unit each, never listed twice; Inactive / Available / Delivered moved only by stock documents; series and ranges; each unit leaves at its own cost | `_moveSerials`, `_setEntryRates`, `serialRange`; engine | `stock_logic_test.dart` (STK-A5, A11); `stock_db_test.dart` (STK-A24, series, duplicate) |
+| STK-R27 | Inline Serial / Batch editor: add, edit, delete, Auto Fetch by FIFO, LIFO or Expiry, Scan, Range, CSV, 10 per page, draft only; empty outgoing lines filled at submit when the setting is on | `ui/serial_batch_editor.dart`; `availableEntries`, `autoPick` | `stock_logic_test.dart`; `stock_db_test.dart` (STK-A25 auto pick) |
+| STK-R28 to R37 | The ledger engine: one entry per line, side and batch; FIFO, Moving Average, serial cost; negative stock refused from the changed point on (never for batch or serial items); backdating and cancelling recompute the chain; transfer rate passed on; Stock Frozen Upto | `data/stock_ledger.dart`, `logic/valuation.dart` | `stock_logic_test.dart` (STK-A1 to A5); `stock_db_test.dart` (STK-A16 to A21, A26, A27) |
+| STK-R38 to R41 | Stock Entry: purposes and warehouses, read-only rate on outgoing lines, additional costs spread by basic amount, opening stock, cancel and amend (`name-1`) | `data/stock_entry_db.dart`; `ui/stock_entry_page.dart` | `stock_db_test.dart` (STK-A8, A23, amend); emulator |
+| STK-R42 | Stock Reconciliation: Opening Stock and counts; current values as of the posting time; unchanged rows dropped; Fetch Items, Scan Mode, CSV with exact headers; batch and serial items refused | `data/stock_reconciliation_db.dart`; `ui/stock_reconciliation_page.dart` | `stock_db_test.dart` (STK-A22); emulator |
+| STK-R43 | Stock Ledger, Stock Balance, Quick Stock Balance, Batch-wise Balance History, Serial No Ledger, Item Price Stock, Low Stock; cancelled entries left out; CSV export | `data/stock_reports.dart`; `ui/report_pages.dart` | `stock_db_test.dart`; `stock_ui_test.dart`; emulator |
+| R3 §5 | Stock workspace of grouped cards; with a record open on an expanded window its list takes the left pane | `ui/stock_screen.dart`; `_workspaceRoute` in `lib/router.dart` | `stock_ui_test.dart`; emulator |
 
 ### 4.3 Acceptance criteria met
 
@@ -244,6 +275,12 @@ Taken from R1, section 2. Each exclusion applies to every screen and table.
 | SET-A19 | Restoring a file that is not a backup is refused; data untouched | Pass |
 | SET-A20 | Wizard and every Setup page on a phone and a tablet in both orientations | Pass on emulators (section 10.5) |
 | SET-B1 to B9 runnable results | Wizard lands on the shell; formats change the preview; Try it reproduces the worked examples; POS Settings saves and the Default Price List cannot be disabled; 200 items import; back up, wipe, restore brings the data back | Pass (sections 10.2, 10.5) |
+| STK-A1 to A5 | FIFO and Moving Average worked examples (costs 1,600 / 1,650 / 1,600 / 1,700; serial 55,000) | Pass |
+| STK-A6 to A15 | Units, fraction refusal, additional cost spread 30 / 20, numeric attribute values, 6 variants, serial range, batch series `5x1SCR00001`, Box price 100 / 10, EAN check digit, item tax by date | Pass |
+| STK-A16 to A19 | Negative stock refused (nothing written) or allowed per item; batch items never negative; an issue dated before the receipt refused | Pass |
+| STK-A20, A21 | A backdated receipt recosts a later issue to 1,450; cancelling a receipt the issue needs is refused and names the issue (tested on the A20 receipts without the backdated one; with it, enough stock remains) | Pass |
+| STK-A22 to A27 | Reconciliation −2 / −160 / 840; transfer keeps total value; a receipt whose serial was sold cannot be cancelled; expired batch: transfer refused, issue allowed; bin rebuilt from the ledger is identical; Stock Frozen Upto | Pass |
+| STK-B1 to B13 runnable results | Masters nest and disable; an item is found by its barcode; the item strip shows prices; defaults flow into new items; receive, issue, transfer, count; reports match the ledger and export; 6 T-shirt variants; batch by earliest expiry, blocked when expired; units go out at their own cost; 50 serials from one range | Pass (tests and emulator, sections 10.2, 10.5) |
 
 ### 4.4 Requirements not yet implemented
 
@@ -251,13 +288,13 @@ Taken from R1, section 2. Each exclusion applies to every screen and table.
 |---|---|---|
 | M0 Foundation | Project, database, settings access, rounding, naming series, theme, adaptive shell | **Done** |
 | M1 Setup A | First-run wizard, Store Profile, System Settings, Global Defaults, Currency, Price List, Naming Series | **Done** |
-| M2 Stock A | Warehouse, Item Group, UoM, Brand, Item, Item Price, Stock Settings | Not started |
-| M3 Stock B | Stock ledger engine, Stock Entry, Stock Reconciliation, core stock reports | Not started |
+| M2 Stock A | Warehouse, Item Group, UoM, Brand, Item, Item Price, Stock Settings | **Done** |
+| M3 Stock B | Stock ledger engine, Stock Entry, Stock Reconciliation, core stock reports | **Done** |
 | M4 Setup B | Mode of Payment, taxes, POS Settings, Selling Settings | **Done** |
 | M5 Cash Register | Sessions, POS screen, totals engine, payment, submit | Not started |
 | M6 Invoices | List, detail, print formats, PDF, thermal printing, returns, cancel | Not started |
 | M7 Dashboard | Cards, charts, sales goal, reports | Not started |
-| M8 Stock C | Variants, batches, serial numbers | Not started |
+| M8 Stock C | Variants, batches, serial numbers | **Done** for stock documents (STK-B10 to B13); selling them at the Cash Register (POS-B9) waits for M5 |
 | M9 Setup C | Data import and export, backup and restore | **Done**, except the backup on POS Closing, which needs M5 |
 
 ---
@@ -273,7 +310,8 @@ flowchart LR
     App -->|CSV file| Share[Android share sheet]
     App <-->|CSV, backup files| Files[Android file picker<br/>and save dialog]
     Asset[[country_info.json<br/>bundled asset]] --> App
-    App -.->|planned| Camera[Camera: barcode scan]
+    Camera[Camera: barcode scan, item photo] --> App
+    Scanner[Bluetooth / USB scanner<br/>as a keyboard] --> App
     App -.->|planned| Printer[Receipt printer]
 ```
 
@@ -290,6 +328,12 @@ flowchart TD
     Router --> Shell[core/widgets/adaptive_shell.dart]
     Router --> Wizard[features/setup/ui/wizard_screen.dart]
     Router --> SetupUi[features/setup/ui/setup_screen.dart<br/>and the Setup pages]
+    Router --> StockUi[features/stock/ui/stock_screen.dart<br/>and the Stock pages]
+    StockUi --> StockLogic[features/stock/logic/<br/>valuation, stock_rules, stock_documents, variants, serials]
+    StockUi --> StockData[features/stock/data/<br/>stock_ledger, stock_entry_db, stock_reconciliation_db,<br/>stock_masters, stock_lists, stock_reports]
+    StockData --> StockLogic
+    StockData --> Database
+    StockUi --> Widgets
     Router --> Providers[core/db/providers.dart]
     Wizard --> Providers
     SetupUi --> Providers
@@ -335,6 +379,7 @@ lib/
       child_table.dart          child rows and the row editor sheet
       status_chip.dart          document status indicator
       report_table.dart         report table and CSV export
+      date_field.dart           date and date-time picker field
   features/
     setup/data/setup.drift      11 tables
     setup/data/country_info.dart  bundled country data
@@ -355,19 +400,40 @@ lib/
     setup/ui/data_pages.dart    Data Import, Data Export, Backups
     stock/data/stock.drift      22 tables, 9 indexes
     stock/data/batch_table.dart the batch table, in Dart
+    stock/data/stock_ledger.dart the ledger engine: post, cancel, repost, bin
+    stock/data/stock_entry_db.dart Stock Entry; batches; Serial / Batch Entries
+    stock/data/stock_reconciliation_db.dart Stock Reconciliation
+    stock/data/stock_masters.dart warehouse, item, variants, item price, lookups
+    stock/data/stock_lists.dart the lists the stock screens show
+    stock/data/stock_reports.dart the seven reports, low-stock count
     stock/logic/barcode.dart    EAN / UPC barcode check
+    stock/logic/valuation.dart  FIFO, Moving Average, serial cost
+    stock/logic/stock_rules.dart units, cost spread, price and tax pick, batch status, auto pick
+    stock/logic/stock_documents.dart document lines and their checks
+    stock/logic/variants.dart   attribute values, combinations, variant codes
+    stock/logic/serials.dart    serial number ranges
+    stock/ui/stock_screen.dart  Stock workspace and page routing
+    stock/ui/stock_providers.dart shared stock streams and lookups
+    stock/ui/item_pages.dart    Item list and form
+    stock/ui/tree_masters.dart  Warehouse, Item Group
+    stock/ui/stock_masters_pages.dart UOM, Brand, Item Attribute, Item Price, Stock Settings, Batch, Serial No
+    stock/ui/stock_entry_page.dart Stock Entry
+    stock/ui/stock_reconciliation_page.dart Stock Reconciliation
+    stock/ui/serial_batch_editor.dart inline Serial / Batch editor
+    stock/ui/report_pages.dart  the seven reports
+    stock/ui/scan.dart          camera barcode scan
     pos/data/pos.drift          8 tables, 5 indexes
     invoices/data/invoices.drift 3 tables
   l10n/
-    app_en.arb                  216 messages, English
+    app_en.arb                  466 messages, English
     app_localizations*.dart     generated by gen-l10n
 assets/
   country_info.json             250 countries (R11)
-test/                           141 tests (section 10.2)
+test/                           191 tests (section 10.2)
 android/                        Android host project
 ```
 
-Size at this issue: 6,025 lines of hand-written Dart under `lib/` (4,738 of them in the Setup feature), 597 lines of schema, 2,027 lines of tests. The generated database code was regenerated for the smaller schema.
+Size at this issue: about 15,700 lines of hand-written Dart under `lib/` (9,190 of them in the Stock feature, about 4,800 in Setup), 597 lines of schema (unchanged), about 3,200 lines of tests.
 
 ### 5.4 Technology
 
@@ -388,7 +454,7 @@ Size at this issue: 6,025 lines of hand-written Dart under `lib/` (4,738 of them
 | Lints | `flutter_lints` | 6.0.0 |
 | Android build | Gradle, Android Gradle Plugin, Kotlin, Java | 9.5.0, 9.3.1, 2.4.20, 17 |
 
-Declared for later milestones and not yet imported by any code: `mobile_scanner` 7.5.0 (barcode), `pdf` 3.13.1 and `printing` 5.15.1 (documents), `fl_chart` 1.3.1 (dashboard), `image_picker` 1.2.4 (images). `cupertino_icons` 2.0.0 is present only for its icon font.
+Used from this issue: `mobile_scanner` 7.5.0 (camera barcode scan; its default bundled ML Kit model needs no download) and `image_picker` 1.2.4 (item photo, at most 512 px). Declared for later milestones and not yet imported: `pdf` 3.13.1 and `printing` 5.15.1 (documents), `fl_chart` 1.3.1 (dashboard). `cupertino_icons` 2.0.0 is present only for its icon font.
 
 ### 5.5 Start-up and the setup gate
 
@@ -433,11 +499,13 @@ If the settings cannot be read, `/loading` shows "The database could not be open
 | `/wizard` | First-run wizard | Outside the navigation frame; `?next=` names where to land |
 | `/pos` | Cash Register placeholder | Branch 1, the home location |
 | `/invoices` | Invoices placeholder | Branch 2 |
-| `/stock` | Stock placeholder | Branch 3 |
+| `/stock` | Stock workspace | Branch 3 |
 | `/dashboard` | Dashboard placeholder | Branch 4 |
 | `/setup` | Setup workspace | Branch 5 |
 | `/setup/:page` | A Setup page, or a master's list (`page` is a slug such as `pos-settings`) | Expanded: the workspace stays on the left and the move does not animate |
 | `/setup/:page/:id` | A master's form; `id` is the record id or `new` | Back returns to the list |
+| `/stock/:page` | A stock page, master list or report (`page` is a slug such as `item`, `stock-entry`, `stock-ledger`); report filters come as query parameters (`warehouse`, `item`, `voucher`, `from`, `to`) | As Setup; expanded with a record open, the record's list takes the left pane |
+| `/stock/:page/:id` | A stock master or document; `id` is the record id or `new` (`?parent=` on a tree's Add Child, `?item=` on Add Price) | Back returns to the list |
 
 The five destinations are branches of one `StatefulShellRoute.indexedStack`, so each keeps its own navigation state when the owner switches between them.
 
@@ -475,6 +543,14 @@ The five destinations are branches of one `StatefulShellRoute.indexedStack`, so 
 | D-28 | All enabled Modes of Payment are offered for sales and refunds; one Default Mode of Payment. "Allow in Returns" and the Item Groups filter are dropped | Owner's decision; both exist to tell registers apart | A refund can go to any enabled mode |
 | D-29 | Schema version 1 was edited in place, without a migration | Owner's decision; nothing had been sold yet | Databases and backups made before issue 3 do not match the schema (P-13) |
 | D-30 | The Default Price List is kept by name in Selling Settings; `savePriceList` carries a rename across, and `_checkPriceLists` refuses a save or delete that leaves it missing or disabled | It replaces the foreign key the POS Profile had to its price list | The check reads Selling Settings on every price list save and delete |
+| D-31 | `ReportTable` builds rows lazily in two synced lists (a pinned first column and the rest) instead of a `DataTable` | R3 asks for a pinned first column and smooth scrolling of 5,000 rows; a `DataTable` builds every cell at once and cannot pin | Fixed column widths (160 / 128dp); a deviation from R1 §7.1's "DataTable" |
+| D-32 | "Edit Posting Date and Time" is not stored: a draft saved with it off has posting time = modified time; `postingSetByHand` reads the switch back, and Submit moves an unedited posting to the moment of submit | No schema change (D-29 is not repeated) | The rule couples two columns; documented in `stock_documents.dart` |
+| D-33 | The engine replays each changed item-warehouse chain from its first entry and refuses negative stock only from the changed posting onward; a transfer's target chain is replayed when its incoming rate changes | Simple and always correct; R3 states the ceiling | Linear in an item's history (P-15) |
+| D-34 | Rules that only apply to a sale (STK-R11, R26, the sale side of R22 and R27, the rate of a sale return) wait for the Cash Register plan; the engine is voucher-type generic and `priceFor`, `itemTaxTemplateOf`, `availableEntries` are ready | Owner's decision; the sale is plan 03's | Plan 03 must wire them |
+| D-35 | A template's numeric range is narrowed by ticking values in Create > Multiple Variants | No columns for a template range in schema version 1 | The narrowing is not stored on the template |
+| D-36 | Opening stock from the item form is a Material Receipt (Is Opening) for every stock item (STK-R5); STK-R40's reconciliation route also works | R5 says so | Two ways to enter opening stock |
+| D-37 | Material Issue may take expired batches (the write-off of STK-R22); Material Transfer may not | R22 and R21 read together | — |
+| D-38 | The low-stock count reaches the shell from the router (`AdaptiveShell.stockBadge`) | `core` must not import a feature | The router watches two stock providers |
 
 ---
 
@@ -623,7 +699,8 @@ extension NamingSeries on AppDatabase {
 | `showRowEditor<R>` | `showRowEditor(context, builder)` | Compact: a modal bottom sheet that stays above the keyboard. Wider: a 400dp side sheet that slides in from the trailing edge. Completes with the value the editor pops. |
 | `ChildTable<T>` | `ChildTable({rows, rowBuilder, editorBuilder, readOnly})` | Lists the rows. Tapping one opens it in `showRowEditor`; "Add Row" opens the editor with no row. `readOnly` hides "Add Row"; rows still open. |
 | `StatusChip` | `StatusChip(status)` | Shows the translated status in its colour role (section 8.1). An unknown status shows as is, in the neutral role. |
-| `ReportTable` | `ReportTable({columns, rows, filters, exportName})` | A filter bar, a table that scrolls both ways, and a CSV export action. A column whose values are all numbers is right-aligned. |
+| `ReportTable` | `ReportTable({columns, rows, filters, exportName, totals, cell, onRowTap, emptyText})` | A filter bar, a table whose rows are built as they scroll into view, a first column that stays put while the others scroll sideways, an optional totals row, and a CSV export action. Values past the last column are carried for `onRowTap` and are neither shown nor exported. `cell` formats a value for display; the export keeps raw values. A column whose values are all numbers is right-aligned (D-31). |
+| `DateField` | `DateField({label, value, formats, onChanged, withTime, mandatory, enabled})` | A date (or date and time) picked with Material pickers, stored as `YYYY-MM-DD` (or with time), shown in the Date Format. An optional field can be cleared. |
 | `toCsv` | `toCsv(columns, rows)` | A header line, then one line per row. Cells holding a comma or a quote are quoted. |
 
 ### 6.9 Setup feature: `lib/features/setup/`
@@ -660,7 +737,7 @@ A post-condition guards the rule that spans records: after a Price List save or 
 |---|---|
 | `wizard_screen.dart` | Language (with **Restore from backup** below the list), Region (country and currency pickers, format preview; the device's country preselected), Store (abbreviation suggested), Done. Compact: one step per screen; wider: a 560dp card. |
 | `setup_screen.dart` | `setupPage(slug, id)` and `SetupScreen` (a `ListDetailPane` of `SetupHome` and the page). `SetupHome` lists six groups; pages owned by other plans are shown disabled. |
-| `form_kit.dart` | `FormPage`, `SectionHeading`, `FieldGrid`, `LockNote`, `MasterList`, `showProblems`, `confirm`, `attempt` (runs a save and shows a refusal or any other error), `refusalText`. |
+| `form_kit.dart` | `FormPage`, `SectionHeading`, `FieldGrid`, `LockNote`, `MasterList` (optional `trailingOf`, used for document status chips), `showProblems`, `confirm`, `attempt` (runs a save and shows a refusal or any other error, numbers and dates in the store's formats), `refusalText`, `lineProblemText`, `lineProblemMessage`. |
 | `settings_pages.dart` | `SinglesForm` and its field spec; Store Profile, System Settings (live preview), Global Defaults, Selling Settings, POS Settings (Payment Methods, Configurations, Print Settings; choices of enabled modes, print headings and enabled terms read first); `countryInfoProvider`, `submittedProvider`. |
 | `simple_masters.dart` | Currency (live amount preview), `NamedMasterForm`; Mode of Payment, Tax, Price List lists and forms. |
 | `tax_template_pages.dart` | Sales Taxes and Charges Template (rows, row editor, Try it), Item Tax Template; `NumberField`. |
@@ -669,7 +746,45 @@ A post-condition guards the rule that spans records: after a Price List save or 
 
 ### 6.10 Localisation: `lib/l10n/`
 
-`app_en.arb` holds 216 English messages: the shell and widget labels of issue 1 and about 200 Setup labels, field names (ERPNext's words), refusal and problem messages. `languageName` holds each language's own name for the language lists. `l10n.yaml` sets `nullable-getter: false`, so `AppLocalizations.of(context)` needs no null check. English is the only locale.
+`app_en.arb` holds 466 English messages: the shell and widget labels of issue 1, about 200 Setup labels and 250 Stock labels, field names (ERPNext's words), refusal and problem messages. `languageName` holds each language's own name for the language lists. `l10n.yaml` sets `nullable-getter: false`, so `AppLocalizations.of(context)` needs no null check. English is the only locale.
+
+### 6.11 Stock feature: `lib/features/stock/`
+
+**Logic (`logic/`), pure Dart.**
+
+| File | Contents |
+|---|---|
+| `valuation.dart` | `StockBalance`: `receive`, `issue`, `reset` for FIFO (queue of `[qty, rate]` layers with ERPNext's negative-layer rules: an issue past the queue keeps a negative layer at the last rate, the next receipt settles it), Moving Average (rate held at 9 decimals; with no stock on hand the incoming rate becomes the rate) and serial cost (each unit at its own rate). Values rounded to Currency Precision. |
+| `stock_rules.dart` | `stockQty`, `isWhole`, `spreadCosts` (proportional, last row takes the remainder), `validityOverlaps`, `pickPrice` (STK-R10 steps 1-2), `itemTaxTemplateFor` (STK-R13), `batchStatus`, `defaultExpiry`, `autoPick` (FIFO / LIFO / Expiry). |
+| `stock_documents.dart` | `EntryLine`, `SbEntry`, `ReconciliationLine`, `StockPurpose`, `LineProblem`; `checkEntryLines` and `checkReconciliationLines` (mandatory warehouses, groups, fractions, item state, zero rate, serial count and duplicates, entry totals, batch or serial items in a count); `postingSetByHand` (D-32). |
+| `variants.dart` | `numericValues`, `combinations`, `variantCode`. |
+| `serials.dart` | `serialRange` (`SN-01::10`). |
+
+**Data (`data/`).** Extensions on `AppDatabase`; every write runs in one transaction.
+
+| File | Contents |
+|---|---|
+| `stock_ledger.dart` | `postLedger` (insert, then replay), `cancelLedger`, `repostChains`, `balanceAt`, `checkNotFrozen`, `syncStockEntryValues`, `rebuildBins`. Replaying a chain (D-33): for each entry in posting order a receipt adds, an issue removes, a reconciliation entry sets the balance to its counted quantity and rate (kept in `qty_after_transaction` and `incoming_rate`); the running quantity, rate, value, value change and outgoing rate are written back only where they changed; a negative balance from the changed posting onward is refused with the item, warehouse, quantity available, quantity needed, date and voucher (never allowed for batch and serial items; no batch may go below zero); the outgoing rate of each transfer line becomes the incoming rate of its target entry (plus its share of additional costs), and the target chain is replayed; `bin` receives the final state (FIFO queue as JSON). |
+| `stock_entry_db.dart` | `StockFacts` (item facts, usable warehouses, whole-number units, precisions, `amendedName`, `postingAt`, `refuseFirst`); `StockEntryDb`: `saveStockEntry` (lines, additional costs spread, typed batches and receipt serials created), `submitStockEntry` (name from the default series or the amended name; empty batch / serial lines filled from series or by Auto Fetch; serial and batch checks; one ledger entry per line, side and batch; serial status moved), `cancelStockEntry`, `amendStockEntry`, `deleteStockEntry`, `saveBatch` (expiry rule), `createBatch`, `availableEntries`, `entriesOf`. |
+| `stock_reconciliation_db.dart` | `fillCurrent`, `fetchItems`, `saveStockReconciliation`, `submitStockReconciliation`, `cancelStockReconciliation`, `amendStockReconciliation`. |
+| `stock_masters.dart` | `saveWarehouse`, `deleteWarehouse` (Default Warehouse rules), `saveItemGroup`, `saveUom`, `saveBrand`, `saveItemAttribute`, `saveSerialNo`, `saveItem` (naming, frozen fields, unit lock, barcodes, child tables, opening stock and price, template propagation), `createVariants`, `saveItemPrice`, `hasLedger`, `priceFor`, `itemTaxTemplateOf`. |
+| `stock_lists.dart` | The list queries of the screens: item rows (with stock, price and barcodes), item prices, batches, serial numbers, batch stock, the item strip, the Default Valuation Method lock, `idByName`. |
+| `stock_reports.dart` | `StockFilters`; the seven reports; `watchLowStockCount`. Group warehouses and item groups include their subtrees. |
+
+**Interface (`ui/`).**
+
+| File | Screens |
+|---|---|
+| `stock_screen.dart` | `stockPage(slug, id, query)`, `StockScreen` (workspace or the record's list on the left on an expanded window), `StockHome` (Items and Pricing, Stock Transactions, Serial No and Batch when enabled, Settings, Reports; low-stock badge). |
+| `item_pages.dart` | Item list (search by code, name, barcode; scan; filter chips; thumbnail, stock dot, price) and Item form (strip of stock levels and prices; tabs Details, Inventory, Variants, Sales, Tax; barcode, unit, re-order, tax and attribute row editors; Create Single / Multiple Variants). |
+| `tree_masters.dart` | `TreeList` (nested `ExpansionTile`s, Add Child, flat-list switch); Warehouse and Item Group forms. |
+| `stock_masters_pages.dart` | UOM, Brand, Item Attribute, Item Price, Stock Settings, Batch (status, quantity per warehouse), Serial No (status, warehouse, ledger); `RowEditorBody`, `deleteAndLeave`. |
+| `stock_entry_page.dart` | Stock Entry list and form (purpose, posting time, default warehouses, scan field, items, additional costs, totals, Save / Submit / Cancel / Amend, Stock Ledger link). |
+| `stock_reconciliation_page.dart` | Stock Reconciliation list and form (purpose, warehouse, posting time, Scan Mode, Fetch Items, CSV, items with coloured differences). |
+| `serial_batch_editor.dart` | `SerialBatchEditor` (STK-R27). |
+| `report_pages.dart` | `StockReport`, `ReportPage` (filter fields, or a filter sheet on phones), Quick Stock Balance. |
+| `scan.dart` | `scanBarcode`, `ScanButton`. |
+| `stock_providers.dart` | Streams of warehouses, item groups, units, brands, attributes, item rows, item strip and image, low-stock count; `searchItems`, `itemByBarcode`, `unitsOf`. |
 
 ---
 
@@ -693,7 +808,7 @@ A post-condition guards the rule that spans records: after a Price List save or 
 - Date-times are `TEXT` in the form `YYYY-MM-DD HH:MM:SS`, local time.
 - Documents carry `docstatus` with `CHECK (docstatus IN (0,1,2))`.
 - Status columns hold ERPNext's English status names, constrained by `CHECK`.
-- Masters and documents (24 tables) carry `created_at` and `modified_at`, both defaulting to the time of insert. Every update written by the Setup feature sets `modified_at`. Child tables, `singles`, `series` and the ledger tables have neither. See P-3.
+- Masters and documents (24 tables) carry `created_at` and `modified_at`, both defaulting to the time of insert. Every update written by the Setup and Stock features sets `modified_at`; for stock document drafts `modified_at` also tells whether the posting time was set by hand (D-32). Child tables, `singles`, `series` and the ledger tables have neither. See P-3.
 - Child tables reference their parent by foreign key and order their rows with `idx` where order matters.
 
 ### 7.3 Where each table is defined
@@ -876,7 +991,7 @@ Stored in `singles` under the doctype shown. A key that is absent takes the defa
 | `auto_insert_price_list_rate_if_missing` | 1 |
 | `allow_negative_stock` | 0 |
 | `auto_indent` (show low-stock alerts) | 1 |
-| `stock_frozen_upto` | none |
+| `stock_frozen_upto` | none (`YYYY-MM-DD`; blank is none) |
 | `enable_serial_and_batch_no_for_item` | 0 |
 | `pick_serial_and_batch_based_on` | `FIFO` |
 | `auto_create_serial_and_batch_bundle_for_outward` | 1 |
@@ -954,11 +1069,23 @@ Each destination shows an outlined icon, and a filled one when selected.
 | Store | Store Profile, System Settings, Global Defaults, Currency |
 | Selling | POS Settings, Mode of Payment, Price List, Selling Settings |
 | Taxes | Tax, Sales Taxes and Charges Template, Item Tax Template |
-| Stock | Stock Settings (disabled: later milestone) |
+| Stock | Stock Settings (the same page as Stock › Settings) |
 | Printing | Print Settings, Letter Head, Print Heading, Terms and Conditions (disabled: later milestone) |
 | Data | Naming Series, Data Import, Data Export, Backups |
 
 Compact and medium: the workspace fills the screen and a link pushes the page. Expanded: the workspace is a 360dp left pane with the chosen link highlighted; the page fills the right pane.
+
+**Stock destination.**
+
+| Group | Pages |
+|---|---|
+| Items and Pricing | Item, Item Group, Item Price, Brand, Item Attribute |
+| Stock Transactions | Stock Entry, Stock Reconciliation |
+| Serial No and Batch | Serial No, Batch (shown when Stock Settings enables them) |
+| Settings | Stock Settings, Warehouse, UOM |
+| Reports | Stock Ledger, Stock Balance, Quick Stock Balance, Batch-wise Balance History, Serial No Ledger, Item Price Stock, Low Stock |
+
+The Stock destination icon and the Low Stock link carry a count badge of low-stock items while Show low-stock alerts is on. Expanded: with a record open, its list (for example the Item list) takes the left pane. Documents show a status chip (Draft, Submitted, Cancelled) in their list and app bar; Submit and Cancel ask for confirmation. Reports: a filter bar (a Filters sheet on phones), a pinned first column, a totals row, Export CSV, and rows that open their voucher.
 
 **Forms.** A title, Delete (existing masters) and a Save button in the app bar; sections with headings; fields in two columns from 600dp of pane width. Mandatory labels end with `*`. A failed save opens a dialog listing each problem and keeps the form. A locked field shows a lock icon and its reason. Master lists have a search bar, an Add button and an empty state that offers the same action. Child rows open in a bottom sheet on phones and a side sheet on tablets.
 
@@ -975,7 +1102,9 @@ The system calls no remote service. Its interfaces to other software are the pac
 | `csv`, `path_provider`, `share_plus` | Report export; CSV import and export | Yes |
 | `file_picker` | Choosing an import or restore file; saving templates, exports and backups | Yes |
 | `sqlite3` | Opening a backup read-only before a restore | Yes |
-| `mobile_scanner`, `pdf`, `printing`, `fl_chart`, `image_picker` | Later milestones | No |
+| `mobile_scanner` | Camera barcode scan | Yes |
+| `image_picker` | Item photo from camera or gallery, at most 512 px | Yes |
+| `pdf`, `printing`, `fl_chart` | Later milestones | No |
 
 ### 8.3 Device and operating-system interfaces
 
@@ -988,7 +1117,8 @@ The system calls no remote service. Its interfaces to other software are the pac
 | App asset bundle | In | `assets/country_info.json` |
 | App cache directory | Write | `<exportName>.csv`, written before sharing |
 | Android share sheet | Out | Receives the CSV file with MIME type `text/csv` |
-| Camera | In | Declared by the barcode plugin; no code uses it yet |
+| Camera | In | Barcode scan (`mobile_scanner`) and item photo (`image_picker`); the permission is asked when first used |
+| Photo picker | In | Item photo from the gallery |
 
 ### 8.4 Android permissions
 
@@ -996,7 +1126,7 @@ Permissions in the merged release manifest:
 
 | Permission | Source | Needed |
 |---|---|---|
-| `android.permission.CAMERA` | `mobile_scanner` plugin | For barcode scanning, in a later milestone |
+| `android.permission.CAMERA` | `mobile_scanner` plugin | Barcode scanning and item photos |
 | `android.permission.ACCESS_NETWORK_STATE` | Added by a plugin | Not by this app; left in place (P-4) |
 | `com.rx_merchant.rx_merchant.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` | AndroidX | App-private; grants nothing |
 
@@ -1028,7 +1158,7 @@ Run from the repository root.
 | 1. Fetch packages | `flutter pub get` | Packages resolved; localisation code generated |
 | 2. Generate database code | `dart run build_runner build` | `lib/core/db/app_database.g.dart` written; one warning (P-2) |
 | 3. Check | `flutter analyze` | `No issues found!` |
-| 4. Test | `flutter test` | `All tests passed!` (141) |
+| 4. Test | `flutter test` | `All tests passed!` (191) |
 | 5. Build | `flutter build apk --release` | `build/app/outputs/flutter-apk/app-release.apk` |
 | 6. Install | `adb install -r build/app/outputs/flutter-apk/app-release.apk` | `Success` |
 
@@ -1067,8 +1197,9 @@ The release build is signed with the debug key, as the Flutter template sets it.
 | `fafec23` | 2026-11-15 01:12 +08:00 | Added Claude Directory (plans and agent skills) |
 | `97bfd33` | 2026-11-15 09:49 +08:00 | Milestone M0 and its session report |
 | `d5b4836` | 2026-11-16 18:00 +08:00 | The Setup plan (issue 2) and its session report |
+| `65f427a` | 2026-11-16 22:29 +08:00 | POS Profile removal (issue 3) and its session report |
 
-On the date of issue, the POS Profile removal (issue 3) is in the working tree and **not yet committed**. The project owner commits. The session report for this issue (R10) lists every added, changed and deleted file.
+On the date of issue, the Stock plan (issue 4) is in the working tree and **not yet committed**. The project owner commits. The session report for this issue (R10) lists every added, changed and deleted file.
 
 ---
 
@@ -1079,22 +1210,22 @@ On the date of issue, the POS Profile removal (issue 3) is in the working tree a
 | Check | Result |
 |---|---|
 | Static analysis, `flutter analyze` | No issues |
-| Formatting, `dart format` | All 55 files formatted |
+| Formatting, `dart format` | All 80 files formatted |
 | Fixes, `dart fix --dry-run` | Nothing to fix |
-| Automated tests, `flutter test` | 141 of 141 pass |
-| Release build | Builds; 75.0 MB APK |
+| Automated tests, `flutter test` | 191 of 191 pass |
+| Release build | Builds; 80.4 MB APK |
 | Release manifest | No `INTERNET` permission |
-| Phone emulator, 360dp wide | Issue 3: fresh install, wizard, POS Settings saves, Default Price List refusal. Issue 2: wizard, Setup pages, backup / wipe / restore round trip |
-| Tablet emulator | Issue 2 only: wizard card; Setup in one pane (portrait) and two panes (landscape); side-sheet row editor. Not repeated at issue 3 |
+| Phone emulator, 360dp wide | Issue 4: wizard; item with barcode, opening stock and price; Material Issue by typed barcode; Stock Ledger and Stock Balance; low-stock badge; Transfer defaults. Issue 3: POS Settings, Default Price List refusal. Issue 2: Setup pages, backup / wipe / restore |
+| Tablet emulator | Issue 4: Item list beside the two-column form (landscape); Stock Reconciliation with Fetch Items and the side-sheet row editor; portrait one pane. Issue 2: wizard card, Setup panes |
 | Real device | **Not tested** |
 
-All checks were run on 2026-11-16, after the last code change. Issue 1's checks (launcher label, 411dp phone, `aapt2` badging) were not repeated.
+All checks were run on 2026-11-17, after the last code change. Issue 1's checks (launcher label, 411dp phone, `aapt2` badging) were not repeated.
 
 ### 10.2 Automated tests
 
 | File | Tests | Covers |
 |---|---|---|
-| `test/app_test.dart` | 14 | Wizard gate: fresh install shows only the wizard, with Restore from backup; Language, Region (device country preselected), Store (abbreviation suggested), Done lands on the Cash Register; a set-up store never sees the wizard. Shell: bottom bar with five destinations in order; boundaries at 599, 600, 839 and 840dp; switching destinations; rotation. Setup: workspace then pushed page on compact (later-milestone links disabled); workspace beside the page on expanded; a settings page saves to `singles`; POS Settings does not save back a stored mode that is no longer offered. |
+| `test/app_test.dart` | 14 | Wizard gate: fresh install shows only the wizard, with Restore from backup; Language, Region (device country preselected), Store (abbreviation suggested), Done lands on the Cash Register; a set-up store never sees the wizard. Shell: bottom bar with five destinations in order; boundaries at 599, 600, 839 and 840dp; switching destinations; rotation. Setup: workspace then pushed page on compact (Stock Settings reachable, later-milestone links disabled); workspace beside the page on expanded; a settings page saves to `singles`; POS Settings does not save back a stored mode that is no longer offered. |
 | `test/core/db/schema_test.dart` | 4 | Exactly the 45 tables; the 14 indexes; foreign keys on; a child row with a missing parent is refused. |
 | `test/core/db/singles_test.dart` | 15 | Defaults of all seven settings pages; derived defaults, including a blank abbreviation; POS Settings' blank "None" read as none; write then read; one row per key; clearing a key; the stream emits after a write; the same field under two doctypes stays separate. |
 | `test/core/numbers/flt_test.dart` | 13 | SET-A1 to A3; negative midpoints; whole-number midpoints; zero; integers; nine decimals; the setting-to-method mapping. |
@@ -1104,12 +1235,15 @@ All checks were run on 2026-11-16, after the last code change. Issue 1's checks 
 | `test/core/widgets/status_chip_test.dart` | 7 | Colour role and label of each status; an unknown status. |
 | `test/core/widgets/child_table_test.dart` | 5 | Rows listed; bottom sheet when compact; side sheet when wider; Add Row; read-only. |
 | `test/core/widgets/link_field_test.dart` | 7 | Label and value; matches and Create new; narrowing and picking; mandatory mark and error; clear button rules. |
-| `test/core/widgets/report_table_test.dart` | 5 | CSV header and rows; quoting; empty cells; headers, cells and export action; sideways scroll. |
+| `test/core/widgets/report_table_test.dart` | 6 | CSV header and rows; quoting; empty cells; headers, cells and export action; the first column stays while the rest scroll sideways; hidden trailing values, totals row, cell formatting and row tap. |
 | `test/features/setup/logic/tax_template_test.dart` | 13 | SET-A8 to A11; included-reference rule; missing tax; SET-R12 worked example (61.88); row removal renumbering; stored type values. |
 | `test/features/setup/logic/data_import_test.dart` | 9 | Header matching; blank rows; SET-A17 problem position; insert and update checks; barcode ownership; EAN / UPC; price validity overlap; `validBarcode`. |
 | `test/features/setup/data/setup_db_test.dart` | 9 | SET-A12; a failed wizard writes nothing; SET-A13; SET-A14 (Default Price List cannot be disabled or deleted, even beside another enabled list; can be once another is the default); SET-A15; SET-A16 (a rename follows into Selling Settings); delete of a used master refused; duplicate name; Update Series below a used number and the next name; naming series order. |
 | `test/features/setup/data/import_backup_test.dart` | 7 | 200 items imported with price and barcode, exported, updated; SET-A17 at database level; Item Price and Item Barcode insert and update; SET-A18; SET-A19; restore onto a fresh install takes no safety backup, onto a set-up store one; Number of Backups below 1. |
-| **Total** | **141** | |
+| `test/features/stock/logic/stock_logic_test.dart` | 19 | STK-A1 to A11, A13 to A15; FIFO negative layer settled; reconciliation reset; price validity and batch prices; batch status and default expiry; auto pick by FIFO, LIFO and Expiry. |
+| `test/features/stock/data/stock_db_test.dart` | 26 | FIFO costs and naming; STK-A16 to A27 (A12, A5 at database level); cancel and amend `-1`; additional costs; opening stock and price from a new item; frozen fields and unit lock (A6); fraction (A7); Default Warehouse rules; variants (A10, template refused); serial series and a range of 50; reports (ledger, balance, low stock); duplicate serial; an old negative entry does not block; price fallback and item tax up the tree; batch expiry rule. |
+| `test/features/stock/ui/stock_ui_test.dart` | 4 | Stock home groups (Serial and Batch hidden until enabled); empty Item list offers Add Item and Import items; a new item saves with its name from the code; low-stock badge on the Stock destination; Stock Ledger with a totals row. |
+| **Total** | **191** | |
 
 Database tests run against an in-memory SQLite database with the real schema. Widget tests run the real widgets inside the app's theme and localisation. No test uses a mock.
 
@@ -1131,10 +1265,11 @@ Database tests run against an in-memory SQLite database with the real schema. Wi
 | C-4 | `app_test.dart` "adaptive shell"; `list_detail_pane_test.dart`; `child_table_test.dart` |
 | C-9, C-10 | `schema_test.dart` |
 | C-2 | Release manifest inspection (10.4) |
+| STK-R1 to R43, STK-A1 to A27 | `stock_logic_test.dart`, `stock_db_test.dart`, `stock_ui_test.dart`; emulator (10.5) |
 
 ### 10.4 Build verification
 
-- `flutter build apk --release` completed and wrote `app-release.apk`, 75.0 MB (75.3 MB at issue 2, 68.9 MB at issue 1).
+- `flutter build apk --release` completed and wrote `app-release.apk`, 80.4 MB (75.0 MB at issue 3, 75.3 MB at issue 2, 68.9 MB at issue 1). The growth is the barcode model and image picker now compiled in.
 - The merged release manifest contains `android.permission.INTERNET` zero times. Its `uses-permission` entries are unchanged from issue 1: `ACCESS_NETWORK_STATE`, `CAMERA`, `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`.
 
 ### 10.5 Device verification
@@ -1158,6 +1293,17 @@ Issue 3 checks, phone only, after a cold boot, the old app uninstalled and the i
 | `Medium_Phone_API_36.1` | 360dp wide | Wizard: United States, USD, store "Test Store"; the last step says sales are tax-free "until a Sales Taxes and Charges Template is made the Default". Setup › Selling lists POS Settings, Mode of Payment, Price List, Selling Settings. POS Settings shows Payment Methods (Default Mode of Payment: Cash), Configurations (eight switches, Set Grand Total to Default Payment Method on, Always Ask, Grand Total), Print Settings (POS Receipt, None, None); a changed switch saves ("Saved"). Price List › Standard Selling switched off: Save refused with the Default Price List message. Logcat: 0 Flutter errors. On first open the top of POS Settings drew as garbled lines until a scroll repainted it, the emulator fault P-1. |
 
 The tablet emulator was not run at issue 3. A first emulator session in software GL mode crashed ("UpdateLayeredWindowIndirect failed … A device attached to the system is not functioning"); the checks above ran on a restarted emulator.
+
+Issue 4 checks. Each run followed the project's emulator procedure: `emulator -avd <AVD> -no-snapshot-load`, `adb uninstall com.rx_merchant.rx_merchant`, `flutter run --no-enable-impeller`. Taps and text were driven through `adb`; screens read through `uiautomator` and screenshots.
+
+| Device | Window | Observed |
+|---|---|---|
+| `Medium_Phone_API_36.1` | 1080x2400, compact | Wizard (United States, USD) → Add your first item → Stock home. New item PARA500: name pre-filled from the code; barcode `4006381333932` as EAN shows the check-digit error, `…931` accepted; Opening Stock 100 at 2.00, Standard Selling Rate 5.00; saved with the strip "Stores: 100.000" and "Standard Selling · Nos: $ 5.00"; Default UOM and Maintain Stock locked with the reason. Item list row with price and stock. Material Issue: the barcode typed into Scan Barcode added the row at $ 2.00; qty 30; Submit → MAT-STE-2026-00002, Total Outgoing Value $ 60.00. Stock Ledger opened from the entry, filtered by voucher, pinned Date column. Stock Balance: opening 0, in 100 / $ 200, out 30 / $ 60, balance 70 / $ 140, rate 2.00. |
+| `Medium_Tablet` | 2560x1600 landscape, expanded | Rail with labels; Item list on the left, item form in two columns. Stock Reconciliation: Fetch Items, row edited in the side sheet with live differences, Submit → MAT-RECO-2026-00001, Difference Amount $ 20.00. |
+| `Medium_Tablet` | portrait, medium | Rail without labels; one pane; two-column form. |
+| `Medium_Phone_API_36.1` | after the review fixes | Item SMOKE with opening stock 2 and re-order level 5: the Stock destination shows the badge 1. New Stock Entry switched to Material Transfer: Source Stores, Target empty. No runtime errors (Dart Tooling Daemon). |
+
+Two defects found on the emulator were fixed before issue: the Default Unit of Measure was blank when a new item form first opened (the form now waits for its choices, D-22), and the report totals row crashed reports whose first column is a date. Camera scanning and photo capture were not exercised (no camera image on the emulator); barcodes were typed, as a hardware scanner types them.
 
 ### 10.6 Code review
 
@@ -1201,6 +1347,25 @@ Issue 3. Same process: `flutter analyze`, `dart fix`, a Ponytail review of the d
 
 Left as they are, with reasons: the POS Settings choices are queried inside a UI provider, as the Selling Settings page already does; the `check()` helper exists on one page only; option strings appear in the page and in `PosSettings` comments; the choices provider is a `FutureProvider` (only one Setup page is open at a time, so the choices cannot go stale under it).
 
+Issue 4. `flutter analyze`, `dart fix`, a Ponytail review (six findings, about −105 lines, all applied: an unused helper, a nine-thunk `copyWith`, a duplicate document list widget, a duplicate stream, a duplicate `exists` helper, an unused enum field), and the code-review skill with a standards reviewer and a spec reviewer against `65f427a`. Fixes, each at the cause:
+
+| Finding | Fix |
+|---|---|
+| A serial number listed twice, or on two lines, was accepted | `LineProblem.duplicateSerial`; test |
+| An old negative entry blocked every later posting of that item and warehouse | Negative stock refused only from the changed posting onward (D-33); test |
+| Auto Fetch ordered serial numbers by `modified_at` | By when the unit came into the warehouse |
+| STK-R10 step 3 and STK-R13's group walk had no database caller | `priceFor`, `itemTaxTemplateOf`; test |
+| STK-R19: expiry neither mandatory nor defaulted; the batch form offered non-batch items | `saveBatch` defaults or refuses (`Refusal.expiryRequired`); pickers list batch or serial items only; test |
+| A new Material Transfer started with source = target | Target cleared when switching to Transfer |
+| Screens ran raw SQL | Queries moved to `data/stock_lists.dart`; the item strip became a provider |
+| Submit was a `TextButton` | `FilledButton` (tonal) |
+| Reconciliation quantity difference rounded at 9 decimals | Float Precision |
+| A recost rewrote a Stock Entry without `modified_at` | Set |
+| The posting-time rule was spelled out in four places; amended names in two | `postingSetByHand`, `amendedName(table, id)` |
+| `core/widgets/adaptive_shell.dart` imported the stock feature | The router passes the count (D-38) |
+
+Left as they are, with reasons: forms read their own initial values with typed drift selects (only raw SQL was moved); `ReportTable` is no longer a `DataTable` (D-31); stored option values show as stored (P-11); stock refusals live in the app's one refusal enum (D-19) and carry positional arguments; the Default Valuation Method lock and the serial checks when cancelling an Issue or Transfer go slightly beyond R3 and follow ERPNext; the two document forms' confirm-save-run helpers stay separate because they save different things.
+
 ---
 
 ## 11. User documentation
@@ -1222,7 +1387,7 @@ What the store owner can do with this build.
 |---|---|
 | Register | Shows "This screen arrives in a later milestone." |
 | Invoices | Same |
-| Stock | Same |
+| Stock | Items, prices, warehouses, stock movements, counts, batches, serial numbers and stock reports; see below |
 | Dashboard | Same |
 | Setup | Every setup page; see below |
 
@@ -1238,7 +1403,7 @@ What the store owner can do with this build.
 | Choose the mode pre-filled at checkout, and how the register behaves | POS Settings |
 | Change the price list the register sells at | Selling Settings: Default Price List. The default list cannot be disabled or deleted until another is the default |
 | Charge VAT | Tax: add "VAT". Sales Taxes and Charges Template: add a template with a row "On Net Total", tax VAT, rate 12; check it in **Try it**; tick **Default**. The register applies the default template. |
-| Exempt some items from a tax | Item Tax Template: Not Applicable for that tax (assigning it to items comes with the Stock milestone) |
+| Exempt some items from a tax | Item Tax Template: Not Applicable for that tax; then assign it on the item's Tax tab or on its Item Group |
 | Change how invoices are numbered | Naming Series; Update Series moves the counter |
 | Load many items | Data Import: Download Template, fill it in a spreadsheet, Choose File, Start Import. Problems are listed by row and column; nothing is imported until all are fixed. |
 | Keep a copy of the data | Backups: Back up now, then the save icon to store the file somewhere other than the device |
@@ -1246,13 +1411,34 @@ What the store owner can do with this build.
 
 A record that is in use cannot be deleted: disable it instead.
 
+**Stock.** Grouped links: Items and Pricing, Stock Transactions, Serial No and Batch (after Stock Settings › Enable Serial and Batch No for Item), Settings, Reports. A number on the Stock icon counts the items at or below their re-order level.
+
+| To | Go to |
+|---|---|
+| Add an item | Item › Add Item: Item Code (Item Name follows), group and unit are filled in. On a new item, Opening Stock with a Valuation Rate puts that stock into the Default Warehouse, and Standard Selling Rate becomes its price. Save. |
+| Find an item | Item: type part of the code, name or barcode, or tap the scan button and point the camera at the barcode |
+| Add a barcode | Item › Details › Barcodes › Add Row. Choose EAN or UPC to have the number checked. A barcode can name a unit, so scanning a box barcode picks the Box. |
+| Sell in boxes | Item › Inventory › Units of Measure: Box, Conversion Factor 10. A unit used on a document keeps its factor. |
+| Get warned when stock is low | Item › Inventory › Auto Reorder: warehouse, Re-order Level, Re-order Qty. Low Stock lists every item at or below its level. |
+| Set a price | Item Price (or Add price on the item's strip): price list, unit, rate, optional validity dates and batch |
+| Bring stock in | Stock Entry › Add › Material Receipt: scan or add items, quantity and rate; Additional Costs (freight) are spread over the items. Save, then Submit. |
+| Write stock off, or move it | Stock Entry › Material Issue, or Material Transfer with a source and a target warehouse |
+| Correct a submitted entry | Open it › Cancel, then Amend: a copy opens as a draft and is named with -1 when submitted |
+| Count stock | Stock Reconciliation › Add: Fetch Items from Warehouse, type the counted quantities (or turn on Scan Mode and scan each unit), Submit. CSV Download / Upload works with a spreadsheet. |
+| Enter a backdated document | Turn on Edit Posting Date and Time. A document that would leave stock below zero at any later point is refused, and the message says where. |
+| Freeze past stock | Stock Settings › Stock Frozen Upto |
+| Make variants | Item Attribute: Color (Red RED, Green GRN), Size (Small S…). Item with Has Variants and those attributes › Variants › Multiple Variants: tick the values. Variants such as TSHIRT-RED-S are created; the template itself is never sold or stocked. |
+| Track batches | Item › Inventory: Has Batch No (with Automatically Create New Batch and a Batch Number Series, or type the Batch ID on the receipt), Has Expiry Date with Shelf Life In Days. An expired batch can leave only by Material Issue. |
+| Track serial numbers | Item › Inventory: Has Serial No and a Serial Number Series, or type them on the receipt: in the line's Serial / Batch Entries, Create Serial Nos from Range takes SN-01::50. Each unit leaves stock at its own cost. |
+| See what you have | Reports: Stock Balance (by item and warehouse, with values), Quick Stock Balance (one item, scan its barcode), Stock Ledger (every movement; tap a row to open its document), and the batch, serial, price and low-stock reports. Every report exports to CSV. |
+
 **Later starts.** The app opens on the Register destination. The Welcome screen does not appear again.
 
 **Start again from scratch.** Clear the app's storage in Android settings, or uninstall and reinstall. This deletes all data.
 
 **Dark theme.** Follows the device setting.
 
-Selling, invoices, stock movements and the dashboard are not available yet.
+Selling, invoices and the dashboard are not available yet.
 
 ---
 
@@ -1264,17 +1450,20 @@ Selling, invoices, stock movements and the dashboard are not available yet.
 |---|---|---|---|
 | P-1 | On the development machine's Android emulator in hardware GPU mode, the first app launch after the emulator boots, or after the display density changes, can draw the first screen after the wizard with text missing: once the app-bar title, twice part of the body text, once (on the tablet) rail icons and labels. It clears on the next repaint. | Cosmetic, on the emulator. | Open. Follows the emulator's GPU path: 2 of 2 trigger launches showed it in hardware mode (AMD integrated GPU); 0 of 3 trigger launches and 0 of 6 launches overall in software mode (`-gpu swiftshader_indirect`), same APK; 6 warm relaunches in hardware mode were clean. Small samples. The cause inside the emulator is not known. **Not checked on a real device.** |
 | P-2 | `dart run build_runner build` prints one warning: `item` cannot be found for the foreign key of the `batch` table. | None. The SQL constraint is correct and the schema test passes. | Accepted (D-3). |
-| P-3 | `modified_at` must be set by every update. | None: every update the Setup feature writes sets it. | Open as a rule for later milestones. |
+| P-3 | `modified_at` must be set by every update. | None: every update the Setup and Stock features write sets it. | Open as a rule for later milestones. |
 | P-4 | The release build carries `ACCESS_NETWORK_STATE`, added by a plugin. | None: without `INTERNET` the app cannot connect. | Accepted. Removing it risks a crash in a plugin's background job. |
 | P-5 | (Issue 1: the wizard was a placeholder.) | — | **Closed** at issue 2: the real wizard replaces it. |
 | P-6 | The release build is signed with the debug key. | It cannot be published. | By design: the app is not being published. |
 | P-7 | Generated localisation code is excluded from analysis. | A real problem in it would go unreported. | Accepted (D-11). |
 | P-8 | No real device has been used. | Behaviour on real hardware is unverified. | Open. |
 | P-9 | Restoring onto a fresh install needed the wizard first, because Setup is behind the wizard gate. | — | **Closed** in issue 2: the wizard's first step offers Restore from backup. |
-| P-10 | Leaving a form with unsaved changes discards them without asking. | Edits can be lost by a stray Back. | Open. |
+| P-10 | Leaving a form with unsaved changes discards them without asking. | Edits can be lost by a stray Back; at issue 4 a stray Back on the emulator lost a Stock Entry draft. | Open. |
 | P-11 | Two deviations from R1 §7.1 and §4: Setup link fields are dropdowns without "Create new" (D-20); stored option values show in English as stored. | Owner must create a master from its own page first; a second language would leave those values untranslated. | Accepted for now. |
 | P-12 | The automatic backup on POS Closing submit (SET-R17) is not wired. | Backups are taken only on demand. | Waits for M5; `takeBackup()` is ready. |
 | P-13 | Schema version 1 was edited in place at issue 3 (D-29). A database or backup made before issue 3 still has the POS Profile tables and a NOT NULL `pos_profile_id` in `pos_opening_entry`, `pos_closing_entry` and `sales_invoice`. `checkRestorable` accepts such a backup, because its schema version is 1. | Setup works on it; the first session or sale (M5) would fail. | Open. Clear the app's data on every device that ran an earlier build, and do not restore backups taken before issue 3. |
+| P-14 | Camera barcode scanning and item photos were not exercised: the emulator has no camera image. | Unverified on hardware; typed barcodes (the hardware-scanner path) were verified. | Open. Check on a real device that has never been online (the scan model is bundled). |
+| P-15 | The engine replays a chain from its first entry (D-33). | Fine for one store; slow only if one item in one warehouse reaches hundreds of thousands of entries. | Accepted (R3's stated ceiling); marked `ponytail:` in `stock_ledger.dart`. |
+| P-16 | Sale-only stock rules are not wired: auto-insert price on the first sale (STK-R11), warranty on sale (R26), refusing to sell an expired batch (R22) and choosing serials and batches on a Sales Invoice (R27), the incoming rate of a sale return. | None until the Cash Register exists. | Waits for plan 03 (D-34). |
 
 ### 12.2 Limits of this issue
 
@@ -1290,10 +1479,11 @@ Beyond the milestones in section 4.4, these foundation pieces were left for the 
 - Amount in words
 - Camera and Bluetooth permission declarations of the app itself
 - A thermal printing package
-- From the Setup plan, waiting on other plans: the POS Closing backup hook (M5); the Stock Settings page (R3); Print Settings, Letter Head, Print Heading and Terms and Conditions pages (R6); assigning Item Tax Templates to items and groups (R3)
+- From the Setup plan, waiting on other plans: the POS Closing backup hook (M5); Print Settings, Letter Head, Print Heading and Terms and Conditions pages (R6)
+- From the Stock plan, waiting on the Cash Register: P-16
 
 ---
 
 ## 13. Summary
 
-Rx Merchant is an offline Android point-of-sale app for one store owner, modelled on ERPNext. At this issue, milestone M0 and the whole Setup plan are complete: a first-run wizard that seeds the store in one transaction; the Setup destination with Store Profile, System Settings, Global Defaults, Selling Settings, Currency, Mode of Payment, Tax, Price List, Sales Taxes and Charges Template with its "Try it" panel, Item Tax Template, POS Settings and Naming Series; Data Import and Export of items, prices and barcodes; and Backup and Restore, also from the wizard's first step on a new device. Issue 3 removed ERPNext's POS Profile, because one owner runs one register: its three tables and the `pos_profile_id` columns are gone from schema version 1 (edited in place, so older databases and backups must not be used, P-13); the register's options are on POS Settings, and its warehouse, price list, taxes and letter head are the store defaults. 141 automated tests pass, analysis is clean, the release build carries no internet permission, and the wizard, POS Settings and the Default Price List refusal were checked on a phone emulator (the tablet checks date from issue 2). The work is not yet committed and no real device has been tested. Selling, invoices, stock and the dashboard come next (M2, M3, M5 to M8).
+Rx Merchant is an offline Android point-of-sale app for one store owner, modelled on ERPNext. At this issue, milestone M0, the whole Setup plan and the whole Stock plan are complete. Setup: a first-run wizard that seeds the store; Store Profile, System Settings, Global Defaults, Selling Settings, POS Settings, Currency, Mode of Payment, Tax, Price List, both tax templates, Naming Series; Data Import and Export; Backup and Restore. Stock: the Stock destination with Warehouse and Item Group trees, UOM, Brand, Item Attribute, Items with barcodes, units, re-order levels, taxes, photos and variants, Item Prices with the price and item tax lookups, Stock Settings, Stock Entry (receipt, issue, transfer, additional costs, cancel and amend), Stock Reconciliation (opening stock and counts), batches and serial numbers with the inline Serial / Batch editor, the stock ledger engine (FIFO, Moving Average, serial cost, negative-stock, backdating and freeze rules), seven stock reports and a low-stock badge. The schema did not change. 191 automated tests pass, including every STK acceptance check; analysis is clean; the release build carries no internet permission; the main flows were checked on phone and tablet emulators, and a standards review, a spec review and a Ponytail review were acted on. Rules that only apply to a sale wait for the Cash Register (P-16). The work is not yet committed and no real device has been tested. Selling, invoices and the dashboard come next (M5 to M7).

@@ -13,7 +13,7 @@ extension SetupQueries on AppDatabase {
   // ---- Locks -------------------------------------------------------------
 
   /// SET-R2: true once any document has been submitted.
-  Future<bool> anySubmittedDocument() => _exists(
+  Future<bool> anySubmittedDocument() => exists(
     'SELECT 1 FROM sales_invoice WHERE docstatus = 1 '
     'UNION ALL SELECT 1 FROM stock_entry WHERE docstatus = 1 '
     'UNION ALL SELECT 1 FROM stock_reconciliation WHERE docstatus = 1 '
@@ -23,11 +23,14 @@ extension SetupQueries on AppDatabase {
 
   /// True while a POS session is open.
   Future<bool> sessionOpen() =>
-      _exists("SELECT 1 FROM pos_opening_entry WHERE status = 'Open'");
+      exists("SELECT 1 FROM pos_opening_entry WHERE status = 'Open'");
 
-  Future<bool> _exists(String query) async {
-    final row = await customSelect('SELECT EXISTS ($query) AS found')
-        .getSingle();
+  /// True when [query], with its `?` [args], returns a row.
+  Future<bool> exists(String query, [List<Object> args = const []]) async {
+    final row = await customSelect(
+      'SELECT EXISTS ($query) AS found',
+      variables: [for (final a in args) Variable(a)],
+    ).getSingle();
     return row.read<int>('found') == 1;
   }
 
