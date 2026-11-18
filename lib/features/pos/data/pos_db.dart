@@ -306,11 +306,11 @@ extension PosDb on AppDatabase {
 
   /// Saves [sale] as a draft (no name, no stock effect) in the open session
   /// and returns its id.
-  Future<int> saveSale(Sale sale) => _keepOnFailure(sale, _saveSale);
+  Future<int> saveSale(Sale sale) => keepOnFailure(sale, writeSale);
 
   /// Runs [write] on [sale]; when it fails the transaction rolls back, so
   /// the cart forgets the draft id and line ids the write gave it.
-  Future<T> _keepOnFailure<T>(Sale sale, Future<T> Function(Sale) write) async {
+  Future<T> keepOnFailure<T>(Sale sale, Future<T> Function(Sale) write) async {
     final id = sale.id;
     final dirty = sale.dirty;
     try {
@@ -323,7 +323,9 @@ extension PosDb on AppDatabase {
     }
   }
 
-  Future<int> _saveSale(Sale sale) => transaction(() async {
+  /// Writes [sale] as a draft in the open session: a sale, or a return
+  /// (INV-R5) with its original lines and costs.
+  Future<int> writeSale(Sale sale) => transaction(() async {
     final session = await openSession();
     if (session == null) throw const RefusedException(Refusal.noOpenSession);
     final f = await formats();
@@ -360,6 +362,9 @@ extension PosDb on AppDatabase {
       printHeadingId: Value(sale.printHeadingId),
       tcId: Value(sale.tcId),
       terms: Value(sale.terms),
+      isReturn: Value(sale.returnAgainstId == null ? 0 : 1),
+      returnAgainstId: Value(sale.returnAgainstId),
+      updateStock: Value(sale.updateStock ? 1 : 0),
       modifiedAt: Value(posting),
     );
     final id = sale.id;
@@ -395,6 +400,10 @@ extension PosDb on AppDatabase {
           itemTaxTemplateId: Value(l.itemTaxTemplateId),
           itemTaxRate: Value(itemTaxJson(l.itemTax)),
           warehouseId: sale.warehouseId,
+          // A sale's cost is written when it posts; a return's is the
+          // original's, and nothing when no goods come back.
+          incomingRate: Value(sale.updateStock ? l.incomingRate : 0),
+          salesInvoiceItemId: Value(l.againstLineId),
         ),
       );
       for (final e in l.entries) {
@@ -476,30 +485,13 @@ extension PosDb on AppDatabase {
     final h = await (select(
       salesInvoice,
     )..where((x) => x.id.equals(id))).getSingle();
-    final taxes =
-        await (select(salesInvoiceTax)
-              ..where((x) => x.salesInvoiceId.equals(id))
-              ..orderBy([(x) => OrderingTerm(expression: x.idx)]))
-            .get();
     final sale =
         Sale(
             id: id,
             warehouseId: h.setWarehouseId,
             priceListId: h.priceListId,
             taxesTemplateId: h.taxesTemplateId,
-            taxes: [
-              for (final x in taxes)
-                TaxRow(
-                  chargeType: ChargeType.of(x.chargeType),
-                  taxId: x.taxId,
-                  description: x.description,
-                  rate: x.rate,
-                  // An Actual row keeps its fixed amount.
-                  taxAmount: x.taxAmount,
-                  rowId: x.rowId,
-                  included: x.includedInPrintRate == 1,
-                ),
-            ],
+            taxes: await taxRowsOf(id),
             discountOnNetTotal: h.applyDiscountOn == 'Net Total',
             letterHeadId: h.letterHeadId,
             printHeadingId: h.printHeadingId,
@@ -539,6 +531,25 @@ extension PosDb on AppDatabase {
     return sale;
   }
 
+  /// Invoice [id]'s tax rows, as a sale copies them: an Actual row keeps
+  /// its fixed amount.
+  Future<List<TaxRow>> taxRowsOf(int id) async => [
+    for (final x
+        in await (select(salesInvoiceTax)
+              ..where((x) => x.salesInvoiceId.equals(id))
+              ..orderBy([(x) => OrderingTerm(expression: x.idx)]))
+            .get())
+      TaxRow(
+        chargeType: ChargeType.of(x.chargeType),
+        taxId: x.taxId,
+        description: x.description,
+        rate: x.rate,
+        taxAmount: x.taxAmount,
+        rowId: x.rowId,
+        included: x.includedInPrintRate == 1,
+      ),
+  ];
+
   /// The register's invoices, newest first (POS-R19).
   Stream<List<SalesInvoiceData>> watchRecentOrders() =>
       (select(salesInvoice)
@@ -567,6 +578,7 @@ extension PosDb on AppDatabase {
       code: c.code ?? '',
       fraction: c.fraction ?? 'Cent',
       precision: f.system.currencyPrecision,
+      indian: f.system.numberFormat == '#,##,###.##',
     );
   }
 
@@ -694,12 +706,12 @@ extension PosDb on AppDatabase {
 
   /// POS-R17: saves and submits [sale] in one transaction, and returns its
   /// name. Every POS-R16 problem is reported together ([RefusedAll]).
-  Future<String> submitSale(Sale sale) => _keepOnFailure(sale, _submitSale);
+  Future<String> submitSale(Sale sale) => keepOnFailure(sale, _submitSale);
 
   Future<String> _submitSale(Sale sale) => transaction(() async {
     final problems = await saleProblems(sale);
     if (problems.isNotEmpty) throw RefusedAll(problems);
-    final id = await _saveSale(sale);
+    final id = await writeSale(sale);
     final session = (await openSession())!;
     final now = DateTime.now();
     final posting = toStorage(now);
@@ -780,7 +792,7 @@ extension PosDb on AppDatabase {
     );
     // The ledger engine also writes each line's incoming_rate.
     await postLedger(ledger);
-    await _deliverSerials(id, posting);
+    await deliverSerials(id, posting);
     await _insertMissingPrices(sale, lines, f);
     return name;
   });
@@ -821,9 +833,14 @@ extension PosDb on AppDatabase {
     }
   }
 
-  /// STK-R24, R26: sold serial numbers are Delivered, with their warranty
-  /// running from the sale date.
-  Future<void> _deliverSerials(int invoiceId, String posting) async {
+  /// STK-R24, R26: the serial numbers of invoice [invoiceId] are
+  /// Delivered, with their warranty running from the sale date [posting];
+  /// changed [at] (default: [posting]).
+  Future<void> deliverSerials(
+    int invoiceId,
+    String posting, [
+    String? at,
+  ]) async {
     final rows = await customSelect(
       'SELECT e.serial_no_id, i.warranty_period FROM serial_and_batch_entry e '
       'JOIN sales_invoice_item l ON l.id = e.voucher_detail_id '
@@ -846,7 +863,7 @@ extension PosDb on AppDatabase {
                 ? toStorage(date.add(Duration(days: days))).substring(0, 10)
                 : null,
           ),
-          modifiedAt: Value(posting),
+          modifiedAt: Value(at ?? posting),
         ),
       );
     }

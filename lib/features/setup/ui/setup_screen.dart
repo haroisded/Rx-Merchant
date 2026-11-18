@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../../core/widgets/list_detail_pane.dart';
 import '../../../core/widgets/spacing.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../invoices/ui/printing_pages.dart';
 import '../../stock/ui/stock_masters_pages.dart';
 import 'data_pages.dart';
 import 'naming_series_page.dart';
@@ -13,8 +14,8 @@ import 'tax_template_pages.dart';
 
 const setupPath = '/setup';
 
-/// The page at `/setup/[slug]`, with record [id] for masters; null for a
-/// page another plan builds.
+/// The page at `/setup/[slug]`, with record [id] for masters; null for an
+/// unknown slug.
 Widget? setupPage(String slug, String? id) {
   final path = '$setupPath/$slug';
   return switch (slug) {
@@ -34,6 +35,10 @@ Widget? setupPage(String slug, String? id) {
     'data-import' => const DataImportPage(),
     'data-export' => const DataExportPage(),
     'backups' => const BackupsPage(),
+    'print-settings' => const PrintSettingsPage(),
+    'letter-head' => LetterHeadPage(path: path, id: id),
+    'print-heading' => PrintHeadingPage(path: path, id: id),
+    'terms-and-conditions' => TermsPage(path: path, id: id),
     _ => null,
   };
 }
@@ -70,8 +75,7 @@ class SetupHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    // A null slug is a page built by 05-invoices-and-receipts.
-    final groups = <(String, List<(String?, String)>)>[
+    final groups = <(String, List<(String, String)>)>[
       (
         l.groupStore,
         [
@@ -102,10 +106,10 @@ class SetupHome extends StatelessWidget {
       (
         l.groupPrinting,
         [
-          (null, l.printSettings),
-          (null, l.letterHead),
-          (null, l.printHeading),
-          (null, l.termsAndConditions),
+          ('print-settings', l.printSettings),
+          ('letter-head', l.letterHead),
+          ('print-heading', l.printHeading),
+          ('terms-and-conditions', l.termsAndConditions),
         ],
       ),
       (
@@ -144,13 +148,9 @@ class SetupHome extends StatelessWidget {
                   for (final (slug, label) in links)
                     ListTile(
                       title: Text(label),
-                      subtitle: slug == null ? Text(l.laterMilestone) : null,
-                      enabled: slug != null,
-                      selected: slug != null && slug == selected,
+                      selected: slug == selected,
                       trailing: const Icon(Icons.chevron_right),
-                      onTap: slug == null
-                          ? null
-                          : () => context.go('$setupPath/$slug'),
+                      onTap: () => context.go('$setupPath/$slug'),
                     ),
                 ],
               ),

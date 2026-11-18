@@ -8,7 +8,7 @@
 | System | Rx Merchant, an offline Android point-of-sale app |
 | System version | 1.0.0+1 (`pubspec.yaml`) |
 | Date of issue | 2026-11-18 |
-| Status | Issued. Describes the system at the end of the Cash Register plan (R4), build steps POS-B1 to POS-B9 (milestone M5 and the register part of M8), on top of M0, the whole Setup plan (M1, M4, M9) and the whole Stock plan (M2, M3, the stock part of M8). |
+| Status | Issued. Describes the system at the end of the Invoices and Receipts plan (R6), build steps INV-B1 to INV-B9 (milestone M6), on top of M0 and the whole Setup (M1, M4, M9), Stock (M2, M3, M8), Cash Register (M5) and Sales Dashboard (M7) plans. Every milestone of R1 is built. |
 | Issuing organization | The Rx Merchant project (one owner, who is also the developer) |
 | Prepared by | Claude (AI assistant), for the project owner |
 | Approval | Pending the project owner's review |
@@ -23,6 +23,8 @@
 | 3 | 2026-11-16 | POS Profile removed: the app serves one owner with one register. Tables `pos_profile`, `pos_profile_payment` and `pos_profile_item_group` and the `pos_profile_id` columns of `pos_opening_entry`, `pos_closing_entry` and `sales_invoice` deleted from schema version 1 in place (no migration, by the owner's decision). The register's options moved to a new **POS Settings** page (`singles`); its warehouse, price list, taxes and letter head are the store defaults. The Default Price List of Selling Settings must stay enabled and follows a rename. Plans 00, 01, 02, 03 and 05 updated to match. Sections 0, 2.2, 3, 4, 5.3, 5.6, 5.7, 6.3, 6.9, 6.10, 7, 8.1, 9, 10, 11, 12 and 13 updated. |
 | 4 | 2026-11-17 | The Stock plan (R3), STK-B1 to B13: the Stock destination; Warehouse and Item Group trees, UOM, Brand, Item Attribute; Item with barcodes, units, re-order, tax, image, variants; Item Price and the price and item tax lookups; Stock Settings; the stock ledger engine (FIFO, Moving Average, serial cost, negative-stock, backdating, freeze); Stock Entry; Stock Reconciliation; batches and serial numbers with the inline Serial / Batch editor; seven stock reports and the low-stock badge. Schema unchanged. Every section updated except 2.3, 5.5, 6.1 to 6.7 and 7.7; new section 6.11. |
 | 5 | 2026-11-18 | The Cash Register plan (R4), POS-B1 to B9: the POS Opening Entry, the POS screen (item selector, cart, item detail, number pad, payment, order summary, recent orders) in three window size classes, the totals engine (item and additional discounts, taxes on net total, previous rows, quantity and fixed amounts, taxes included in the rate, item tax overrides, rounding to the smallest coin, In Words), Submit with the stock ledger, held orders, the POS Closing Entry with its backup, and serial numbers and batches at the counter. The sale-side stock rules left by issue 4 (D-34, P-16) are wired, except the cost of a sale return, which comes with returns (R6). Printing and returns stay with R6. Schema unchanged. Every section updated except 2.3, 5.5, 6.1 to 6.5, 7.1, 7.3 to 7.7 and 8.4; new section 6.12. |
+| 6 | 2026-11-18 | The Sales Dashboard plan (R5), DSH-B1 to B5: the Dashboard destination with its period bar (Today to This Year, Custom), eight number cards with the change against the previous period, the monthly sales goal, four charts (Sales Trend, Sales by Item Group, Top Items, Payment Modes) with table alternatives, and three reports (Sales Analytics, Item-wise Sales, Gross Profit) with drill-down links and CSV export headed by the filters. Three indexes added to schema version 1 in place (owner's decision): an invoice's lines, taxes and payments by `sales_invoice_id`, which the dashboard needs at 20,000 invoices. The links into R6's invoice list stay out until R6 (owner's decision). Every section updated except 2.3, 5.5, 6.1 to 6.7, 7.1, 7.2, 7.4, 7.6 and 8.3 to 8.5; new section 6.13. |
+| 7 | 2026-11-18 | The Invoices and Receipts plan (R6), INV-B1 to B9: the Invoices destination (list with status, date and name filters and receipt scan; read-only invoice), Return / Credit Note with stock back at the cost it went out at, Cancel for sales and returns, two print formats as PDF (Standard and POS Receipt) with preview, Print and Share, raw printing to a Bluetooth thermal printer with an in-house ESC/POS builder, Setup › Printing (Print Settings, Letter Head, Print Heading, Terms and Conditions), In Words in lakh and crore. The links left by R4 and R5 are wired (D-52 closed). Schema unchanged. One new package, `print_bluetooth_thermal`. Every section updated except 2.3, 5.5, 6.1, 6.2, 6.4, 6.5, 6.7, 6.9, 6.11, 6.13, 7.1, 7.2, 7.4 to 7.7; new section 6.14. |
 
 ### How this document follows ISO/IEC/IEEE 15289
 
@@ -62,13 +64,13 @@ It describes the current state only. Planned behaviour is listed in section 4.4 
 | Version | 1.0.0, build 1 |
 | Platform | Android only. Minimum SDK 24 (Android 7.0), target and compile SDK 36. |
 | Form factors | Phones and tablets, portrait and landscape |
-| Milestone state | M0, the whole Setup plan (M1, M4, M9), the whole Stock plan (M2, M3) and the whole Cash Register plan (M5) complete; M8 complete. M6 (Invoices) and M7 (Dashboard) not started. |
+| Milestone state | Every milestone complete: M0, Setup (M1, M4, M9), Stock (M2, M3, M8), Cash Register (M5), Invoices and Receipts (M6), Sales Dashboard (M7). |
 
 ### 1.2 What the system is
 
 An Android app for one store run by one owner. It works with no internet connection. When complete it will keep the item catalogue and stock, sell at a cash register, print receipts and invoices, and show a sales dashboard. Its screens, field names and rules follow ERPNext, reduced to what one store owner needs.
 
-At this issue the store can be set up completely, its stock kept, and goods sold at the register. A first-run wizard creates the store and its default records; the Setup destination holds every settings page and master of the Setup plan; the Stock destination holds the item catalogue, prices, warehouses, stock movements (receipts, issues, transfers, counts), batches, serial numbers and the stock reports; the Register destination opens a cash-register session, sells with taxes and discounts, takes cash, card or split payments, holds orders, and closes the session with a cash count and a backup; items can be imported from CSV; the data can be backed up and restored. The Invoices and Dashboard destinations are still empty, and nothing can be printed yet.
+At this issue the store can be set up completely, its stock kept, goods sold at the register, and the sales read on a dashboard. A first-run wizard creates the store and its default records; the Setup destination holds every settings page and master of the Setup plan; the Stock destination holds the item catalogue, prices, warehouses, stock movements (receipts, issues, transfers, counts), batches, serial numbers and the stock reports; the Register destination opens a cash-register session, sells with taxes and discounts, takes cash, card or split payments, holds orders, and closes the session with a cash count and a backup; items can be imported from CSV; the data can be backed up and restored; the Dashboard destination shows the period's sales, profit, taxes, returns and stock value, the monthly sales goal, four charts and three sales reports; the Invoices destination lists every sale and return, prints them as a full-page invoice or a till receipt (PDF, or raw to a Bluetooth thermal printer), takes goods back with a Return / Credit Note and cancels a mistaken sale.
 
 ---
 
@@ -87,7 +89,7 @@ At this issue the store can be set up completely, its stock kept, and goods sold
 | R7 | ERPNext documentation, merged | `.claude/erpnext-planner/erpnext-docs-merged.md` |
 | R8 | ISO/IEC/IEEE 15289:2019, Content of life-cycle information items (documentation) | Published standard |
 | R9 | Material Design 3 guidelines (window size classes, navigation, sheets) | m3.material.io |
-| R10 | Session reports: issue 1 `2026-11-15_09-47-00.txt`, issue 2 `2026-11-16_17-26-13.txt`, issue 3 `2026-11-16_22-00-06.txt`, issue 4 `2026-11-17_14-38-00.txt`, issue 5 `2026-11-18_00-48-56.txt` | `.claude/commits/` |
+| R10 | Session reports: issue 1 `2026-11-15_09-47-00.txt`, issue 2 `2026-11-16_17-26-13.txt`, issue 3 `2026-11-16_22-00-06.txt`, issue 4 `2026-11-17_14-38-00.txt`, issue 5 `2026-11-18_00-48-56.txt`, issue 6 `2026-11-18_01-59-10.txt`, issue 7 `2026-11-18_17-32-05.txt` | `.claude/commits/` |
 | R11 | Frappe `frappe/geo/country_info.json` (MIT licence), source of `assets/country_info.json` | github.com/frappe/frappe |
 
 ### 2.2 Glossary
@@ -129,6 +131,19 @@ At this issue the store can be set up completely, its stock kept, and goods sold
 | Amount to pay | The Rounded Total when rounding is on, otherwise the Grand Total (POS-R14). |
 | Additional discount | A discount on the whole sale, on Net Total or on Grand Total (POS-R13), beside each line's own discount. |
 | In Words | The amount to pay spelled out, for example "PHP Seven Hundred And Fifty-Four and Ninety Centavo only." |
+| Period | The span the dashboard shows: Today, Yesterday, This Week, This Month, This Year (each up to today) or a Custom range (DSH-R3). |
+| Previous period | What a card compares with: the same days one day, week, month or year back; a custom range, as many days just before it (D-50). |
+| Net Sales | Σ Net Total of submitted invoices, returns as negatives (DSH-R4). |
+| Gross Profit | Net Sales − Cost of Goods Sold, the cost being Σ stock quantity × the line's `incoming_rate` (DSH-R4). |
+| Achievement % | Total Monthly Sales ÷ Monthly Sales Target × 100 (DSH-R5). |
+| Bucket | One step of a chart or of Sales Analytics' columns: a day, week, month, quarter or year (DSH-R6, R7). |
+| Drill-down | A card, bar or table row that opens the report explaining it, for the same period (DSH-R10). |
+| Return / Credit Note | A Sales Invoice with Is Return, Return Against the sale, negative quantities and a refund (INV-R5 to R8). |
+| Price-only credit | A return with Update Stock off: nothing comes back into stock; only the price is credited (INV-R6). |
+| Print Format | Standard (a full page) or POS Receipt (a till roll), both laid out from the same print blocks (INV-R12). |
+| Letter Head | The logo, header lines and footer printed on an invoice; one is the Default (INV-R14). |
+| Print Heading | A title a sale prints under instead of "Sales Invoice" (INV-R15). |
+| Raw printing | Sending ESC/POS commands straight to a thermal printer instead of a PDF (INV-R22). |
 
 ### 2.3 Notation
 
@@ -152,7 +167,7 @@ One person: the store owner. The owner sets the system up, maintains items and s
 - No network. The release build does not hold the Android `INTERNET` permission, so it cannot open a connection even if a library tries.
 - Android's file picker and save dialog, for CSV import and export and for backups.
 - The device camera, for barcode scanning and item photos. A Bluetooth or USB barcode scanner works as a keyboard.
-- Planned for a later milestone: a receipt printer.
+- A printer: any printer Android's print services reach (Wi-Fi, USB) through a PDF, or a Bluetooth thermal printer paired in Android's settings.
 
 ### 3.3 Intended operation (when complete)
 
@@ -165,7 +180,7 @@ One person: the store owner. The owner sets the system up, maintains items and s
 
 ### 3.4 Operation at this issue
 
-Steps 1 to 4 of the flow exist:
+All six steps of the flow exist:
 
 1. The app starts and reads System Settings.
 2. On a fresh install it shows the first-run wizard. Nothing else is reachable. On its first step **Restore from backup** brings in another device's data instead, and the app opens on the restored store.
@@ -174,7 +189,8 @@ Steps 1 to 4 of the flow exist:
 5. In **Setup** the owner adjusts the store and formats, defines payment modes, taxes, tax templates, price lists and POS Settings, edits naming series, imports or exports items, prices and barcodes, and backs up or restores the data.
 6. In **Stock** the owner keeps the catalogue (items, groups, units, brands, attributes and variants, prices, barcodes), the warehouses and Stock Settings; brings stock in, moves it and writes it off with Stock Entries; counts it with Stock Reconciliations; tracks batches and serial numbers; and reads the stock reports. A badge on Stock counts the items at or below their re-order level.
 7. In **Register** the owner opens a session with the opening cash, sells (scan, search or tap items; change quantity, unit, rate and discounts; take one or several payments; see the change), holds orders and completes them later, and closes the session: the app shows the expected amount per payment mode against the counted amount, and takes a backup.
-8. Invoices and Dashboard still show "This screen arrives in a later milestone." Receipts cannot be printed yet.
+8. In **Dashboard** the owner picks a period and reads the cards (each against the previous period), the monthly sales goal and four charts; a card, bar or table row opens the report behind it (Sales Analytics, Item-wise Sales, Gross Profit, or a stock report), and every report exports to CSV.
+9. In **Invoices** the owner finds any sale or return (status chips, a date range, the name, or a scanned receipt), opens it read-only, prints it as a full-page invoice or a till receipt, shares the PDF, makes a Return / Credit Note against a sale (stock back, refund paid out), or cancels a mistaken sale or return while its session is open. The register prints the receipt after a sale when POS Settings says so.
 
 ### 3.5 What the system deliberately leaves out
 
@@ -202,7 +218,7 @@ Taken from R1, section 2. Each exclusion applies to every screen and table.
 | ID | Constraint | Met by | Status |
 |---|---|---|---|
 | C-1 | Android only | Project created with `--platforms=android`; no other platform folder exists | Met |
-| C-2 | Works fully offline; the release build holds no `INTERNET` permission | `android/app/src/release/AndroidManifest.xml` removes the permission even when a plugin declares it | Met, verified (section 10.4) |
+| C-2 | Works fully offline; the release build holds no `INTERNET` permission | `android/app/src/release/AndroidManifest.xml` removes the permission even when a plugin declares it (the printer plugin does) | Met, verified (section 10.4) |
 | C-3 | SQLite is the only data store | `lib/core/db/app_database.dart` | Met |
 | C-4 | Phones and tablets from the first build, in three window size classes | `WindowSize`, `AdaptiveShell`, `ListDetailPane`, `showRowEditor` | Met, verified (sections 10.2, 10.5) |
 | C-5 | Material 3 only. Colours come from `ColorScheme` roles; the seed colour is the only literal. | `AppTheme` in `lib/app.dart` | Met |
@@ -210,7 +226,7 @@ Taken from R1, section 2. Each exclusion applies to every screen and table.
 | C-7 | Three hops at most: screen, provider, query or pure function. No repository interfaces, use-case classes or mapper layers. | Code structure (section 5) | Met |
 | C-8 | Numeric columns are `REAL`. Every calculated value is rounded by `flt` before it is stored. | Schema; `lib/core/numbers/flt.dart` | Met. Stock values round to Currency Precision, quantities to Float Precision, valuation rates to 9 decimals (`logic/valuation.dart`). Sale amounts and taxes round to Currency Precision in the totals engine (`pos/logic/totals.dart`), always with the Rounding Method in force. |
 | C-9 | Foreign keys are enforced | `PRAGMA foreign_keys = ON` at every open | Met, verified |
-| C-10 | Schema version 1 contains every table of every feature plan | 45 tables, 14 indexes | Met, verified |
+| C-10 | Schema version 1 contains every table of every feature plan | 45 tables, 17 indexes (three added at issue 6, D-51) | Met, verified |
 | C-11 | ERPNext's labels and status names are used as is | Status values in the schema; localisation keys | Met for what exists |
 
 ### 4.2 Functional requirements implemented
@@ -229,7 +245,7 @@ Taken from R1, section 2. Each exclusion applies to every screen and table.
 | SET-R12 | An Item Tax Template row overrides the matching tax's rate; Not Applicable removes the tax | `effectiveRate`; `saveItemTaxTemplate` | `tax_template_test.dart` (worked example 61.88) |
 | SET-R13 | The Default Price List of Selling Settings (the register's) exists and stays enabled, which keeps at least one enabled; renaming it renames it in Selling Settings; only enabled lists can be the default | `savePriceList`, `_checkPriceLists` (also run by `deleteMaster`); `SellingSettingsPage` | `setup_db_test.dart` (SET-A14, SET-A16) |
 | SET-R14 | POS Settings: Default Mode of Payment (Cash), the eight configuration switches, Action on New Invoice, Apply Discount On, Print Format, Print Heading, Terms and Conditions | `PosSettings` in `singles.dart`; `PosSettingsPage` in `settings_pages.dart` | `singles_test.dart` (defaults, blank "None"); saving goes through `SinglesForm`, tested in `app_test.dart` |
-| SET-R15 | Monthly Sales Target on Store Profile; it blocks nothing | `StoreProfilePage` in `settings_pages.dart` (money field) | Field seen on the emulator; saving goes through `SinglesForm`, tested in `app_test.dart`. The dashboard use comes with M7. |
+| SET-R15 | Monthly Sales Target on Store Profile; it blocks nothing | `StoreProfilePage` in `settings_pages.dart` (money field) | Field seen on the emulator; saving goes through `SinglesForm`, tested in `app_test.dart`. Read by the dashboard's goal card (DSH-R5). |
 | SET-R16 | Data Import of Item, Item Price, Item Barcode: template, every row checked first, problems by row and column, one transaction, a result log; Data Export of the same columns | `logic/data_import.dart`, `data/data_import_db.dart`, `ui/data_pages.dart` | `data_import_test.dart`; `import_backup_test.dart` (SET-A17, 200 items) |
 | SET-R17 | Backup by `VACUUM INTO`, named `{abbr}-backup-{YYYYMMDD-HHMMSS}.sqlite`, newest Number of Backups kept, Export outside the app | `takeBackup`, `listBackups` in `data/backup.dart`; `BackupsPage` | `import_backup_test.dart` (SET-A18); emulator. Also taken after every POS Closing Entry (`submitClosing`): `pos_db_test.dart` (POS-A22), emulator. |
 | SET-R18 | Restore checks the file, refuses with an open session, backs up first (skipped when setup was never finished), replaces the database and reopens it; available on the Backups page and on the wizard's first step | `checkRestorable`, `restoreDatabase`; `pickBackupCopy`, `restoreAndReopen`; `BackupsPage`, `WizardScreen` | `import_backup_test.dart` (SET-A19, fresh-install restore); emulator round trips (section 10.5) |
@@ -269,6 +285,31 @@ Taken from R1, section 2. Each exclusion applies to every screen and table.
 | POS-R20 | POS Closing Entry: period, sales and returns, totals, expected amount per mode (opening + received − change), counted amount, difference, remarks; it closes the session and takes a backup; the latest closing can be cancelled while nothing newer exists | `closingDraft`, `submitClosing`, `cancellableClosing`, `cancelLastClosing` (`pos/data/pos_closing_db.dart`); `ClosingPage` | `pos_db_test.dart` (POS-A22, A24); emulator |
 | POS-R21 | A scanned serial number adds its unit; the line's Serial / Batch Entries in the item detail, with Auto Fetch; auto pick at Submit, or refusal | `availableSerial`; `addToSale`; `SerialBatchEditor` in `ItemDetail`; `fillOutwardEntries` | `sale_test.dart`; `pos_db_test.dart` (POS-A25, STK-R22) |
 | R4 §5 | The POS screen in three layouts: phone in two steps with a bottom sheet for the item detail and the opening as an AlertDialog; Medium with selector and cart, item detail and payment as side sheets over the selector; Expanded with item detail and payment in the selector pane and a number pad under the cart | `PosScreen`, `OpeningForm`, `CartPanel`, `PaymentPanel`, `OrderSummary` | `pos_ui_test.dart` (phone, Medium, tablet); emulator |
+| DSH-R1, R2 | Only submitted invoices count, returns as negatives; every figure uses the invoice's posting date | `submittedIn`, `spanArgs` (`dashboard/data/dashboard_db.dart`) | `dashboard_db_test.dart` (DSH-A1 to A10, A19) |
+| DSH-R3 | Today, Yesterday, This Week, This Month, This Year, Custom; the week starts on the First Day of the Week; each card against the previous period | `spanOf`, `weekStart`, `previousOf` (`dashboard/logic/periods.dart`); `_PeriodBar`, `_NumberCard` | `periods_test.dart` (DSH-A18) |
+| DSH-R4 | Net Sales, Taxes, Total Sales, Invoices, Returns, Average Sale, Items Sold, Cost of Goods Sold, Gross Profit and %, Stock Value, Low Stock | `figures`, `stockValue`; `lowStockCountProvider` | `dashboard_db_test.dart` (DSH-A1 to A8) |
+| DSH-R5 | Sales goal for the current calendar month; hidden at target 0 and replaced by a link to Store Profile | `monthlySales`, `achievement`; `_GoalCard` | `dashboard_db_test.dart` (DSH-A11, A12); `dashboard_ui_test.dart` (DSH-A13) |
+| DSH-R6 | Sales Trend (days up to 31 days, weeks up to 26 weeks, months beyond; Value or Quantity), Sales by Item Group (top 8 and Other), Top Items (top 10), Payment Modes (change off the cash mode) | `trendRange`, `bucketsOf`; `trend`, `salesByGroup`, `topItems`, `paymentModes`; `LinesChart`, `BarsChart`, `ChartCard` | `periods_test.dart`; `dashboard_db_test.dart` (DSH-A9, top 8, change) |
+| DSH-R7 | Sales Analytics: Item or Item Group (tree sums), Value or Quantity, date range, Range; a chart of the chosen rows; Total first on phones | `salesAnalytics`; `SalesReportPage` | `dashboard_db_test.dart` (DSH-A14, A15); `dashboard_ui_test.dart` |
+| DSH-R8 | Item-wise Sales: one row per line, tax from the item-wise detail with the invoice's remainder on its last line; filters date range, Item, Item Group; totals | `itemWiseSales` | `dashboard_db_test.dart` (DSH-A16, a two-line split) |
+| DSH-R9 | Gross Profit by Invoice, Item, Item Group or Brand; by Item also Average Selling Rate and Valuation Rate; a stock item sold at no cost is flagged | `grossProfit` | `dashboard_db_test.dart` (DSH-A17, the flag); `dashboard_ui_test.dart` (totals %) |
+| DSH-R10 | Cards, bars and chart table rows open their report for the same period; Stock Value and Low Stock open the stock reports; Invoices, Average Sale and Returns open the invoice list; Item-wise Sales' Invoice cell opens the invoice | `reportLink`, `invoicesIn`; `ChartCard.onRowTap`; `/dashboard/:page` | Emulator (10.5) |
+| DSH-R11 | Amounts in Currency Precision, the Number Format and Hide Currency Symbol; percentages with one decimal; CSV headed by the filters, values rounded as shown | `Formats`, `percent`; `ReportTable.exportPreamble`, `toCsv` | `report_table_test.dart`; emulator (exported CSVs read back) |
+| DSH-R12 | A completed sale shows on the dashboard without a refresh | `salesTickProvider` (drift `tableUpdates`) | `dashboard_ui_test.dart` |
+| R5 §5 | Dashboard: period bar, cards 2 per row on phones and 4 otherwise, goal, charts one per row (Compact), 2 per row (Medium), goal beside the trend and 3 per row (Expanded), report links; states for no sale yet and no sales in the period | `DashboardScreen` | `dashboard_ui_test.dart` (phone, tablet, no sale yet); emulator |
+| INV-R1 | Every invoice newest first; status chips, a date range, search by name, scan a receipt to open it; a POS session filter for the closing entry's link | `watchInvoices`, `InvoiceFilters` (`invoices/data/invoice_db.dart`); `InvoiceList`, `openScanned` | `invoices_db_test.dart` (INV-R1); `invoices_ui_test.dart`; emulator |
+| INV-R2 | Read-only invoice: header, items, taxes and totals, payments, terms, Return Against and Returns; Print, Create › Return / Credit Note, Stock Ledger, Cancel; a draft opens in the register | `invoiceView`; `InvoiceDetail`; `/pos?heldOrder=` | `invoices_ui_test.dart`; emulator |
+| INV-R3, R4 | Draft, Paid, Credit Note Issued, Return, Cancelled; a sale is Credit Note Issued while a submitted return exists; names from the Sales Invoice and Sales Invoice Return series, never reused | `_setStatus`, `submitReturn`, `cancelInvoice` (`invoices/data/returns_db.dart`) | `invoices_db_test.dart` (INV-A15, A16, A22) |
+| INV-R5 to R8 | A return of what is still returnable at the original's rate, unit, discount, item tax and tax rows; quantities only down; Update Stock (receiving warehouse) or a price-only credit with a lowered rate; serials and batches sold on the line; refund in full in any enabled mode; one transaction: return series, +stock at the original cost, serials Available, statuses | `returnDraft`, `returnProblems`, `submitReturn`; `scaleReturn`, `takeBatches` (`invoices/logic/returns.dart`); `ReturnForm` | `invoices_db_test.dart` (INV-A10 to A15, A17 to A19, D-62) |
+| INV-R9 | After a return, New Order starts the replacement sale in the same session | `OrderSummary` (a return's summary) | Emulator |
+| INV-R10, R11 | Cancel a sale while its session is open and no submitted return exists; cancel a return while its session is open, refused when its stock was sold since; serials back; statuses recalculated | `cancelInvoice` | `invoices_db_test.dart` (INV-A16, A20 to A22, INV-R11) |
+| INV-R12, R13 | Standard and POS Receipt from one layout; the print screen starts on POS Settings' Print Format; drafts and cancelled invoices print only when Print Settings allows | `layoutInvoice`, `mayPrint` (`invoices/logic/print_layout.dart`); `PrintPage` | `print_layout_test.dart` (INV-A9, R13) |
+| INV-R14 to R16 | Letter head (the invoice's own, else the default; logo, header, footer; switch on the print screen); Print Heading or Sales Invoice / Credit Note; terms copied into the sale and printed after the totals | `invoiceView`; `layoutInvoice`; `newSale` (POS-R2a); `saveLetterHead`, `savePrintHeading`, `saveTerms` | `invoices_db_test.dart` (INV-A24, R14); `print_layout_test.dart` |
+| INV-R17 to R20 | Compact 4-column or full 9-column item table, the receipt always compact; totals in order with included taxes marked and zero taxes left out unless asked; Rounded Total unless disabled; In Words (lakh and crore for `#,##,###.##`); amounts in the Number Format and currency symbol | `layoutInvoice`; `moneyInWords` (`indian`) | `print_layout_test.dart` (INV-A3 to A5); `in_words_test.dart` (INV-A1, A2) |
+| INV-R21 | Preview, Print through Android's print dialog, Share the PDF | `invoiceDocument` (`invoices/ui/invoice_pdf.dart`); `PrintPage` (`printing`) | `invoice_pdf_test.dart`; emulator |
+| INV-R22 | Raw printing: paired printer, ESC/POS commands wrapped to Characters per line, symbol as currency code, cut and drawer kick, Test print, the PDF when the printer cannot be reached | `escPosJob`, `printable`, `rulerLines` (`invoices/logic/escpos.dart`); `receiptLines`; `receiptJob`, `printRaw` (`print_page.dart`); `pairedPrinters`, `sendRaw` (`raw_printer.dart`); `PrintSettingsPage` | `print_layout_test.dart` (INV-A6 to A8); emulator (no printer: states only) |
+| INV-R23 | The receipt ends with the invoice name as Code 128; scanning it in the list or Recent Orders opens the invoice | `invoiceDocument` (`pw.BarcodeWidget`), `escPosJob` (`GS k`); `openScanned` | `invoices_db_test.dart` (`invoiceIdByName`); emulator (preview) |
+| INV-R24 | Print Receipt on Order Complete: the saved receipt printer, else the preview; any invoice can be reprinted | `printAfterSale`; Print Receipt on `OrderSummary` and in `RecentOrders` | Emulator |
 
 ### 4.3 Acceptance criteria met
 
@@ -306,6 +347,20 @@ Taken from R1, section 2. Each exclusion applies to every screen and table.
 | POS-A9 to A16 | 200 less 10% is 180, 360 for two; 25% against a 20% Max Discount refused; the four discount cells (972 / 972 / 1,026 / 1,030); 754.92 rounds to 754.92 / 754.90 / 755, and 754.93 to 754.95; change 245.10 and 45.10, card 800 refused; 3 Cartons are 30; two lines at 54 with 8% included give exactly 108.00 | Pass |
 | POS-A17 to A25 | A sale of 2 posts −2 at cost 100, Paid, `ACC-SINV-2026-00001`; deleted drafts leave no gap; overselling refused with nothing written; short payment refused; a second session refused; the closing example (cash 1,401.80, card 500, difference −1.80); a later template edit leaves the sale alone; a held order joins the later session; a Delivered serial cannot be sold | Pass |
 | POS-B1 to B9 runnable results | A session is asked for, then the register opens; every worked example passes; items scanned into a cart with live totals; unit, rate and discounts change the totals; change right for cash and split, card overpayment refused; a sale reduces stock and appears in the Stock Ledger; a held order survives an app restart and is completed; the closing example reproduces; a serialised unit is sold by its serial number | Pass (tests and emulator, sections 10.2, 10.5) |
+| DSH-A1 to A8 | Days 1 to 2: Net Sales 600; Taxes 48; Total Sales 648; Invoices 2, Returns 1 worth 108; Average Sale 378; Items Sold 2; Cost of Goods Sold 410; Gross Profit 190, 31.7% | Pass |
+| DSH-A9, A10 | Payment Modes Cash 108, Card 540; day 1 only Net Sales 700 | Pass |
+| DSH-A11 to A13 | Target 1,296: Total Monthly Sales 648, Achievement 50.0%; 13,949 of 100,000 is 13.949%; target 0 hides the goal card | Pass |
+| DSH-A14, A15 | Sales Analytics by Item, Daily: A 200, −100, total 100; B 500, 0, 500; columns 700, −100, 600. By Item Group: Products and All Item Groups equal those columns | Pass |
+| DSH-A16, A17 | Item-wise Sales: Net 600, Tax 48, Total 648. Gross Profit by Item: A 100 / 60 / 40, B 500 / 350 / 150, total 190 | Pass |
+| DSH-A18 | This Week with First Day of the Week Sunday, then Monday: the week starts one day later | Pass |
+| DSH-A19 | Cancelling Invoice 2 takes its amounts away from the figures, the group chart, the trend and the payment modes; nothing else changes | Pass |
+| DSH-B1 to B5 runnable results | The fixture returns the expected figures; cards follow the period and a new sale; goal and charts match the cards; report totals equal the cards; cards, bars and table rows open their report; exports read back with their filter lines | Pass (tests and emulator, sections 10.2, 10.5) |
+| R5 §3 ceiling | 20,000 invoices: the dashboard's queries in under 500 ms and the three reports in under 2 s, in memory | Pass: about 80 ms and 160 ms on the development machine |
+| INV-A1, A2 | In Words for 108.00 and 754.90 in USD: `USD One Hundred And Eight only.`, `USD Seven Hundred And Fifty-Four and Ninety Cent only.` (Frappe's wording, D-66) | Pass |
+| INV-A3 to A9 | 4 / 9 columns; a zero tax row absent / present; no rounding lines with Disable Rounded Total; a 60-character name wrapped at 32 with amounts right-aligned; raw commands start with initialise and end with cut, no drawer; the currency code for a symbol the printer cannot print; DRAFT in a draft's heading | Pass |
+| INV-A10 to A19 | Return of 10 offers −10, then −7 after 3; 8 refused; 108 with 8% included: −100 / −8 / −108; stock back at cost 100 after the cost changed, profit nets to zero; Return status and series name, the sale Credit Note Issued; cancelling it restores Paid and the stock; a price-only credit moves no stock but counts; a disabled mode refused; a returned serial Available at its cost | Pass |
+| INV-A20 to A24 | Cancel refused with a return; refused after the session closed (a return still possible); cancel in the open session: Cancelled, ledger cancelled, stock restored, name not reused; a cancelled invoice not printed without Allow Print for Cancelled; a later terms edit leaves the sale alone | Pass |
+| INV-B1 to B9 runnable results | Every sale found and read; new sales carry the chosen terms; Print Settings save and reload; layout tests; PDFs print and share; the receipt barcode opens its invoice (scan in tests only); ESC/POS commands (no printer here); a partial return puts stock back and refunds; a cancelled sale leaves stock, dashboard and expected cash | Pass (tests and emulator, sections 10.2, 10.5), except INV-B7's real printer (P-18) |
 
 ### 4.4 Requirements not yet implemented
 
@@ -317,8 +372,8 @@ Taken from R1, section 2. Each exclusion applies to every screen and table.
 | M3 Stock B | Stock ledger engine, Stock Entry, Stock Reconciliation, core stock reports | **Done** |
 | M4 Setup B | Mode of Payment, taxes, POS Settings, Selling Settings | **Done** |
 | M5 Cash Register | Sessions, POS screen, totals engine, payment, submit | **Done** |
-| M6 Invoices | List, detail, print formats, PDF, thermal printing, returns, cancel | Not started |
-| M7 Dashboard | Cards, charts, sales goal, reports | Not started |
+| M6 Invoices | List, detail, print formats, PDF, thermal printing, returns, cancel | **Done** (INV-B1 to B9); raw printing not tried on a real printer (P-18) |
+| M7 Dashboard | Cards, charts, sales goal, reports | **Done** (DSH-B1 to B5), with the links into the invoice list since issue 7 |
 | M8 Stock C | Variants, batches, serial numbers across stock documents and the Cash Register | **Done** (STK-B10 to B13, POS-B9) |
 | M9 Setup C | Data import and export, backup and restore | **Done**, including the backup on POS Closing |
 
@@ -337,10 +392,12 @@ flowchart LR
     Asset[[country_info.json<br/>bundled asset]] --> App
     Camera[Camera: barcode scan, item photo] --> App
     Scanner[Bluetooth / USB scanner<br/>as a keyboard] --> App
-    App -.->|planned| Printer[Receipt printer]
+    App -->|PDF| Print[Android print services:<br/>Wi-Fi and USB printers]
+    App -->|PDF| Share
+    App -->|ESC/POS over Bluetooth| Printer[Paired thermal printer]
 ```
 
-The system has no server, no network peer and no other user. Dashed lines are interfaces that later milestones add.
+The system has no server, no network peer and no other user.
 
 ### 5.2 Structure
 
@@ -365,6 +422,19 @@ flowchart TD
     StockData --> StockLogic
     StockData --> Database
     StockUi --> Widgets
+    Router --> DashUi[features/dashboard/ui/<br/>dashboard_screen, charts, sales_report_pages]
+    DashUi --> DashLogic[features/dashboard/logic/<br/>periods]
+    DashUi --> DashData[features/dashboard/data/<br/>dashboard_db, sales_reports]
+    DashData --> DashLogic
+    DashData --> Database
+    DashUi --> Widgets
+    Router --> InvUi[features/invoices/ui/<br/>list, detail, return form, print, printing pages]
+    InvUi --> InvLogic[features/invoices/logic/<br/>invoice, returns, print_layout, receipt_text, escpos]
+    InvUi --> InvData[features/invoices/data/<br/>invoice_db, returns_db, print_masters]
+    InvData --> InvLogic
+    InvData --> PosData
+    InvData --> Database
+    PosUi --> InvUi
     Router --> Providers[core/db/providers.dart]
     Wizard --> Providers
     SetupUi --> Providers
@@ -388,7 +458,7 @@ A screen reads a provider or calls a query method on `AppDatabase` (a Dart exten
 lib/
   main.dart                     entry point
   app.dart                      App widget, AppTheme
-  router.dart                   routes, setup gate, placeholder screens (Invoices, Dashboard)
+  router.dart                   routes of the five destinations, setup gate
   core/
     db/
       app_database.dart         AppDatabase (drift)
@@ -410,7 +480,7 @@ lib/
       link_field.dart           picker for one master record
       child_table.dart          child rows and the row editor sheet (trailing or leading side)
       status_chip.dart          document status indicator
-      report_table.dart         report table and CSV export
+      report_table.dart         report table, CSV export headed by the filters, ReportFilters
       date_field.dart           date and date-time picker field
   features/
     setup/data/setup.drift      11 tables
@@ -454,7 +524,7 @@ lib/
     stock/ui/serial_batch_editor.dart inline Serial / Batch editor
     stock/ui/report_pages.dart  the seven reports
     stock/ui/scan.dart          camera barcode scan
-    pos/data/pos.drift          8 tables, 5 indexes
+    pos/data/pos.drift          8 tables, 8 indexes
     pos/data/pos_db.dart        sessions, register items, the sale (new, lines, units, prices), held orders, checks, Submit
     pos/data/pos_closing_db.dart POS Closing Entry: draft, submit with backup, cancel the latest
     pos/logic/sale.dart         Sale and SaleLine (the cart), adding a line, item tax rates as JSON
@@ -470,17 +540,41 @@ lib/
     pos/ui/recent_orders.dart   Recent Orders
     pos/ui/closing_page.dart    POS Closing Entry
     pos/ui/pos_widgets.dart     LiveNumberField, TotalRow, NumberPad
+    dashboard/logic/periods.dart periods, previous period, buckets of a range
+    dashboard/data/dashboard_db.dart the dashboard's figures, goal, chart data
+    dashboard/data/sales_reports.dart Sales Analytics, Item-wise Sales, Gross Profit
+    dashboard/ui/dashboard_providers.dart period, the sales tick, the dashboard's data
+    dashboard/ui/dashboard_screen.dart the Dashboard: period bar, cards, goal, charts, report links
+    dashboard/ui/dashboard_charts.dart ChartCard, LinesChart, BarsChart (fl_chart), bucket labels
+    dashboard/ui/sales_report_pages.dart the three sales reports
     invoices/data/invoices.drift 3 tables
+    invoices/data/invoice_db.dart InvoiceFilters, the invoice list, the invoice view, name lookup
+    invoices/data/returns_db.dart return draft, checks, submit; cancel of sales and returns
+    invoices/data/print_masters.dart Letter Head, Print Heading, Terms and Conditions saves
+    invoices/logic/invoice.dart  Invoice, InvoiceLine, InvoiceTax: an invoice as the screens and the print read it
+    invoices/logic/returns.dart  scaleReturn, takeBatches
+    invoices/logic/print_layout.dart PrintDoc: the one layout step of both formats; mayPrint
+    invoices/logic/receipt_text.dart the receipt as fixed-width lines
+    invoices/logic/escpos.dart   ESC/POS commands, printable text, Test print's ruler
+    invoices/ui/invoice_providers.dart paths and links, the list and invoice streams
+    invoices/ui/invoices_screen.dart the Invoices destination: list (filters, scan) beside the record
+    invoices/ui/invoice_detail.dart the read-only invoice and its actions
+    invoices/ui/return_form.dart Return / Credit Note
+    invoices/ui/print_page.dart  the print screen; print options, raw job, print after a sale
+    invoices/ui/invoice_pdf.dart Standard and POS Receipt as PDF; bundled fonts
+    invoices/ui/raw_printer.dart the Bluetooth printer (the only caller of print_bluetooth_thermal); Android settings
+    invoices/ui/printing_pages.dart Setup › Print Settings, Letter Head, Print Heading, Terms and Conditions
   l10n/
-    app_en.arb                  526 messages, English
+    app_en.arb                  641 messages, English
     app_localizations*.dart     generated by gen-l10n
 assets/
   country_info.json             250 countries (R11)
-test/                           223 tests (section 10.2)
+  fonts/                        Roboto Regular and Bold (Apache 2.0), embedded in printed PDFs
+test/                           282 tests (section 10.2)
 android/                        Android host project
 ```
 
-Size at this issue: about 19,900 lines of hand-written Dart under `lib/` (3,958 of them in the Cash Register feature, about 9,200 in Stock, about 4,800 in Setup), 597 lines of schema (unchanged), about 4,000 lines of tests (823 of them for the Cash Register).
+Size at this issue: about 25,600 lines of hand-written Dart under `lib/` (3,542 of them in the Invoices feature, 1,984 in the Dashboard, about 4,000 in the Cash Register, about 9,200 in Stock, about 4,800 in Setup), 600 lines of schema (unchanged), about 5,600 lines of tests (820 of them for Invoices).
 
 ### 5.4 Technology
 
@@ -501,7 +595,7 @@ Size at this issue: about 19,900 lines of hand-written Dart under `lib/` (3,958 
 | Lints | `flutter_lints` | 6.0.0 |
 | Android build | Gradle, Android Gradle Plugin, Kotlin, Java | 9.5.0, 9.3.1, 2.4.20, 17 |
 
-Used since issue 4: `mobile_scanner` 7.5.0 (camera barcode scan; its default bundled ML Kit model needs no download) and `image_picker` 1.2.4 (item photo, at most 512 px). Declared for later milestones and not yet imported: `pdf` 3.13.1 and `printing` 5.15.1 (documents), `fl_chart` 1.3.1 (dashboard). `cupertino_icons` 2.0.0 is present only for its icon font.
+Used since issue 4: `mobile_scanner` 7.5.0 (camera barcode scan; its default bundled ML Kit model needs no download) and `image_picker` 1.2.4 (item photo, at most 512 px). Used since issue 6: `fl_chart` 1.3.1 (the dashboard's charts; horizontal bars by `rotationQuarterTurns`). Used since issue 7: `pdf` 3.13.1 (the two print formats; its `BarcodeWidget` draws Code 128), `printing` 5.15.1 (preview, Android's print dialog, Share) and `print_bluetooth_thermal` 1.2.5 (paired printers, connect, write bytes; it brings `win_ble`, unused on Android). Roboto (Apache 2.0) is copied from the Flutter SDK into `assets/fonts/` for PDFs. `cupertino_icons` 2.0.0 is present only for its icon font.
 
 ### 5.5 Start-up and the setup gate
 
@@ -544,11 +638,14 @@ If the settings cannot be read, `/loading` shows "The database could not be open
 |---|---|---|
 | `/loading` | Blank, or the start-up error | Shown only while settings are read |
 | `/wizard` | First-run wizard | Outside the navigation frame; `?next=` names where to land |
-| `/pos` | Cash Register: the POS Opening Entry until a session is open, then the register | Branch 1, the home location |
+| `/pos` | Cash Register: the POS Opening Entry until a session is open, then the register; `?heldOrder=<id>` loads that held order (a draft chosen in the invoice list) | Branch 1, the home location |
 | `/pos/closing` | POS Closing Entry of the open session | Back returns to the register; after Submit the opening form shows |
-| `/invoices` | Invoices placeholder | Branch 2 |
+| `/invoices` | Invoice list; filters as query parameters (`status` comma-separated, `from`, `to`, `q`, `session`) | Branch 2 |
+| `/invoices/invoice/:id` | An invoice | Expanded: beside the list, which keeps its filters |
+| `/invoices/return/:id` | A Return / Credit Note against sale `id` | As above |
 | `/stock` | Stock workspace | Branch 3 |
-| `/dashboard` | Dashboard placeholder | Branch 4 |
+| `/dashboard` | Dashboard | Branch 4; full width, no list pane |
+| `/dashboard/:page` | A sales report: `sales-analytics`, `item-wise-sales` or `gross-profit`; filters as query parameters (`from`, `to`, `item`, `group`, `qty=1`) | Opens over the dashboard; Back returns to it. An unknown slug shows the dashboard |
 | `/setup` | Setup workspace | Branch 5 |
 | `/setup/:page` | A Setup page, or a master's list (`page` is a slug such as `pos-settings`) | Expanded: the workspace stays on the left and the move does not animate |
 | `/setup/:page/:id` | A master's form; `id` is the record id or `new` | Back returns to the list |
@@ -556,6 +653,8 @@ If the settings cannot be read, `/loading` shows "The database could not be open
 | `/stock/:page/:id` | A stock master or document; `id` is the record id or `new` (`?parent=` on a tree's Add Child, `?item=` on Add Price) | Back returns to the list |
 
 The five destinations are branches of one `StatefulShellRoute.indexedStack`, so each keeps its own navigation state when the owner switches between them.
+
+The print screen is not a route: `openPrint` pushes it on the root navigator over any destination (D-70).
 
 ### 5.7 Design decisions
 
@@ -610,6 +709,33 @@ The five destinations are branches of one `StatefulShellRoute.indexedStack`, so 
 | D-47 | On a Medium window the item detail and payment open as side sheets on the leading edge (`showRowEditor(leading: true)`) | R4: "side sheets over the selector", so the cart on the trailing side stays visible | One more option on a shared widget |
 | D-48 | Tapping a payment mode that holds nothing fills it with the amount still due; the number pad then types over it | Split payments in two taps, as in ERPNext's POS | Beyond the letter of POS-R15 |
 | D-49 | Sale lines are checked with the Stock Entry line checks (Material Issue) minus "not a stock item", plus not a sales item, Max Discount, valuation rate, stock and payment; all are reported together. Serial and batch checks run inside Submit and report one problem at a time | One set of line rules for every outgoing document | A serial or batch problem shows alone, after the others are fixed |
+| D-50 | A card's previous period covers the same days one unit back: This Month on the 18th against the 1st to 18th of last month (cut to a shorter month), This Week against the same weekdays last week, This Year against the same days last year; Today, Yesterday and a custom range against as many days just before. No change line when the previous figure is 0 | R5 asks for "the previous period of the same length"; a month to date against a whole month would always look down | Not ERPNext's number-card rule, which compares whole periods |
+| D-51 | Three indexes added to schema version 1 in place: `sii_invoice_idx`, `sit_invoice_idx`, `sip_invoice_idx` on the invoice's lines, taxes and payments by `sales_invoice_id` | Owner's decision. Without them each invoice scanned whole child tables: 16 to 29 s for the dashboard at 20,000 invoices; with them about 80 ms | Databases created before issue 6 lack them until reinstalled (P-17); R5 §3 named only two indexes |
+| D-52 | The links into R6's invoice list were left out at issue 6 | Owner's decision then | **Closed** at issue 7: wired (owner's decision) |
+| D-53 | The Taxes card opens Item-wise Sales, which has the Tax column | R5 names no target for Taxes | — |
+| D-54 | The dashboard is refreshed by one drift `tableUpdates` stream on the invoice tables and `bin` (`salesTickProvider`), which a `FutureProvider` watches; the queries stay `Future`s | One trigger for twelve queries; the queries stay plain and testable | Any write to those tables re-runs every query, about 80 ms at 20,000 invoices |
+| D-55 | Item-wise Sales takes a line's tax from `item_wise_tax_detail` (`json_each`) and puts the invoice's rounding remainder on its last line | ERPNext's Item-wise Sales Register reads the same detail; with the remainder the Tax column adds up to the Taxes card (DSH-B4) | The last line can carry a cent more than its own rate gives |
+| D-56 | Sales by Item Group shows the sales of the items directly in each group; its drill-down filter, like ERPNext's Item Group filter, includes subgroups | Bars that included subgroups would count a sale in every ancestor | A group that has both its own items and subgroups with sales shows less on its bar than in the report |
+| D-57 | Gross Profit flags a row when a stock item in it was sold (not returned) at no cost; the flag is an extra column, "Check" | `ReportTable` has no row styling; a price-only credit note rightly has no cost (R5 DSH-R4) | One more column |
+| D-58 | Sales Analytics draws the first five rows until the owner taps others; a tapped row toggles, marked with ●. Its chart colours are primary, tertiary, secondary and the primary and tertiary containers | R5 asks for "a line chart of the selected rows" without a default; colours from R5 §5 | Lines in the container colours are pale |
+| D-59 | A chart's table alternative lists its data; the group and item tables open Item-wise Sales on a row tap, and the bars' touch area is widened to 48dp | R1 §7.2's 48dp touch target; a 14dp bar is too small to aim at | — |
+| D-60 | The phone filter sheet of the stock reports became a shared widget, `ReportFilters`, now used by the stock and the sales reports | The sales reports needed the same sheet | Beyond R5's letter; the stock reports behave as before |
+| D-61 | A return is never held: it lives on the return form until Submit, which saves and submits it in one transaction | One fewer state; a return is made with the goods on the counter | No Draft return to come back to |
+| D-62 | A partial return refunds the original's additional discount and Actual (fixed) tax charges in proportion to the line amounts returned (a percentage discount is proportional by itself); a full return refunds exactly what was paid | R6 says a return is taxed as the sale was; ERPNext negates the whole charge on any return | A rounding cent can sit on the last partial return |
+| D-63 | The refund must equal the amount in full; no change on a refund; payments stored negative | R6 INV-R7; the closing entry nets them | A refund cannot be split with change |
+| D-64 | A return comes back in at the original line's `incoming_rate` at the moment of the return | STK-R33; the dashboard's profit is reversed exactly | A later backdated recost of the sale does not follow (marked `ponytail:`) |
+| D-65 | A batch line's return takes its quantity from the original's batches in the order they were sold | R6 "the batch is the one sold" without saying which | The owner cannot pick the batch |
+| D-66 | In Words keeps Frappe's wording built at issue 5: "Fifty-Four", the Currency's Fraction name as stored ("Cent"); lakh and crore added for `#,##,###.##` | ERPNext's own output; R6's examples ("Fifty Four … Cents") differ from it | INV-A2 is checked against Frappe's text |
+| D-67 | PDFs embed Roboto from the Flutter SDK; a currency symbol it lacks prints as the currency code | The PDF standard fonts lack ₱ and similar; Google Fonts would need the internet | 340 KB of fonts in the APK |
+| D-68 | Raw text is printable ASCII: the currency symbol becomes its code, × becomes x, anything else ?; the barcode is the printer's own Code 128 command | Printers' code pages differ; ASCII prints everywhere | Accented names print with ? |
+| D-69 | `roundToFraction` works on the size of the amount, so a return's negative total rounds as the sale's did | A remainder of exactly half rounded the two ways differently | Shared with the register; tested by the POS tests |
+| D-70 | The print screen is a full-screen route on the root navigator (`openPrint`), not a URL | The register, Recent Orders and the invoice open it alike, from any destination | It has no deep link |
+| D-71 | A draft tapped in the invoice list opens in the register (`/pos?heldOrder=<id>`), through the same Action on New Invoice as Recent Orders' Edit | R6 INV-R2: "A draft opens in the Cash Register instead" | Leaves the Invoices destination |
+| D-72 | The list's filters ride in the route's query; a new query starts the list afresh; a session filter (a removable chip) serves the closing entry's link, which also names the submitted statuses | Links from the dashboard and the closing entry land on the right list; opening a record keeps them | — |
+| D-73 | Renaming a Print Heading or Terms and Conditions writes the new name into POS Settings, which keeps them by name | As D-30 does for the Default Price List | One extra read on those saves |
+| D-74 | Android's Bluetooth or app settings are opened through a small MethodChannel in `MainActivity.kt` | R6's states ask for a link to the system setting; no package for two intents | Native code in the host project |
+| D-75 | One Bluetooth connection per print job, closed after | No stale connection to manage | A little slower per receipt (marked `ponytail:`) |
+| D-76 | Print Settings asks for Android's Nearby devices permission when it opens, since it lists the paired printers; the saved printer stays a choice while Bluetooth is off | The plugin asks on its first call; saving another setting must not forget the printer | The prompt appears on the first visit |
 
 ---
 
@@ -654,7 +780,7 @@ Seven classes give typed access with defaults: `StoreProfile`, `SystemSettings`,
 Two defaults are derived rather than fixed:
 
 - `StoreProfile.abbr` defaults to the initials of the store name, also when the stored value is blank.
-- `PrintSettings.rawCharsPerLine` defaults to 48 for 80mm paper and 32 for 58mm paper.
+- `PrintSettings.rawCharsPerLine` defaults to 48 for 80mm paper and 32 for 58mm paper; `rawPaperMm` gives the width as 58 or 80.
 
 `PosSettings.selectPrintHeading` and `tcName` read a blank value (the form's "None") as null.
 
@@ -717,7 +843,7 @@ The group separator is the second character of the format; the decimal separator
 
 `Formats` (`lib/core/numbers/formats.dart`) bundles System Settings, Global Defaults and the store Currency, and offers `number`, `money`, `date`, `time`, `parse` and `rounding`. Every Setup screen formats through `formatsProvider`.
 
-`moneyInWords(amount, code, fraction, precision)` (`lib/core/numbers/in_words.dart`) writes an amount as Frappe's `money_in_words` does: the currency code, the whole part in title-cased English words with "And" after hundreds and commas between thousands groups, then "and" with the fraction in words and the currency's Fraction name, then "only.": `PHP Seven Hundred And Fifty-Four and Ninety Centavo only.`; a zero whole part gives the fraction alone. International scale only (marked `ponytail:`; the Indian lakh and crore are not written).
+`moneyInWords(amount, code, fraction, precision)` (`lib/core/numbers/in_words.dart`) writes an amount as Frappe's `money_in_words` does: the currency code, the whole part in title-cased English words with "And" after hundreds and commas between thousands groups, then "and" with the fraction in words and the currency's Fraction name, then "only.": `PHP Seven Hundred And Fifty-Four and Ninety Centavo only.`; a zero whole part gives the fraction alone. With `indian` (the Number Format `#,##,###.##`) it counts in thousand, lakh and crore: `INR Twelve Lakh, Thirty-Four Thousand, Five Hundred And Sixty-Seven only.`
 
 `formatDate` accepts ERPNext's Date Format text (`yyyy-mm-dd`, `dd-mm-yyyy`, `dd/mm/yyyy`, `dd.mm.yyyy`, `mm/dd/yyyy`, `mm-dd-yyyy`), where `mm` means month. `formatTime` accepts `HH:mm:ss` and `HH:mm`. `toStorage` produces the text stored in date-time columns, `yyyy-MM-dd HH:mm:ss` in local time, which `DateTime.parse` reads back.
 
@@ -759,10 +885,11 @@ extension NamingSeries on AppDatabase {
 | `LinkField<T>` | `LinkField({label, value, search, labelOf, onChanged, onCreateNew, mandatory, errorText})` | Opens a search view listing what `search` returns for the typed text, followed by "Create new" when `onCreateNew` is given. A mandatory field ends its label with `*` and has no clear button. An optional field with a value shows a clear button that reports `null`. |
 | `showRowEditor<R>` | `showRowEditor(context, builder, {leading})` | Compact: a modal bottom sheet that stays above the keyboard. Wider: a 400dp side sheet that slides in from the trailing edge, or from the leading edge with `leading` (D-47). Completes with the value the editor pops. |
 | `ChildTable<T>` | `ChildTable({rows, rowBuilder, editorBuilder, readOnly})` | Lists the rows. Tapping one opens it in `showRowEditor`; "Add Row" opens the editor with no row. `readOnly` hides "Add Row"; rows still open. |
-| `StatusChip` | `StatusChip(status)` | Shows the translated status in its colour role (section 8.1). An unknown status shows as is, in the neutral role. |
-| `ReportTable` | `ReportTable({columns, rows, filters, exportName, totals, cell, onRowTap, emptyText})` | A filter bar, a table whose rows are built as they scroll into view, a first column that stays put while the others scroll sideways, an optional totals row, and a CSV export action. Values past the last column are carried for `onRowTap` and are neither shown nor exported. `cell` formats a value for display; the export keeps raw values. A column whose values are all numbers is right-aligned (D-31). |
+| `StatusChip` | `StatusChip(status)`; `statusLabel(l, status)` | Shows the translated status in its colour role (section 8.1). An unknown status shows as is, in the neutral role. `statusLabel` is shared with the invoice list's filter chips. |
+| `ReportTable` | `ReportTable({columns, rows, filters, exportName, totals, cell, onRowTap, emptyText, exportPreamble})` | A filter bar, a table whose rows are built as they scroll into view, a first column that stays put while the others scroll sideways, an optional totals row, and a CSV export action. Values past the last column are carried for `onRowTap` and are neither shown nor exported. `cell` formats a value for display; the export keeps raw values, headed by the `exportPreamble` lines (such as the filters, DSH-R11). A column whose values are all numbers is right-aligned (D-31). |
+| `ReportFilters` | `ReportFilters({fields})` | A report's filter fields in place, or on Compact a Filters chip that opens them in `showRowEditor`; `fields` gets a callback that redraws an open sheet (D-60). |
 | `DateField` | `DateField({label, value, formats, onChanged, withTime, mandatory, enabled})` | A date (or date and time) picked with Material pickers, stored as `YYYY-MM-DD` (or with time), shown in the Date Format. An optional field can be cleared. |
-| `toCsv` | `toCsv(columns, rows)` | A header line, then one line per row. Cells holding a comma or a quote are quoted. |
+| `toCsv` | `toCsv(columns, rows, [preamble])` | The preamble lines, a header line, then one line per row. Cells holding a comma or a quote are quoted. |
 
 ### 6.9 Setup feature: `lib/features/setup/`
 
@@ -807,7 +934,7 @@ A post-condition guards the rule that spans records: after a Price List save or 
 
 ### 6.10 Localisation: `lib/l10n/`
 
-`app_en.arb` holds 526 English messages: the shell and widget labels of issue 1, about 200 Setup labels, 250 Stock labels and 60 Cash Register labels, field names (ERPNext's words), refusal and problem messages. `languageName` holds each language's own name for the language lists. `l10n.yaml` sets `nullable-getter: false`, so `AppLocalizations.of(context)` needs no null check. English is the only locale.
+`app_en.arb` holds 641 English messages: the shell and widget labels of issue 1, about 200 Setup labels, 250 Stock labels, 60 Cash Register labels, 45 Dashboard labels and 70 Invoices labels, field names (ERPNext's words), refusal and problem messages. `languageName` holds each language's own name for the language lists. `l10n.yaml` sets `nullable-getter: false`, so `AppLocalizations.of(context)` needs no null check. English is the only locale.
 
 ### 6.11 Stock feature: `lib/features/stock/`
 
@@ -860,8 +987,8 @@ A post-condition guards the rule that spans records: after a Price List save or 
 
 | File | Contents |
 |---|---|
-| `pos_db.dart` | `openSessionWith`, `openSession`, `watchOpenSession` (POS-R1, R2); `formats` (the settings as `Formats`) and `saleSettingsOf`; `newSale` (POS-R2a); `watchRegisterItems` (sales items with stock in the warehouse and the stock-unit price); `newLine`, `setUnit`, `reprice` (STK-R10, R13 through `priceFor`, `itemTaxTemplateOf`); `availableSerial`; `saveSale`, `loadSale`, `deleteSale`, `watchRecentOrders` (POS-R18, R19); `saleProblems` (POS-R16, all at once); `submitSale` (POS-R17: name, entries picked or checked, ledger, serial cost, Delivered with warranty, missing price inserted, Paid). A failed save or submit restores the cart's draft id (`_keepOnFailure`), because the transaction rolled the row back. |
-| `pos_closing_db.dart` | `closingDraft` (period, invoices, totals, one reconciliation row per mode with opening, received and change), `submitClosing` (closing entry and rows, session Closed, then `takeBackup` outside the transaction; a failed backup is returned, not thrown), `cancellableClosing`, `cancelLastClosing`. |
+| `pos_db.dart` | `writeSale` (a sale or a return, R6), `keepOnFailure`, `taxRowsOf` and `deliverSerials` are public for the Invoices feature (as D-46). `openSessionWith`, `openSession`, `watchOpenSession` (POS-R1, R2); `formats` (the settings as `Formats`) and `saleSettingsOf`; `newSale` (POS-R2a); `watchRegisterItems` (sales items with stock in the warehouse and the stock-unit price); `newLine`, `setUnit`, `reprice` (STK-R10, R13 through `priceFor`, `itemTaxTemplateOf`); `availableSerial`; `saveSale`, `loadSale`, `deleteSale`, `watchRecentOrders` (POS-R18, R19); `saleProblems` (POS-R16, all at once); `submitSale` (POS-R17: name, entries picked or checked, ledger, serial cost, Delivered with warranty, missing price inserted, Paid). A failed save or submit restores the cart's draft id (`_keepOnFailure`), because the transaction rolled the row back. |
+| `pos_closing_db.dart` | `changeModeOf` (SQL for the mode a sale's change comes out of, D-43; also used by the dashboard); `closingDraft` (period, invoices, totals, one reconciliation row per mode with opening, received and change), `submitClosing` (closing entry and rows, session Closed, then `takeBackup` outside the transaction; a failed backup is returned, not thrown), `cancellableClosing`, `cancelLastClosing`. |
 
 **Interface (`ui/`).**
 
@@ -874,8 +1001,69 @@ A post-condition guards the rule that spans records: after a Price List save or 
 | `cart_panel.dart` | Lines (swipe to remove; tap to open), the totals block, Add Discount (percentage or amount), Checkout; on Expanded the number pad for Quantity, Discount (%) and Rate of the selected line, and Remove. |
 | `item_detail.dart` | Quantity stepper, UOM, Rate, Discount (%), Discount Amount, Price List Rate (each read-only unless allowed), Available Qty, Warehouse, the `SerialBatchEditor` with Auto Fetch for batch and serial items. |
 | `payment_panel.dart` | One card per enabled mode, the number pad, Grand Total, Rounded Total, Paid Amount, To Be Paid or Change Amount, Complete Order; `defaultMode`. |
-| `order_summary.dart`, `recent_orders.dart`, `closing_page.dart` | The submitted sale with New Order; Recent Orders; the POS Closing Entry form (cards on Compact, rows otherwise; Difference in the error colour when not zero). |
+| `order_summary.dart`, `recent_orders.dart`, `closing_page.dart` | The submitted sale (or return) with Print Receipt and New Order; Recent Orders (scan a receipt; a submitted invoice opens, prints, and a sale offers Return); the POS Closing Entry form (cards on Compact, rows otherwise; Difference in the error colour when not zero; the invoice count opens the session's invoices). After Submit, Print Receipt on Order Complete prints (`printAfterSale`). |
 | `pos_widgets.dart` | `LiveNumberField` (follows its value when not focused; shows "not a number" or a refused value under the field), `TotalRow`, `NumberPad` (keys at least 48dp high), `padInput`. |
+
+### 6.13 Sales Dashboard feature: `lib/features/dashboard/`
+
+No tables of its own: every figure is a query over the invoice tables (R4), `item`, `item_group`, `brand`, `bin`, `item_reorder` (R3) and `singles` (R2).
+
+**Logic (`logic/`), pure Dart.**
+
+| File | Contents |
+|---|---|
+| `periods.dart` | `Period` (Today to This Year, Custom), `Range` (Daily to Yearly), `Span` (two UTC calendar days, so day arithmetic meets no daylight-saving hour); `spanOf` (DSH-R3, up to today), `weekStart` (First Day of the Week), `previousOf` (D-50), `trendRange` (DSH-R6), `bucketsOf` (a span cut into units, the ends cut to the span), `dayIndex`, `ymd`, `parseDay`, `dayOf`. |
+
+**Data (`data/`).** Extensions on `AppDatabase`; read only.
+
+| File | Contents |
+|---|---|
+| `dashboard_db.dart` | `submittedIn` and `spanArgs` (submitted invoices posted from the first day to before the day after the last, so `si_posting_idx` serves the range; DSH-R1, R2); `figures` (DSH-R4 in two queries); `monthlySales`, `achievement` (DSH-R5); `stockValue`; `hasAnySale`; `trend` (Net Total or quantity per day, put into buckets); `salesByGroup` (top 8 and Other), `topItems` (top 10), `paymentModes` (payments less the change taken off its cash mode, through `changeModeOf`). |
+| `sales_reports.dart` | `SalesFilters`; `salesAnalytics` (item or group × day, pivoted into the range's columns and a Total; for Item Group a depth-first walk adds each child to its parent, rows indented by depth, the depth carried for the totals row); `itemWiseSales` (D-55); `grossProfit` by Invoice, Item, Item Group or Brand (D-57). Item filters use `subtreeIds` from the stock reports. |
+
+**Interface (`ui/`).**
+
+| File | Contents |
+|---|---|
+| `dashboard_providers.dart` | `dashboardPath`; `periodProvider` (`PeriodNotifier`); `firstDayOfWeekProvider`; `salesTickProvider` (D-54); `dashboardProvider`: span, figures now and before, stock value, month's sales, buckets, trend by value and quantity, groups, top items by value and quantity, payment modes. |
+| `dashboard_screen.dart` | `reportLink`; `DashboardScreen`: no sale yet, a card with Open Cash Register; otherwise `_PeriodBar` (`FilterChip`s, Custom through `showDateRangePicker`, scrolls sideways), eight `_NumberCard`s (change in primary when up, error when down; Low Stock as a `Badge` button), `_GoalCard` or the Set a monthly sales target link, the four `ChartCard`s, the report links; laid out by `_grid` per window class (R5 §5). |
+| `dashboard_charts.dart` | `bucketLabel`, `percent`; `ChartCard` (title button opening the table alternative, D-59; "No sales in this period"); `LinesChart` (one line per series, from zero or below, about four bottom labels); `BarsChart` (horizontal, largest first, tooltip, tap); value-axis labels in the Number Format, the crowded end labels hidden. |
+| `sales_report_pages.dart` | `SalesReport` (three slugs), `salesReportPage`, `SalesReportPage`: filters from the query, `ReportFilters` with `_FilterBar`, `ReportTable` with totals (Sales Analytics adds its top rows only), values rounded as shown before export, the filters as the export's first lines; Sales Analytics' chart and legend above the table (D-58), Total first on Compact. |
+
+### 6.14 Invoices and Receipts feature: `lib/features/invoices/`
+
+No new table: `sales_invoice*` (R4) carry returns (`is_return`, `return_against_id`, `update_stock`, `sales_invoice_item_id`) and the statuses; `letter_head`, `print_heading`, `terms_and_conditions` are in `invoices.drift`; Print Settings are keys in `singles`.
+
+**Logic (`logic/`), pure Dart.**
+
+| File | Contents |
+|---|---|
+| `invoice.dart` | `Invoice`, `InvoiceLine`, `InvoiceTax`, `PrintLetterHead`, `InvoiceRef`, `InvoicePayment`: an invoice as the detail screen and the print read it. |
+| `returns.dart` | `ReturnBasis`; `scaleReturn` (D-62: the discount amount and Actual rows scaled by the share of line amounts returned); `takeBatches` (D-65). |
+| `print_layout.dart` | `PrintLabel` (the words, translated by the screen), `PrintOptions` (Print Settings and Global Defaults), `PrintDoc` (heading, logo, header and footer lines, meta, columns and rows with the numeric columns, receipt items, totals, payments, In Words, terms, barcode), `layoutInvoice` (INV-R14 to R20), `mayPrint` (INV-R13). |
+| `receipt_text.dart` | `receiptLines` (the receipt as `ReceiptLine`s of at most Characters per line, centred and bold where marked), `wrap` (keeps a leading indent, cuts long words), `pairLines` (a value right-aligned on the label's last line or its own). |
+| `escpos.dart` | `escInit`, `escCut`, `escDrawer`; `printable` (D-68); `escPosJob` (initialise, lines, `GS k` Code 128, feed, drawer, cut); `rulerLines` (Test print). |
+
+**Data (`data/`).** Extensions on `AppDatabase`; every write runs in one transaction.
+
+| File | Contents |
+|---|---|
+| `invoice_db.dart` | `InvoiceFilters` (statuses, `from`, `to`, name, session; `of(query)` and `params`; value equality for the provider family); `watchInvoices` (newest first; `to` is inclusive); `invoiceIdByName`; `invoiceView` (lines with Serial / Batch Entries, taxes, payments, the original and its submitted returns, the session and whether it is open, the letter head: its own, else the default). |
+| `returns_db.dart` | `returnDraft` (INV-R5: what is still returnable per original line, the sold serials and batches not yet back, the original's rates, the scaled basis); `returnProblems` (INV-R8, all together: session, original still submitted, nothing to return, too much, rate, serial or batch entries, refund not equal, disabled mode); `submitReturn` (return series, ledger +stock at the original cost per batch, serial cost from `serial_no`, serials Available in the receiving warehouse, Return and Credit Note Issued); `cancelInvoice` (INV-R10, R11). |
+| `print_masters.dart` | `saveLetterHead` (one Default), `savePrintHeading`, `saveTerms` (renames follow into POS Settings, D-73). |
+
+**Interface (`ui/`).**
+
+| File | Contents |
+|---|---|
+| `invoice_providers.dart` | `invoicesPath`, `invoicePath`, `returnPath`, `invoicesLink`; `invoiceListProvider` (per filters), `invoiceViewProvider` (re-read whenever an invoice changes). |
+| `invoices_screen.dart` | `InvoicesScreen` (a `ListDetailPane` of the list and the invoice or return form), `InvoiceList` (`SearchBar` with scan, status `FilterChip`s, a date-range chip, the session chip, empty states), `openScanned` (INV-R23, also used by Recent Orders). |
+| `invoice_detail.dart` | `InvoiceDetail`: header card, items as `ListTile`s (a `DataTable` on Expanded), the print layout's totals, payments, terms, Return Against and Returns; app bar Print, Create › Return / Credit Note, overflow Stock Ledger and Cancel (confirmed as "Cancel <name>"). |
+| `return_form.dart` | `ReturnForm`: a session banner when none is open; Update Stock with the receiving warehouse; each line with what is still returnable and a stepper (serial chips for serialised lines; a rate field, only lower, for a price-only credit); totals and the refund; refund per enabled mode with the default pre-filled; Submit confirmed with the amount; then the return's summary. |
+| `print_page.dart` | `openPrint`; `printSettingsProvider`, `pdfFontsProvider`; `printOptions`, `layoutFor`, `printLabel`; `receiptJob`, `printRaw`, `reportRaw`, `rawReady`, `printAfterSale` (INV-R24); `PrintPage` (`PdfPreview` with its own actions off; Format `SegmentedButton`, Letter Head switch, Print, Share, Receipt printer; a side panel on Expanded; a refusal text for drafts and cancelled invoices when not allowed). |
+| `invoice_pdf.dart` | `PrintFormat`, `PdfFonts`, `loadPdfFonts`, `pageFormatOf`; `invoiceDocument`: Standard as a `MultiPage` (letter head and footer on every page or the first and last; the item table with numbers on the right; totals, In Words, then payments; terms), POS Receipt on a 57 or 80 mm roll ending with the Code 128 barcode. |
+| `raw_printer.dart` | `PrinterState`, `Printer`, `pairedPrinters`, `sendRaw` (D-75), `openSystemSettings` (D-74). |
+| `printing_pages.dart` | `PrintSettingsPage` (a `SinglesForm`: page size and the PDF switches; Enable Raw Printing, the printer, paper width, characters per line, cut, drawer; the printer's state with links to Android's settings and Refresh; Test print), `LetterHeadPage` (logo from camera or gallery at most 512 px, header, footer, Default, Disabled, live preview), `PrintHeadingPage`, `TermsPage`. |
 
 ---
 
@@ -899,7 +1087,7 @@ A post-condition guards the rule that spans records: after a Price List save or 
 - Date-times are `TEXT` in the form `YYYY-MM-DD HH:MM:SS`, local time.
 - Documents carry `docstatus` with `CHECK (docstatus IN (0,1,2))`.
 - Status columns hold ERPNext's English status names, constrained by `CHECK`.
-- Masters and documents (24 tables) carry `created_at` and `modified_at`, both defaulting to the time of insert. Every update written by the Setup, Stock and Cash Register features sets `modified_at`; for stock document drafts `modified_at` also tells whether the posting time was set by hand (D-32). Child tables, `singles`, `series` and the ledger tables have neither. See P-3.
+- Masters and documents (24 tables) carry `created_at` and `modified_at`, both defaulting to the time of insert. Every update written by the Setup, Stock, Cash Register and Invoices features sets `modified_at`; for stock document drafts `modified_at` also tells whether the posting time was set by hand (D-32). Child tables, `singles`, `series` and the ledger tables have neither. See P-3.
 - Child tables reference their parent by foreign key and order their rows with `idx` where order matters.
 
 ### 7.3 Where each table is defined
@@ -909,9 +1097,9 @@ A post-condition guards the rule that spans records: after a Price List save or 
 | `lib/features/setup/data/setup.drift` | 11 | 0 |
 | `lib/features/stock/data/stock.drift` | 22 | 9 |
 | `lib/features/stock/data/batch_table.dart` | 1 (`batch`) | 0 |
-| `lib/features/pos/data/pos.drift` | 8 | 5 |
+| `lib/features/pos/data/pos.drift` | 8 | 8 |
 | `lib/features/invoices/data/invoices.drift` | 3 | 0 |
-| **Total** | **45** | **14** |
+| **Total** | **45** | **17** |
 
 These files are the authoritative definition. The catalogue below summarises them and names the key columns; it does not repeat every column.
 
@@ -984,7 +1172,7 @@ These files are the authoritative definition. The catalogue below summarises the
 | `print_heading` ts | Alternative titles for printed documents | U `name` |
 | `terms_and_conditions` ts | Reusable terms text | U `title` |
 
-### 7.5 Indexes (14)
+### 7.5 Indexes (17)
 
 | Index | Table (columns) | Serves |
 |---|---|---|
@@ -1002,6 +1190,9 @@ These files are the authoritative definition. The catalogue below summarises the
 | `si_session_idx` | `sales_invoice` (`pos_opening_entry_id`) | Invoices of a session |
 | `si_return_idx` | `sales_invoice` (`return_against_id`) | Returns against an invoice |
 | `sii_item_idx` | `sales_invoice_item` (`item_id`) | Sales of an item |
+| `sii_invoice_idx` | `sales_invoice_item` (`sales_invoice_id`) | Lines of an invoice; the dashboard and sales reports (D-51) |
+| `sit_invoice_idx` | `sales_invoice_tax` (`sales_invoice_id`) | Tax rows of an invoice; Item-wise Sales (D-51) |
+| `sip_invoice_idx` | `sales_invoice_payment` (`sales_invoice_id`) | Payments of an invoice; Payment Modes and the closing entry (D-51) |
 
 ### 7.6 Settings keys
 
@@ -1109,7 +1300,7 @@ Stored in `singles` under the doctype shown. A key that is absent takes the defa
 
 ### 7.7 Migration policy
 
-The schema is at version 1 and no data exists outside test devices. No migration code and no schema snapshot exist yet. Issue 3 changed version 1 in place, which this policy allows while no real data exists; databases from before it must be cleared (P-13). Before any change to a table after the app holds real data: export a schema snapshot with `dart run drift_dev make-migrations`, raise `schemaVersion`, write the step, and run the generated migration tests.
+The schema is at version 1 and no data exists outside test devices. No migration code and no schema snapshot exist yet. Issue 3 changed version 1 in place, which this policy allows while no real data exists; databases from before it must be cleared (P-13). Issue 6 added three indexes to version 1 in place (D-51); databases from before it work but lack them (P-17). Before any change to a table after the app holds real data: export a schema snapshot with `dart run drift_dev make-migrations`, raise `schemaVersion`, write the step, and run the generated migration tests.
 
 ---
 
@@ -1161,7 +1352,7 @@ Each destination shows an outlined icon, and a filled one when selected.
 | Selling | POS Settings, Mode of Payment, Price List, Selling Settings |
 | Taxes | Tax, Sales Taxes and Charges Template, Item Tax Template |
 | Stock | Stock Settings (the same page as Stock › Settings) |
-| Printing | Print Settings, Letter Head, Print Heading, Terms and Conditions (disabled: later milestone) |
+| Printing | Print Settings, Letter Head, Print Heading, Terms and Conditions |
 | Data | Naming Series, Data Import, Data Export, Backups |
 
 Compact and medium: the workspace fills the screen and a link pushes the page. Expanded: the workspace is a 360dp left pane with the chosen link highlighted; the page fills the right pane.
@@ -1188,6 +1379,25 @@ The Stock destination icon and the Low Stock link carry a count badge of low-sto
 
 The app bar menu holds Toggle Recent Orders, Save as Draft and Close the POS. Item cards show the image (or the initial), name, price and the quantity in the warehouse, in the error colour at zero. The closing entry shows each payment mode as a card on Compact and as a row otherwise, its Difference in the error colour when it is not zero.
 
+**Dashboard destination.**
+
+| Window | Arrangement |
+|---|---|
+| Compact | Period bar scrolling sideways; number cards 2 per row; the goal, then one chart per row; the report links |
+| Medium | Number cards 4 per row; the goal; charts 2 per row |
+| Expanded | Number cards 4 per row; the goal beside Sales Trend; the other charts 3 per row |
+
+The cards are Net Sales, Invoices, Average Sale, Items Sold, Gross Profit (with its %), Taxes, Returns (with the amount) and Stock Value (with a Low Stock button carrying a `Badge` count). Each shows its change against the previous period, an arrow and a percentage in the primary colour when up and the error colour when down. Tapping Net Sales, Items Sold, Gross Profit, Taxes or Stock Value opens its report. Each chart's title opens its data as a table. The bars and the table rows of Sales by Item Group and Top Items open Item-wise Sales. A store with no sale yet sees one card, "Complete your first sale to see your dashboard", with Open Cash Register. Reports: as the stock reports, with the chart and legend above the table in Sales Analytics.
+
+**Invoices destination.**
+
+| Window | Arrangement |
+|---|---|
+| Compact, Medium | The list fills the screen; an invoice or a return form replaces it; Back returns to the list with its filters. |
+| Expanded | The list in a 360dp left pane, the invoice (items as a `DataTable`) or the return form on the right. |
+
+The list has a search bar with a scan button, filter chips for the five statuses, a date-range chip and, from the closing entry, a POS session chip; each row shows the name (or Draft n), posting date and time, Grand Total and a status chip. With no invoice yet: "Sales you complete at the Cash Register appear here." The print screen covers the whole window: the preview, then a bottom bar (Compact, Medium) or a 320dp side panel (Expanded) with the format, the Letter Head switch, Print, Share and Receipt printer.
+
 **Forms.** A title, Delete (existing masters) and a Save button in the app bar; sections with headings; fields in two columns from 600dp of pane width. Mandatory labels end with `*`. A failed save opens a dialog listing each problem and keeps the form. A locked field shows a lock icon and its reason. Master lists have a search bar, an Add button and an empty state that offers the same action. Child rows open in a bottom sheet on phones and a side sheet on tablets.
 
 ### 8.2 Software interfaces
@@ -1205,7 +1415,10 @@ The system calls no remote service. Its interfaces to other software are the pac
 | `sqlite3` | Opening a backup read-only before a restore | Yes |
 | `mobile_scanner` | Camera barcode scan | Yes |
 | `image_picker` | Item photo from camera or gallery, at most 512 px | Yes |
-| `pdf`, `printing`, `fl_chart` | Later milestones | No |
+| `fl_chart` | The dashboard's charts | Yes |
+| `pdf`, `printing` | Print formats as PDF; preview, Android's print dialog, Share | Yes |
+| `print_bluetooth_thermal` | Paired Bluetooth printers; raw bytes to the receipt printer | Yes |
+| MethodChannel `rx_merchant/settings` | Opens Android's Bluetooth or app settings (`MainActivity.kt`) | Yes |
 
 ### 8.3 Device and operating-system interfaces
 
@@ -1219,7 +1432,10 @@ The system calls no remote service. Its interfaces to other software are the pac
 | App cache directory | Write | `<exportName>.csv`, written before sharing |
 | Android share sheet | Out | Receives the CSV file with MIME type `text/csv` |
 | Camera | In | Barcode scan (`mobile_scanner`) in the Stock pages and the register's search, and item photo (`image_picker`); the permission is asked when first used |
-| Photo picker | In | Item photo from the gallery |
+| Photo picker | In | Item photo, letter head logo from the gallery |
+| Android print service | Out | Printed PDFs, to any printer the device's print services reach |
+| Android share sheet (PDF) | Out | An invoice or receipt PDF, `<name>.pdf` |
+| Bluetooth | Out | ESC/POS bytes to the paired receipt printer, one connection per job; the Nearby devices permission is asked on Print Settings' first visit |
 
 ### 8.4 Android permissions
 
@@ -1229,6 +1445,8 @@ Permissions in the merged release manifest:
 |---|---|---|
 | `android.permission.CAMERA` | `mobile_scanner` plugin | Barcode scanning and item photos |
 | `android.permission.ACCESS_NETWORK_STATE` | Added by a plugin | Not by this app; left in place (P-4) |
+| `android.permission.BLUETOOTH`, `BLUETOOTH_ADMIN` | `print_bluetooth_thermal` | The receipt printer on Android 11 and earlier |
+| `android.permission.BLUETOOTH_CONNECT`, `BLUETOOTH_SCAN` | `print_bluetooth_thermal` | The receipt printer on Android 12 and later (asked at run time) |
 | `com.rx_merchant.rx_merchant.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` | AndroidX | App-private; grants nothing |
 
 `android.permission.INTERNET` is **absent** from the release build. Debug and profile builds keep it, because Flutter's hot reload needs it.
@@ -1259,7 +1477,7 @@ Run from the repository root.
 | 1. Fetch packages | `flutter pub get` | Packages resolved; localisation code generated |
 | 2. Generate database code | `dart run build_runner build` | `lib/core/db/app_database.g.dart` written; one warning (P-2) |
 | 3. Check | `flutter analyze` | `No issues found!` |
-| 4. Test | `flutter test` | `All tests passed!` (223) |
+| 4. Test | `flutter test` | `All tests passed!` (282) |
 | 5. Build | `flutter build apk --release` | `build/app/outputs/flutter-apk/app-release.apk` |
 | 6. Install | `adb install -r build/app/outputs/flutter-apk/app-release.apk` | `Success` |
 
@@ -1300,8 +1518,9 @@ The release build is signed with the debug key, as the Flutter template sets it.
 | `d5b4836` | 2026-11-16 18:00 +08:00 | The Setup plan (issue 2) and its session report |
 | `65f427a` | 2026-11-16 22:29 +08:00 | POS Profile removal (issue 3) and its session report |
 | `6ed71b8` | 2026-11-17 | The Stock plan (issue 4) and its session report |
+| `861d78d` | 2026-11-18 00:59 +08:00 | The Cash Register plan (issue 5) and its session report |
 
-On the date of issue, the Cash Register plan (issue 5) is in the working tree and **not yet committed**. The project owner commits. The session report for this issue (R10) lists every added, changed and deleted file.
+On the date of issue, the Sales Dashboard plan (issue 6) and the Invoices and Receipts plan (issue 7) are in the working tree and **not yet committed**. The project owner commits. The session report for this issue (R10) lists every added, changed and deleted file.
 
 ---
 
@@ -1312,23 +1531,23 @@ On the date of issue, the Cash Register plan (issue 5) is in the working tree an
 | Check | Result |
 |---|---|
 | Static analysis, `flutter analyze` | No issues |
-| Formatting, `dart format` | All 101 files formatted |
+| Formatting, `dart format` | All 131 files formatted |
 | Fixes, `dart fix --dry-run` | Nothing to fix |
-| Automated tests, `flutter test` | 223 of 223 pass |
-| Release build | Builds; 81.8 MB APK |
-| Release manifest | No `INTERNET` permission |
-| Phone emulator, 360dp wide | Issue 5: opening, a sale with VAT, item and Grand Total discounts and a split payment; a held order across an app restart; the Stock Ledger; the closing entry with its backup and its cancel; the compact opening dialog after the review. Issue 4: wizard; item with barcode, opening stock and price; Material Issue by typed barcode; Stock Ledger and Stock Balance; low-stock badge; Transfer defaults. Issue 3: POS Settings, Default Price List refusal. Issue 2: Setup pages, backup / wipe / restore |
-| Tablet emulator | Issue 5: landscape (expanded) with the number pad and the detail and payment panes; portrait (medium) after rotating mid-sale, with side sheets. Issue 4: Item list beside the two-column form (landscape); Stock Reconciliation with Fetch Items and the side-sheet row editor; portrait one pane. Issue 2: wizard card, Setup panes |
+| Automated tests, `flutter test` | 282 of 282 pass |
+| Release build | Builds; 90.5 MB APK |
+| Release manifest | No `INTERNET` permission; four Bluetooth permissions from the printer plugin |
+| Phone emulator, 360dp wide | Issue 7: a sale; POS Receipt and Standard A4 previews; Android's print dialog; Share; the invoice list and the invoice; a partial return and its Credit Note receipt; cancel refused while a return exists; cancelling the return; dashboard cards opening the list with the right filters; Print Settings with no paired printer and the Bluetooth settings link; Letter Head preview; Recent Orders' Print and Return; the closing entry's link with the session chip. Issue 6: the empty state; a sale, then the cards, period chips, goal link and goal card, chart table views, drill-down into Sales Analytics (by Item and by Item Group) and Item-wise Sales, Gross Profit, CSV exports read back; after the review, axis labels, a table row opening Item-wise Sales, the date-only column. Issue 5: opening, a sale with VAT, item and Grand Total discounts and a split payment; a held order across an app restart; the Stock Ledger; the closing entry with its backup and its cancel; the compact opening dialog after the review. Issue 4: wizard; item with barcode, opening stock and price; Material Issue by typed barcode; Stock Ledger and Stock Balance; low-stock badge; Transfer defaults. Issue 3: POS Settings, Default Price List refusal. Issue 2: Setup pages, backup / wipe / restore |
+| Tablet emulator | Issue 7: landscape (expanded) with the invoice beside the list and the print screen's side panel; portrait (medium) with the return form. Issue 6: landscape (expanded) with 4 cards per row, the goal link beside the trend and 3 charts per row, a bar opening Item-wise Sales with the inline filter bar; portrait (medium) with charts 2 per row. Issue 5: landscape (expanded) with the number pad and the detail and payment panes; portrait (medium) after rotating mid-sale, with side sheets. Issue 4: Item list beside the two-column form (landscape); Stock Reconciliation with Fetch Items and the side-sheet row editor; portrait one pane. Issue 2: wizard card, Setup panes |
 | Real device | **Not tested** |
 
-All checks were run on 2026-11-17 and 2026-11-18, after the last code change (the phone emulator check of the review fixes on 2026-11-18). Issue 1's checks (launcher label, 411dp phone, `aapt2` badging) were not repeated.
+Issue 6's checks were run on 2026-11-18, after the last code change (the phone check of the review fixes last). Issue 5's were run on 2026-11-17 and 2026-11-18. Issue 1's checks (launcher label, 411dp phone, `aapt2` badging) were not repeated.
 
 ### 10.2 Automated tests
 
 | File | Tests | Covers |
 |---|---|---|
 | `test/app_test.dart` | 14 | Wizard gate: fresh install shows only the wizard, with Restore from backup; Language, Region (device country preselected), Store (abbreviation suggested), Done lands on the Cash Register; a set-up store never sees the wizard. Shell: bottom bar with five destinations in order; boundaries at 599, 600, 839 and 840dp; switching destinations; rotation. Setup: workspace then pushed page on compact (Stock Settings reachable, later-milestone links disabled); workspace beside the page on expanded; a settings page saves to `singles`; POS Settings does not save back a stored mode that is no longer offered. |
-| `test/core/db/schema_test.dart` | 4 | Exactly the 45 tables; the 14 indexes; foreign keys on; a child row with a missing parent is refused. |
+| `test/core/db/schema_test.dart` | 4 | Exactly the 45 tables; the 17 indexes; foreign keys on; a child row with a missing parent is refused. |
 | `test/core/db/singles_test.dart` | 15 | Defaults of all seven settings pages; derived defaults, including a blank abbreviation; POS Settings' blank "None" read as none; write then read; one row per key; clearing a key; the stream emits after a write; the same field under two doctypes stays separate. |
 | `test/core/numbers/flt_test.dart` | 13 | SET-A1 to A3; negative midpoints; whole-number midpoints; zero; integers; nine decimals; the setting-to-method mapping. |
 | `test/core/numbers/format_test.dart` | 17 | SET-A4; all six number formats; precision; padding; negative values; a negative value that rounds to zero; currency symbol placement; all date and time formats; storage text round trip; `parseNumber` round trip, plain typing, mistyped decimal marks, non-numbers. |
@@ -1337,20 +1556,27 @@ All checks were run on 2026-11-17 and 2026-11-18, after the last code change (th
 | `test/core/widgets/status_chip_test.dart` | 7 | Colour role and label of each status; an unknown status. |
 | `test/core/widgets/child_table_test.dart` | 5 | Rows listed; bottom sheet when compact; side sheet when wider; Add Row; read-only. |
 | `test/core/widgets/link_field_test.dart` | 7 | Label and value; matches and Create new; narrowing and picking; mandatory mark and error; clear button rules. |
-| `test/core/widgets/report_table_test.dart` | 6 | CSV header and rows; quoting; empty cells; headers, cells and export action; the first column stays while the rest scroll sideways; hidden trailing values, totals row, cell formatting and row tap. |
+| `test/core/widgets/report_table_test.dart` | 7 | CSV header and rows; quoting; empty cells; the filter lines above the header (DSH-R11); headers, cells and export action; the first column stays while the rest scroll sideways; hidden trailing values, totals row, cell formatting and row tap. |
 | `test/features/setup/logic/tax_template_test.dart` | 13 | SET-A8 to A11; included-reference rule; missing tax; SET-R12 worked example (61.88); row removal renumbering; stored type values. |
 | `test/features/setup/logic/data_import_test.dart` | 9 | Header matching; blank rows; SET-A17 problem position; insert and update checks; barcode ownership; EAN / UPC; price validity overlap; `validBarcode`. |
 | `test/features/setup/data/setup_db_test.dart` | 9 | SET-A12; a failed wizard writes nothing; SET-A13; SET-A14 (Default Price List cannot be disabled or deleted, even beside another enabled list; can be once another is the default); SET-A15; SET-A16 (a rename follows into Selling Settings); delete of a used master refused; duplicate name; Update Series below a used number and the next name; naming series order. |
 | `test/features/setup/data/import_backup_test.dart` | 7 | 200 items imported with price and barcode, exported, updated; SET-A17 at database level; Item Price and Item Barcode insert and update; SET-A18; SET-A19; restore onto a fresh install takes no safety backup, onto a set-up store one; Number of Backups below 1. |
 | `test/features/stock/logic/stock_logic_test.dart` | 19 | STK-A1 to A11, A13 to A15; FIFO negative layer settled; reconciliation reset; price validity and batch prices; batch status and default expiry; auto pick by FIFO, LIFO and Expiry. |
 | `test/features/stock/data/stock_db_test.dart` | 26 | FIFO costs and naming; STK-A16 to A27 (A12, A5 at database level); cancel and amend `-1`; additional costs; opening stock and price from a new item; frozen fields and unit lock (A6); fraction (A7); Default Warehouse rules; variants (A10, template refused); serial series and a range of 50; reports (ledger, balance, low stock); duplicate serial; an old negative entry does not block; price fallback and item tax up the tree; batch expiry rule. |
-| `test/core/numbers/in_words_test.dart` | 1 | In Words as Frappe writes it: hundreds with "And", thousands and millions, a fraction alone, zero. |
+| `test/core/numbers/in_words_test.dart` | 3 | In Words as Frappe writes it: hundreds with "And", thousands and millions, a fraction alone, zero; INV-A1, A2 in USD; lakh and crore. |
 | `test/features/pos/logic/totals_test.dart` | 13 | POS-A1 to A9, A11 to A14, A16; Not Applicable stored as "NA"; a typed rate below the list rate; Disable Rounded Total; the Grand Total discount remainder on the last tax row. |
 | `test/features/pos/logic/sale_test.dart` | 2 | Lines merge by item, unit and rate (POS-R4); a scanned serial joins its line once (POS-R21). |
 | `test/features/pos/data/pos_db_test.dart` | 13 | POS-A10, A15, A17 to A25 (POS-A22 with a return inserted directly, returns being R6's); STK-R22 expired batch and the retry after a refused Submit; STK-R11 price inserted once; a backdated receipt recosts the sale; STK-R26 warranty; STK-R27 auto pick; the backup after closing; cancelling the latest closing. |
 | `test/features/pos/ui/pos_ui_test.dart` | 3 | Phone: the opening gate, a barcode added, Checkout, Complete Order, the summary and the stored sale; tablet: selector, cart and number pad side by side; Medium: the item detail opens over the selector, not the cart. |
 | `test/features/stock/ui/stock_ui_test.dart` | 4 | Stock home groups (Serial and Batch hidden until enabled); empty Item list offers Add Item and Import items; a new item saves with its name from the code; low-stock badge on the Stock destination; Stock Ledger with a totals row. |
-| **Total** | **223** | |
+| `test/features/dashboard/logic/periods_test.dart` | 5 | DSH-A18; the fixed periods up to today; the previous period (month cut to a shorter month, January back to December, a leap day, custom); trend bucket sizes; ranges cut into weeks, quarters and years; day index. |
+| `test/features/dashboard/data/dashboard_db_test.dart` | 16 | The section 7 fixture: DSH-A1 to A17 and A19 (also the group chart and trend after the cancel); change taken off the cash mode; no sale yet and stock value; a stock item sold at no cost flagged, a price-only credit note not; a two-line invoice's tax split by line; the top 8 item groups and Other; 20,000 invoices: the dashboard's queries under 500 ms and the reports under 2 s. |
+| `test/features/dashboard/ui/dashboard_ui_test.dart` | 5 | No sale yet; phone: cards 2 per row and the target link (DSH-A13); tablet: cards 4 per row and the goal card; a new sale shows without a refresh (DSH-R12); Sales Analytics with Total first on a phone and the chosen row marked; Gross Profit's extra columns and its totals %. |
+| `test/features/invoices/data/invoices_db_test.dart` | 16 | INV-A10 to A22, A24; the rate kept and a refund in full; a return whose stock was sold since cannot be cancelled; a full return refunds a discount and a fixed charge exactly (D-62); the list's filters; one Default letter head, used by a sale made without one. |
+| `test/features/invoices/logic/print_layout_test.dart` | 8 | INV-A3 to A9; R13; R14 and R18 (letter head lines, totals order, In Words, change); × printed as x. |
+| `test/features/invoices/ui/invoice_pdf_test.dart` | 2 | Roboto covers ₱; 40 lines on A5 run over pages; the POS Receipt is one 58 mm roll page. |
+| `test/features/invoices/ui/invoices_ui_test.dart` | 4 | Phone: empty state, list, invoice; tablet: the invoice beside the list with a `DataTable`; a partial return from the invoice through the form and its confirmation; Setup › Letter Head lists the default. |
+| **Total** | **282** | |
 
 Database tests run against an in-memory SQLite database with the real schema. Widget tests run the real widgets inside the app's theme and localisation. No test uses a mock.
 
@@ -1376,11 +1602,19 @@ Database tests run against an in-memory SQLite database with the real schema. Wi
 | POS-R9 to R15, POS-A1 to A9, A11 to A14, A16 | `totals_test.dart`, `in_words_test.dart` |
 | POS-R1 to R8, R16 to R21, POS-A10, A15, A17 to A25; STK-R11, R22, R24, R26, R27 on a sale | `pos_db_test.dart`, `sale_test.dart` |
 | R4 §5 (screens and layouts) | `pos_ui_test.dart`; emulator (10.5) |
+| DSH-R3, R6 buckets, A18 | `periods_test.dart` |
+| DSH-R1, R2, R4 to R9, DSH-A1 to A17, A19; R5 §3 ceiling | `dashboard_db_test.dart` |
+| DSH-R11 | `report_table_test.dart`; emulator (exports read back) |
+| DSH-R12, A13, R5 §5 | `dashboard_ui_test.dart`; emulator (10.5) |
+| DSH-R10 | Emulator (10.5) |
+| INV-R1 to R11, INV-A10 to A22, A24 | `invoices_db_test.dart`; `invoices_ui_test.dart`; emulator (10.5) |
+| INV-R12 to R23, INV-A1 to A9, A23 | `print_layout_test.dart`, `in_words_test.dart`, `invoice_pdf_test.dart`; emulator (10.5) |
+| INV-R24, R5 §5 | Emulator (10.5) |
 
 ### 10.4 Build verification
 
-- `flutter build apk --release` completed and wrote `app-release.apk`, 81.8 MB (80.4 MB at issue 4, 75.0 MB at issue 3, 75.3 MB at issue 2, 68.9 MB at issue 1).
-- The merged release manifest contains `android.permission.INTERNET` zero times. Its `uses-permission` entries are unchanged from issue 1: `ACCESS_NETWORK_STATE`, `CAMERA`, `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`.
+- `flutter build apk --release` completed and wrote `app-release.apk`, 90.5 MB (83.2 MB at issue 6, 81.8 MB at issue 5, 80.4 MB at issue 4, 75.0 MB at issue 3, 75.3 MB at issue 2, 68.9 MB at issue 1).
+- The merged release manifest contains `android.permission.INTERNET` zero times (the printer plugin declares it; the release manifest removes it). Its `uses-permission` entries: `ACCESS_NETWORK_STATE`, `CAMERA`, `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`, and since issue 7 `BLUETOOTH`, `BLUETOOTH_ADMIN`, `BLUETOOTH_CONNECT`, `BLUETOOTH_SCAN`.
 
 ### 10.5 Device verification
 
@@ -1424,6 +1658,27 @@ Issue 5 checks, with the same procedure (hardware GPU mode, the emulator's defau
 | `Medium_Phone_API_36.1` | after the review fixes | Fresh install; the POS Opening Entry shows as an `AlertDialog`; Open; an empty catalogue shows "No items found". Logcat and the Dart Tooling Daemon: no runtime errors. |
 
 Two defects found on the emulator were fixed before issue: a number field wrote to its text controller after it was disposed when a side sheet closed ("A TextEditingController was used after being disposed", four times in logcat; fixed in `LiveNumberField`, then checked with a hot reload: no errors), and the confirm dialog for cancelling a closing entry showed two "Cancel" buttons (the action now reads "Cancel POS-CLO-…"). Camera scanning was again not exercised; barcodes were typed.
+
+Issue 6 checks, with the same procedure (hardware GPU mode). Taps and text through `adb`, screens through screenshots, exported CSVs read back with `adb shell run-as … cat`, runtime errors through logcat and the Dart Tooling Daemon.
+
+| Device | Window | Observed |
+|---|---|---|
+| `Medium_Phone_API_36.1` | 1080x2400, compact | Wizard (United States, USD, "Test Store") → Add your first item → Dashboard: "Complete your first sale to see your dashboard" with Open Cash Register. Item PARA500, Opening Stock 100 at 2.00, Standard Selling Rate 5.00; register opened; 3 × $ 5.00 sold → `ACC-SINV-2026-00001`. Dashboard, Today: Net Sales $ 15.00, Invoices 1, Average Sale $ 15.00, Items Sold 3.000, Gross Profit $ 9.00 and 60.0%, Taxes $ 0.00, Returns 0, Stock Value $ 194.00; "Set a monthly sales target"; the period bar scrolls sideways. This Month: a trend of 17 days. Sales Trend's table view listed every day. The target link opened Store Profile; 60.00 saved; the goal card showed $ 60.00, $ 15.00 and Achievement 25.0%. Net Sales opened Sales Analytics (Total first, the row marked ●, its line drawn); Tree Type Item Group showed All Item Groups and Products. Its export began with From Date, To Date, Tree Type, Value or Qty, Range. Gross Profit's export: PARA500, 3, 15, 6, 9, 60, 5, 2. |
+| `Medium_Tablet` | 2560x1600 landscape, expanded | Rail with labels; cards 4 per row; the target link beside Sales Trend; Sales by Item Group, Top Items and Payment Modes in one row. The Gauze bar opened Item-wise Sales with the filter bar in place (Item GAUZE). |
+| `Medium_Tablet` | portrait, medium | Rail without labels; cards 4 per row; charts 2 per row. |
+| `Medium_Phone_API_36.1` | after the review fixes | Fresh install, one sale; axis labels in the Number Format; Top Items' table row opened Item-wise Sales filtered to the item, its Date column without the time; the export's filter lines named the item (Item, PARA500). No runtime errors. |
+
+Four defects found on the emulator were fixed before issue: the trend's axis started at the sale's value, not at zero; fl_chart's extra end labels overlapped the last regular labels on both axes; Sales Analytics drew nothing after the Tree Type changed (the default rows were taken from the previous result while the new one loaded); the Value filter's label read "Value" (now "Value or Qty", ERPNext's label).
+
+Issue 7 checks, with the same procedure (hardware GPU mode). Taps and text through `adb`, screens through `uiautomator` and screenshots, runtime errors through logcat.
+
+| Device | Window | Observed |
+|---|---|---|
+| `Medium_Phone_API_36.1` | 1080x2400, compact | Wizard (United States, USD, "Test Store"); item PARA500, 100 at 2.00, sells at 5.00; session with 500 cash; 3 sold → `ACC-SINV-2026-00001`; the summary offers Print Receipt. The POS Receipt preview: letter head, Sales Invoice, Invoice No. and Date, the line, totals, "USD Fifteen only.", Cash and Change, Code 128. Standard on A4 with 4 columns. Print opened Android's print dialog (ISO A4, page 1 of 1); Share offered `….pdf`. The invoice list and the invoice. Create › Return / Credit Note: 2 of 3 back, Refund 10.00 in Cash, confirmed → `ACC-SINV-RET-2026-00001`, Return; its receipt headed Credit Note with Return Against. Cancel of the sale refused ("A return has been made against this sale…"); the return cancelled; the sale Paid again; PARA500 at 97. Dashboard: Returns opened the list with Return; Invoices then with Paid and Credit Note Issued. Print Settings: the Nearby devices prompt, "No Bluetooth printer is paired", Bluetooth settings opened Android's Connected devices, Save → Saved. Letter Head: a header line added, the preview followed, saved. Recent Orders: Print Receipt and Return on the sale; Return opened the form. Closing entry: "Invoices: 1" opened the list with the POS Opening Entry chip. |
+| `Medium_Tablet` | 2560x1600 landscape, expanded | Wizard, item GAUZE (50 at 3.00, sells at 8.00), 2 sold. The invoice beside the list, items as a `DataTable`; the print screen with its controls in a side panel. |
+| `Medium_Tablet` | portrait, medium | Rail without labels; the return form in one pane. Logcat: no Flutter errors. |
+
+One defect found on the phone was fixed before issue: the cancel confirmation showed two "Cancel" buttons (the action now reads "Cancel ACC-SINV-…"). No thermal printer was available (P-18); camera scanning was again not exercised.
 
 Issue 4: two defects found on the emulator were fixed before issue: the Default Unit of Measure was blank when a new item form first opened (the form now waits for its choices, D-22), and the report totals row crashed reports whose first column is a date. Camera scanning and photo capture were not exercised (no camera image on the emulator); barcodes were typed, as a hardware scanner types them.
 
@@ -1508,7 +1763,45 @@ Issue 5. `flutter analyze`, `dart fix`, a Ponytail review (four findings, all ap
 | A number field showed no error for text that is not a number | It shows "not a number" |
 | The merge rule lived in the cart notifier; `({Sale sale, String name})` written six times; `pad` and `_line` named vaguely | `addToSale` in `logic/sale.dart` with a test; `Submitted`; `numberPad`, `_lineRefusal` |
 
-Left as they are, with reasons: Complete Order and Open submit without a dialog (D-39); Action on New Invoice applies when a held order replaces unsaved changes, the one place ERPNext's POS starts another invoice over a changed one; tapping an empty payment mode fills the amount due (D-48); the sale cost follows the ledger after backdating (D-44); serial and batch checks report one at a time (D-49); building the payment list for `settle` appears in four places; the data layer builds its own `Formats` because it cannot read providers; the stock check exists in the cart (on add) and in the Submit checks; option texts such as "Net Total" are stored as text (D-6).
+Left as they are (issue 5), with reasons: Complete Order and Open submit without a dialog (D-39); Action on New Invoice applies when a held order replaces unsaved changes, the one place ERPNext's POS starts another invoice over a changed one; tapping an empty payment mode fills the amount due (D-48); the sale cost follows the ledger after backdating (D-44); serial and batch checks report one at a time (D-49); building the payment list for `settle` appears in four places; the data layer builds its own `Formats` because it cannot read providers; the stock check exists in the cart (on add) and in the Submit checks; option texts such as "Net Total" are stored as text (D-6).
+
+Issue 6. `flutter analyze`, `dart fix`, a Ponytail review (two findings, about −10 lines, both applied: a switch repeating `_groupByText`; a one-caller helper), and the code-review skill with a standards reviewer and a spec reviewer against `861d78d`. Fixes, each at the cause:
+
+| Finding | Fix |
+|---|---|
+| A 14dp bar was the only way to open Item-wise Sales from a chart (R1 §7.2, 48dp) | The bars' touch area widened to 48dp; the group and item tables open it on a row tap (D-59) |
+| Axis labels used `NumberFormat.compact`, ignoring the Number Format (DSH-R11) | Through `Formats`, whole numbers without decimals |
+| The dashboard showed a raw error text | A message, then the error |
+| Sales Analytics drew a line in the error colour, which means "down" on the cards; R5 §5 names primary, secondary, tertiary and their containers | Those colours (D-58) |
+| The dashboard screen and the report pages imported each other | `bucketLabel` and `percent` moved to `dashboard_charts.dart` |
+| Nine item groups gave nine bars and no Other ("top 8 and Other") | Other from the ninth |
+| The cost flag would mark a price-only credit note, which R5 says has no cost | Returns are not flagged (D-57); test |
+| The export wrote values unrounded, such as an average rate at full float length | Rows rounded as shown before the table and the export |
+| The export's Item and Item Group lines read the lists once and could be blank on a phone | The page watches them |
+| Item-wise Sales' Date column showed the time | Date only |
+| `_totals`, the per-line tax split and A19's "nothing else changes" were not tested | Totals % in a widget test; a two-line invoice; A19 also checks the group chart and the trend |
+
+Left as they are, with reasons: Export sits in the report's filter row, not the app bar (R5 §5), as in every stock report (D-31); `SalesReportPage` reads the database directly, as the stock reports do; month labels are English (`yMMM`), as dates are (D-7); `achievement` lives in `data/` beside its query; switches on `SalesReport` stay in the page rather than on the enum; a `bool` for Value or Quantity; `ReportRows` and `subtreeIds` come from the stock reports; the group indent is made in the data layer, which also returns the depth; a group bar against its drill-down (D-56); `ReportFilters` reused by the stock reports (D-60).
+
+
+Issue 7. `flutter analyze`, `dart fix`, a Ponytail review (six findings, about −40 lines, all applied: four invoice fields never read, a one-caller PDF wrapper, a second status-label switch, a hand-built filter beside `copy()`, a desktop-only exception branch, two helpers made public for no caller), and the code-review skill with a standards reviewer and a spec reviewer against `861d78d` (plan 05 files only). Fixes, each at the cause:
+
+| Finding | Fix |
+|---|---|
+| Raw receipts printed `2 ? USD 1.50`: × is not ASCII | `printable` maps × to x; a test runs the clean step |
+| Saving Print Settings with Bluetooth off wiped the saved printer | The saved printer stays a choice (D-76) |
+| The Receipt printer button ignored the Letter Head switch | `printRaw(letterHead:)` |
+| A sale made without a letter head printed none (INV-R14 "else the default") | `invoiceView` falls back to the default; test |
+| An open list kept old filters when a new link arrived | The list is keyed by its query (D-72) |
+| The closing entry's session filter was invisible and stuck; its link listed drafts and cancelled invoices | A removable session chip; the link names the submitted statuses |
+| The Standard PDF printed In Words after the payments (INV-R18) | Before them |
+| A serial return line's quantity stored without `flt` (C-8) | `flt` |
+| Literal text on the test receipt (C-6) | Messages |
+| The raw pipeline, scan-to-open, the "return exists" SQL, the warehouse filter, the totals block, the day text and a default were written twice | One each (`receiptJob`, `reportRaw`, `openScanned`, `_returned`, `usable`, the layout's totals, `toStorage`, `rawCharsPerLine`) |
+| Invoice paths built by hand in eight places; the PDF guessed numeric columns from the column count | `invoicePath`, `returnPath`, `invoicesLink`; `PrintDoc.numeric` |
+| Names: `refund` / `refundAmount`, `PosScreen.edit`; a misplaced doc comment; three unused messages | `refundPaidIn`, `heldOrderId`; moved; removed |
+
+Left as they are (issue 7), with reasons: status names stay strings (C-11); the `#,##,###.##` literal and the three `_now` helpers; `_followRename` beside the price list's rename carry (other keys and tables); the symbol-to-code replacement exists for the PDF font and for the printer, two different limits; `from` / `to` passed together in one call site; the ESC/POS and receipt tests live in `print_layout_test.dart`; the detail pane's Back arrow on Expanded, as the stock and setup pages nested under their workspace have.
 
 ---
 
@@ -1530,12 +1823,12 @@ What the store owner can do with this build.
 | Destination | Today |
 |---|---|
 | Register | The cash register; see below |
-| Invoices | Shows "This screen arrives in a later milestone." |
+| Invoices | Every sale and return: find, read, print, return, cancel; see below |
 | Stock | Items, prices, warehouses, stock movements, counts, batches, serial numbers and stock reports; see below |
-| Dashboard | Same |
+| Dashboard | Sales, profit and the monthly goal for a period; see below |
 | Setup | Every setup page; see below |
 
-**Setup.** Grouped links: Store, Selling, Taxes, Stock, Printing, Data. Greyed links arrive with later milestones. On a tablet in landscape the links stay on the left and the page opens on the right.
+**Setup.** Grouped links: Store, Selling, Taxes, Stock, Printing, Data. On a tablet in landscape the links stay on the left and the page opens on the right.
 
 | To | Go to |
 |---|---|
@@ -1551,6 +1844,8 @@ What the store owner can do with this build.
 | Change how invoices are numbered | Naming Series; Update Series moves the counter |
 | Load many items | Data Import: Download Template, fill it in a spreadsheet, Choose File, Start Import. Problems are listed by row and column; nothing is imported until all are fixed. |
 | Keep a copy of the data | Backups: Back up now, then the save icon to store the file somewhere other than the device |
+| Print on paper | Print Settings: page size and what prints; Letter Head: your logo, address lines and footer, one marked Default; Print Heading: another title such as "Official Receipt"; Terms and Conditions: text copied into each sale (choose it on POS Settings) |
+| Use a receipt printer | Pair the Bluetooth printer in Android's settings. Print Settings › Receipt printer: Enable Raw Printing, choose the printer, paper width and characters per line, cut and drawer; Test print. Allow Nearby devices when Android asks. |
 | Bring data back | Backups: Restore from file; the current data is backed up first. On a new device, tap **Restore from backup** on the wizard's first page instead of setting up. |
 
 A record that is in use cannot be deleted: disable it instead.
@@ -1589,7 +1884,31 @@ A record that is in use cannot be deleted: disable it instead.
 | Park a sale | Menu › **Save as Draft**. Menu › **Toggle Recent Orders** › Draft › Edit brings it back, at today's prices. |
 | End the day | Menu › **Close the POS**: count each payment mode and type the Closing Amount; the Difference shows any shortage. **Submit** closes the session and backs up the data. A mistake? "Cancel POS-CLO-…" on the opening screen reopens the session. |
 
-Receipts cannot be printed and sales cannot be returned yet; both arrive with Invoices.
+After **Complete Order**, **Print Receipt** opens the receipt (or prints it at once on the receipt printer when POS Settings › Print Receipt on Order Complete is on). In Recent Orders a sale can be printed or returned, and the scan button opens a receipt's invoice.
+
+**Invoices.** Every sale and return.
+
+| To | Do |
+|---|---|
+| Find a sale | Tap the status chips, pick a date range, type part of the name, or scan the barcode at the foot of the receipt |
+| Print or share it | Open it › the print icon. Choose Standard (full page) or POS Receipt, switch the letter head on or off, then **Print** (any printer Android reaches), **Share** (the PDF to any app) or **Receipt printer** |
+| Take goods back | Open the sale › **Create › Return / Credit Note** (or Return in Recent Orders). Lower the quantity of what comes back, choose the warehouse, type the refund per payment mode (the default mode is filled in), **Submit**. A session must be open. For a price-only credit, turn Update Stock off and lower the rate. After the return, **New Order** rings up an exchange. |
+| Undo a mistaken sale | Open it › menu › **Cancel**, while its session is open and before any return. After closing the session, make a return instead. A return can be cancelled the same way while its session is open. |
+| Continue a held order | Tap the draft: it opens in the register |
+
+
+**Dashboard.** How the store is doing. It counts completed sales only, by the day they were sold; a held order counts once it is completed.
+
+| To | Do |
+|---|---|
+| Choose the period | Tap Today, Yesterday, This Week, This Month or This Year, or Custom to pick two dates. A week starts on System Settings' First Day of the Week. |
+| Compare | Each card shows its change against the same days of the previous day, week, month or year, with an arrow: up in the theme colour, down in red |
+| Set a sales goal | Tap "Set a monthly sales target", or Setup › Store Profile › Monthly Sales Target. The goal card then shows this month's sales against it, whatever period is chosen. |
+| See the figures behind a card | Tap Net Sales or Items Sold (Sales Analytics), Gross Profit (Gross Profit), Taxes (Item-wise Sales), or Stock Value and Low Stock (the stock reports) |
+| Read a chart as numbers | Tap its title. In Sales by Item Group and Top Items, tap a bar or a row to see those sales line by line. |
+| Compare items over time | Sales Analytics: Tree Type Item or Item Group, Value or Qty, a Range (Daily to Yearly). Tap rows to draw or hide their lines; on a phone the Total column comes first. |
+| Check your margins | Gross Profit, grouped by Invoice, Item, Item Group or Brand. "No buying or valuation rate" in the Check column means a stock item was sold at no cost: check its valuation rate. |
+| Take a report away | The download button exports it to CSV; the first lines record the filters |
 
 **Later starts.** The app opens on the Register destination. The Welcome screen does not appear again.
 
@@ -1597,7 +1916,6 @@ Receipts cannot be printed and sales cannot be returned yet; both arrive with In
 
 **Dark theme.** Follows the device setting.
 
-Invoices, printing, returns and the dashboard are not available yet.
 
 ---
 
@@ -1609,7 +1927,7 @@ Invoices, printing, returns and the dashboard are not available yet.
 |---|---|---|---|
 | P-1 | On the development machine's Android emulator in hardware GPU mode (seen again at issue 5 on the POS Closing Entry), the first app launch after the emulator boots, or after the display density changes, can draw the first screen after the wizard with text missing: once the app-bar title, twice part of the body text, once (on the tablet) rail icons and labels. It clears on the next repaint. | Cosmetic, on the emulator. | Open. Follows the emulator's GPU path: 2 of 2 trigger launches showed it in hardware mode (AMD integrated GPU); 0 of 3 trigger launches and 0 of 6 launches overall in software mode (`-gpu swiftshader_indirect`), same APK; 6 warm relaunches in hardware mode were clean. Small samples. The cause inside the emulator is not known. **Not checked on a real device.** |
 | P-2 | `dart run build_runner build` prints one warning: `item` cannot be found for the foreign key of the `batch` table. | None. The SQL constraint is correct and the schema test passes. | Accepted (D-3). |
-| P-3 | `modified_at` must be set by every update. | None: every update the Setup, Stock and Cash Register features write sets it. | Open as a rule for later milestones. |
+| P-3 | `modified_at` must be set by every update. | None: every update the Setup, Stock, Cash Register and Invoices features write sets it. | Open as a rule for later changes. |
 | P-4 | The release build carries `ACCESS_NETWORK_STATE`, added by a plugin. | None: without `INTERNET` the app cannot connect. | Accepted. Removing it risks a crash in a plugin's background job. |
 | P-5 | (Issue 1: the wizard was a placeholder.) | — | **Closed** at issue 2: the real wizard replaces it. |
 | P-6 | The release build is signed with the debug key. | It cannot be published. | By design: the app is not being published. |
@@ -1622,27 +1940,23 @@ Invoices, printing, returns and the dashboard are not available yet.
 | P-13 | Schema version 1 was edited in place at issue 3 (D-29). A database or backup made before issue 3 still has the POS Profile tables and a NOT NULL `pos_profile_id` in `pos_opening_entry`, `pos_closing_entry` and `sales_invoice`. `checkRestorable` accepts such a backup, because its schema version is 1. | Setup works on it; opening a session or selling fails. | Open. Clear the app's data on every device that ran an earlier build, and do not restore backups taken before issue 3. |
 | P-14 | Camera barcode scanning and item photos were not exercised: the emulator has no camera image. | Unverified on hardware; typed barcodes (the hardware-scanner path) were verified. | Open. Check on a real device that has never been online (the scan model is bundled). |
 | P-15 | The engine replays a chain from its first entry (D-33). | Fine for one store; slow only if one item in one warehouse reaches hundreds of thousands of entries. | Accepted (R3's stated ceiling); marked `ponytail:` in `stock_ledger.dart`. |
-| P-16 | Sale-only stock rules were not wired (D-34). | — | **Closed** at issue 5 for STK-R11, R22, R26 and R27 on a sale. The incoming rate of a sale return comes with returns (section 12.3). |
+| P-17 | Schema version 1 gained three indexes in place at issue 6 (D-51). A database or backup made before issue 6 lacks them; `checkRestorable` accepts it. | Correct figures, but the dashboard and the sales reports slow down as the invoices grow. | Open. Reinstall (the emulator procedure does), or create the indexes by hand on such a database. |
+| P-16 | Sale-only stock rules were not wired (D-34). | — | **Closed**: at issue 5 for STK-R11, R22, R26 and R27 on a sale; at issue 7 for a sale return's incoming rate (D-64). |
+| P-18 | Raw printing has not been tried on a real thermal printer: the ESC/POS bytes, cut, drawer kick, Code 128, the character width and the Bluetooth connection are checked by unit tests and the settings states only. | A printer may need another code page, command or width. | Open. Test print on the store's printer first; the PDF through Android's print dialog is the fallback. |
 
 ### 12.2 Limits of this issue
 
 - English is the only language.
 - Backups kept only on the device are lost with it; Export copies them elsewhere.
 - No migration path exists yet (section 7.7); issue 3 changed version 1 without one (P-13).
-- Recent Orders lists the newest 200 invoices.
+- Recent Orders lists the newest 200 invoices; the Invoices list loads every invoice that matches its filters.
 
 ### 12.3 Not built yet
 
-Beyond the milestones in section 4.4, these foundation pieces were left for the milestone that first needs them:
-
-- Docstatus rules for documents (save, submit, cancel, amend)
-- Camera and Bluetooth permission declarations of the app itself
-- A thermal printing package
-- From the Setup plan, waiting on R6: Print Settings, Letter Head, Print Heading and Terms and Conditions pages
-- From the Cash Register plan, waiting on R6 (owner's decision): Print Receipt on the order summary and in Recent Orders, the print preview after a sale (Print Receipt on Order Complete), Return in Recent Orders, and the cost of a sale return (STK-R33); the closing entry's invoice count links to nothing until the Invoices list exists
+Every milestone of R1 is built. Left out on purpose, as the plans' sections 8 list them: the Print Format Builder, HTML letter heads, store credit, amending a cancelled invoice, In Words in other languages, printing stock documents and the closing entry, network or USB raw printing, email from the app.
 
 ---
 
 ## 13. Summary
 
-Rx Merchant is an offline Android point-of-sale app for one store owner, modelled on ERPNext. At this issue, milestone M0 and the whole Setup, Stock and Cash Register plans are complete (M1 to M5, M8, M9). Setup: a first-run wizard that seeds the store; every settings page and master; Data Import and Export; Backup and Restore. Stock: the item catalogue with barcodes, units, prices, taxes, photos and variants; warehouses; Stock Entry and Stock Reconciliation; batches and serial numbers; the stock ledger engine; seven reports and a low-stock badge. Cash Register: the POS Opening Entry; a POS screen built for phones, portrait tablets and landscape tablets; the totals engine with item and whole-sale discounts, all five tax types, taxes included in the rate, item tax overrides, rounding to the smallest coin and In Words; split payments with change; Submit that posts stock, costs each line, delivers serial numbers and inserts missing prices; held orders; and the POS Closing Entry with its cash count and backup. The schema did not change. 223 automated tests pass, including every POS and STK acceptance check; analysis is clean; the release build carries no internet permission; the main flows were checked on phone and tablet emulators; a Ponytail review, a standards review and a spec review were acted on. Printing, returns, the invoice list and the dashboard come next (M6, M7). The work is not yet committed and no real device has been tested.
+Rx Merchant is an offline Android point-of-sale app for one store owner, modelled on ERPNext. At this issue every milestone is complete (M0 to M9). Setup: a first-run wizard that seeds the store; every settings page and master; Data Import and Export; Backup and Restore. Stock: the item catalogue with barcodes, units, prices, taxes, photos and variants; warehouses; Stock Entry and Stock Reconciliation; batches and serial numbers; the stock ledger engine; seven reports and a low-stock badge. Cash Register: sessions, a POS screen for phones and tablets, the totals engine, split payments with change, Submit with stock and cost, held orders, and the POS Closing Entry with its cash count and backup. Sales Dashboard: a period bar, eight cards against the previous period, the monthly sales goal, four charts, and three sales reports with drill-down and CSV export. Invoices and Receipts: a filtered, scannable invoice list; the read-only invoice; Return / Credit Note with stock back at its cost; Cancel within the session; Standard and POS Receipt PDFs with preview, Print and Share; raw ESC/POS printing to a Bluetooth thermal printer; Setup › Printing. 282 automated tests pass, including every INV, DSH, POS and STK acceptance check; analysis is clean; the release build carries no internet permission; the main flows were checked on phone and tablet emulators; a Ponytail review, a standards review and a spec review were acted on. The work of issues 6 and 7 is not yet committed; no real device and no real thermal printer have been tested (P-8, P-18).

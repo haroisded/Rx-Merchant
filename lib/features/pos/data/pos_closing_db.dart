@@ -15,6 +15,14 @@ import 'pos_db.dart';
 
 const posClosingType = 'POS Closing Entry';
 
+/// SQL for the Mode of Payment that sale `s`'s change comes out of: its
+/// first Cash-type payment (D-43). Null when it has none.
+const changeModeOf =
+    '(SELECT p.mode_of_payment_id FROM sales_invoice_payment p '
+    'JOIN mode_of_payment m ON m.id = p.mode_of_payment_id '
+    "WHERE p.sales_invoice_id = s.id AND m.type = 'Cash' "
+    'ORDER BY p.id LIMIT 1)';
+
 /// One Payment Reconciliation row before the owner counts the drawer.
 typedef ReconciliationRow = ({
   int modeId,
@@ -72,10 +80,7 @@ extension PosClosingDb on AppDatabase {
     }
     final change = <int, double>{};
     for (final r in await customSelect(
-      'SELECT (SELECT p.mode_of_payment_id FROM sales_invoice_payment p '
-      'JOIN mode_of_payment m ON m.id = p.mode_of_payment_id '
-      "WHERE p.sales_invoice_id = s.id AND m.type = 'Cash' "
-      'ORDER BY p.id LIMIT 1) AS mode, s.change_amount AS change '
+      'SELECT $changeModeOf AS mode, s.change_amount AS change '
       'FROM sales_invoice s WHERE s.pos_opening_entry_id = ? '
       'AND s.docstatus = 1 AND s.change_amount != 0',
       variables: [Variable(session.id)],

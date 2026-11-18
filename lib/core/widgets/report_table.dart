@@ -6,11 +6,17 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../l10n/app_localizations.dart';
+import 'child_table.dart';
 import 'spacing.dart';
+import 'window_size.dart';
 
-/// The CSV text of a report: a header line, then one line per row.
-String toCsv(List<String> columns, List<List<Object?>> rows) =>
-    csv.encode([columns, ...rows]);
+/// The CSV text of a report: the [preamble] lines (such as the filters),
+/// a header line, then one line per row.
+String toCsv(
+  List<String> columns,
+  List<List<Object?>> rows, [
+  List<List<Object?>> preamble = const [],
+]) => csv.encode([...preamble, columns, ...rows]);
 
 const double _rowHeight = 48;
 const double _firstWidth = 160;
@@ -37,6 +43,7 @@ class ReportTable extends StatefulWidget {
     this.cell,
     this.onRowTap,
     this.emptyText,
+    this.exportPreamble = const [],
   });
 
   final List<String> columns;
@@ -51,6 +58,9 @@ class ReportTable extends StatefulWidget {
   final String Function(int column, Object? value)? cell;
   final ValueChanged<List<Object?>>? onRowTap;
   final String? emptyText;
+
+  /// Lines written above the header of the export, such as the filters.
+  final List<List<Object?>> exportPreamble;
 
   @override
   State<ReportTable> createState() => _ReportTableState();
@@ -91,7 +101,9 @@ class _ReportTableState extends State<ReportTable> {
     final directory = await getTemporaryDirectory();
     final file = File('${directory.path}/${widget.exportName}.csv');
     await file.writeAsString(
-      toCsv(widget.columns, [for (final r in widget.rows) _shown(r)]),
+      toCsv(widget.columns, [
+        for (final r in widget.rows) _shown(r),
+      ], widget.exportPreamble),
     );
     await SharePlus.instance.share(
       ShareParams(files: [XFile(file.path, mimeType: 'text/csv')]),
@@ -207,6 +219,36 @@ class _ReportTableState extends State<ReportTable> {
                 ),
         ),
       ],
+    );
+  }
+}
+
+/// A report's filter fields: in place, or on a phone a Filters chip that
+/// opens them in a sheet (00-overview, section 7.2). [fields] gets a
+/// callback to call after a filter changes, so an open sheet shows it.
+class ReportFilters extends StatelessWidget {
+  const ReportFilters({super.key, required this.fields});
+
+  final Widget Function(VoidCallback changed) fields;
+
+  @override
+  Widget build(BuildContext context) {
+    if (WindowSize.of(context) != WindowSize.compact) return fields(() {});
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: ActionChip(
+        avatar: const Icon(Icons.filter_list),
+        label: Text(AppLocalizations.of(context).filters),
+        onPressed: () => showRowEditor<void>(
+          context,
+          (_) => Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: StatefulBuilder(
+              builder: (context, setSheet) => fields(() => setSheet(() {})),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

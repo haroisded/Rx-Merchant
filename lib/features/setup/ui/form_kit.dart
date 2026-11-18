@@ -110,6 +110,21 @@ String refusalText(AppLocalizations l, RefusedException e, Formats f) {
     ),
     Refusal.nonCashOverpaid => l.refusedNonCashOverpaid,
     Refusal.notLatestClosing => l.refusedNotLatestClosing,
+    Refusal.returnOriginal => l.refusedReturnOriginal,
+    Refusal.nothingToReturn => l.refusedNothingToReturn,
+    Refusal.returnTooMuch => l.refusedReturnTooMuch(
+      a[0]! as int,
+      f.number(a[1]! as num),
+    ),
+    Refusal.returnRate => l.refusedReturnRate(a[0]! as int),
+    Refusal.returnEntries => l.refusedReturnEntries(a[0]! as int),
+    Refusal.refundNotEqual => l.refusedRefundNotEqual(
+      f.money(a[0]! as num),
+      f.money(a[1]! as num),
+    ),
+    Refusal.modeDisabled => l.refusedModeDisabled(d),
+    Refusal.cancelSessionClosed => l.refusedCancelSessionClosed,
+    Refusal.cancelHasReturns => l.refusedCancelHasReturns,
   };
 }
 

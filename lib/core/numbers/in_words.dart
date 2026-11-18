@@ -12,41 +12,52 @@ const _scales = ['', 'thousand', 'million', 'billion', 'trillion'];
 
 /// [amount] in words with the currency [code] and its [fraction] name
 /// ("Cent"), the fraction having [precision] digits. A negative amount is
-/// spelled as its size; the document shows the sign elsewhere.
-// ponytail: international scale only; add lakh / crore if the Indian number
-// format (#,##,###.##) is ever chosen.
+/// spelled as its size; the document shows the sign elsewhere. [indian]
+/// counts in lakh and crore, for the Number Format `#,##,###.##`
+/// (05-invoices-and-receipts INV-R19).
 String moneyInWords(
   double amount, {
   required String code,
   required String fraction,
   required int precision,
+  bool indian = false,
 }) {
+  String words(int n) => _title(_words(n, indian: indian));
   final parts = amount.abs().toStringAsFixed(precision).split('.');
   final whole = int.parse(parts[0]);
   final cents = parts.length > 1 ? int.parse(parts[1]) : 0;
   if (whole == 0 && cents == 0) return '$code Zero only.';
-  if (whole == 0) return '${_title(_words(cents))} $fraction only.';
-  final out = '$code ${_title(_words(whole))}';
-  return cents == 0
-      ? '$out only.'
-      : '$out and ${_title(_words(cents))} $fraction only.';
+  if (whole == 0) return '${words(cents)} $fraction only.';
+  final out = '$code ${words(whole)}';
+  return cents == 0 ? '$out only.' : '$out and ${words(cents)} $fraction only.';
 }
 
 /// English words for [n], as num2words writes them ("one thousand and
-/// five", "two hundred and thirty-four thousand, five hundred").
-String _words(int n) {
+/// five", "two hundred and thirty-four thousand, five hundred"); with
+/// [indian], "twelve lakh, thirty-four thousand, …".
+String _words(int n, {bool indian = false}) {
   if (n == 0) return _ones[0];
-  final groups = <int>[];
-  for (var rest = n; rest > 0; rest ~/= 1000) {
-    groups.add(rest % 1000);
+  // (count, scale), lowest first.
+  final groups = <(int, String)>[];
+  if (indian) {
+    groups
+      ..add((n % 1000, ''))
+      ..add((n ~/ 1000 % 100, 'thousand'))
+      ..add((n ~/ 100000 % 100, 'lakh'))
+      ..add((n ~/ 10000000, 'crore'));
+  } else {
+    for (var rest = n, i = 0; rest > 0; rest ~/= 1000, i++) {
+      groups.add((rest % 1000, _scales[i]));
+    }
   }
   final out = StringBuffer();
   for (var i = groups.length - 1; i >= 0; i--) {
-    final g = groups[i];
+    final (g, scale) = groups[i];
     if (g == 0) continue;
     if (out.isNotEmpty) out.write(i == 0 && g < 100 ? ' and ' : ', ');
-    out.write(_below1000(g));
-    if (_scales[i].isNotEmpty) out.write(' ${_scales[i]}');
+    // Crores can run past 999: "one thousand crore".
+    out.write(g < 1000 ? _below1000(g) : _words(g, indian: true));
+    if (scale.isNotEmpty) out.write(' $scale');
   }
   return '$out';
 }

@@ -98,21 +98,14 @@ void main() {
       await pumpApp(tester, width: 400);
       await openSetup(tester);
       expect(find.text('Store Profile'), findsOneWidget);
-      // Stock Settings arrived with the Stock plan; pages of plans not
-      // built yet are listed but not reachable.
+      // Every plan's pages are reachable, Printing's too (05-invoices).
       await tester.scrollUntilVisible(find.text('Print Settings'), 200);
-      expect(
-        tester
-            .widget<ListTile>(find.widgetWithText(ListTile, 'Stock Settings'))
-            .enabled,
-        isTrue,
-      );
-      expect(
-        tester
-            .widget<ListTile>(find.widgetWithText(ListTile, 'Print Settings'))
-            .enabled,
-        isFalse,
-      );
+      for (final page in ['Stock Settings', 'Print Settings']) {
+        expect(
+          tester.widget<ListTile>(find.widgetWithText(ListTile, page)).enabled,
+          isTrue,
+        );
+      }
 
       await tester.scrollUntilVisible(find.text('Mode of Payment'), -200);
       await tester.tap(find.text('Mode of Payment'));

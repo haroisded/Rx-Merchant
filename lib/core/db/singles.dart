@@ -220,6 +220,7 @@ class PrintSettings {
 
   /// '80mm' or '58mm'.
   String get rawPaperWidth => v['raw_paper_width'] ?? '80mm';
+  int get rawPaperMm => rawPaperWidth == '58mm' ? 58 : 80;
 
   /// 48 for 80mm paper, 32 for 58mm, unless edited.
   int get rawCharsPerLine =>

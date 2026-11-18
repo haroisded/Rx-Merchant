@@ -31,9 +31,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navSetup => 'Setup';
 
   @override
-  String get comingSoon => 'This screen arrives in a later milestone.';
-
-  @override
   String get wizardTitle => 'Welcome';
 
   @override
@@ -173,9 +170,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get lockedAfterSubmit =>
       'Locked: documents have been submitted in this currency.';
-
-  @override
-  String get laterMilestone => 'Arrives with a later milestone.';
 
   @override
   String get refusedDuplicateName => 'A record with this name already exists.';
@@ -1799,4 +1793,390 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get lineBelowValuationRate =>
       'Selling rate is below the item\'s valuation rate.';
+
+  @override
+  String get periodToday => 'Today';
+
+  @override
+  String get periodYesterday => 'Yesterday';
+
+  @override
+  String get periodThisWeek => 'This Week';
+
+  @override
+  String get periodThisMonth => 'This Month';
+
+  @override
+  String get periodThisYear => 'This Year';
+
+  @override
+  String get periodCustom => 'Custom';
+
+  @override
+  String get netSales => 'Net Sales';
+
+  @override
+  String get averageSale => 'Average Sale';
+
+  @override
+  String get itemsSold => 'Items Sold';
+
+  @override
+  String get grossProfit => 'Gross Profit';
+
+  @override
+  String get grossProfitPercent => 'Gross Profit %';
+
+  @override
+  String get taxes => 'Taxes';
+
+  @override
+  String get returns => 'Returns';
+
+  @override
+  String get stockValue => 'Stock Value';
+
+  @override
+  String get totalMonthlySales => 'Total Monthly Sales';
+
+  @override
+  String get achievement => 'Achievement';
+
+  @override
+  String get setSalesTarget => 'Set a monthly sales target';
+
+  @override
+  String get salesTrend => 'Sales Trend';
+
+  @override
+  String get salesByItemGroup => 'Sales by Item Group';
+
+  @override
+  String get topItems => 'Top Items';
+
+  @override
+  String get paymentModes => 'Payment Modes';
+
+  @override
+  String get other => 'Other';
+
+  @override
+  String get noSalesInPeriod => 'No sales in this period';
+
+  @override
+  String get firstSaleHint => 'Complete your first sale to see your dashboard';
+
+  @override
+  String get reportSalesAnalytics => 'Sales Analytics';
+
+  @override
+  String get reportItemWiseSales => 'Item-wise Sales';
+
+  @override
+  String get treeType => 'Tree Type';
+
+  @override
+  String get rangeLabel => 'Range';
+
+  @override
+  String get rangeDaily => 'Daily';
+
+  @override
+  String get rangeWeekly => 'Weekly';
+
+  @override
+  String get rangeMonthly => 'Monthly';
+
+  @override
+  String get rangeQuarterly => 'Quarterly';
+
+  @override
+  String get rangeYearly => 'Yearly';
+
+  @override
+  String quarterOf(int quarter, int year) {
+    return 'Q$quarter $year';
+  }
+
+  @override
+  String get groupBy => 'Group By';
+
+  @override
+  String get invoice => 'Invoice';
+
+  @override
+  String get sellingAmount => 'Selling Amount';
+
+  @override
+  String get buyingAmount => 'Buying Amount';
+
+  @override
+  String get averageSellingRate => 'Average Selling Rate';
+
+  @override
+  String get check => 'Check';
+
+  @override
+  String get costMissing => 'No buying or valuation rate';
+
+  @override
+  String get netAmount => 'Net Amount';
+
+  @override
+  String get notSet => 'Not Set';
+
+  @override
+  String get valueOrQty => 'Value or Qty';
+
+  @override
+  String get dashboardLoadError => 'The sales figures could not be read.';
+
+  @override
+  String get refusedReturnOriginal =>
+      'Only a submitted sale can be returned, and a return cannot be returned again.';
+
+  @override
+  String get refusedNothingToReturn =>
+      'Nothing is coming back. Set the quantity of at least one line.';
+
+  @override
+  String refusedReturnTooMuch(int row, String left) {
+    return 'Row $row: at most $left can still be returned.';
+  }
+
+  @override
+  String refusedReturnRate(int row) {
+    return 'Row $row: a return keeps the original rate. To credit part of the price, turn Update Stock off and lower the rate.';
+  }
+
+  @override
+  String refusedReturnEntries(int row) {
+    return 'Row $row: choose one serial number or batch quantity per unit, from those sold on this line and not yet returned.';
+  }
+
+  @override
+  String refusedRefundNotEqual(String amount, String entered) {
+    return 'The refund must be $amount in full; $entered is entered.';
+  }
+
+  @override
+  String refusedModeDisabled(String mode) {
+    return '$mode is disabled.';
+  }
+
+  @override
+  String get refusedCancelSessionClosed =>
+      'Its POS session is closed, so the drawer has been counted. Make a return instead.';
+
+  @override
+  String get refusedCancelHasReturns =>
+      'A return has been made against this sale. Cancel the return first, or make another return.';
+
+  @override
+  String get invoicesEmpty =>
+      'Sales you complete at the Cash Register appear here.';
+
+  @override
+  String get dateRange => 'Date range';
+
+  @override
+  String noInvoiceNamed(String name) {
+    return 'No invoice is named $name.';
+  }
+
+  @override
+  String get returnAgainst => 'Return Against';
+
+  @override
+  String get returnCreditNote => 'Return / Credit Note';
+
+  @override
+  String get print => 'Print';
+
+  @override
+  String get printReceipt => 'Print Receipt';
+
+  @override
+  String get share => 'Share';
+
+  @override
+  String get payments => 'Payments';
+
+  @override
+  String get priceOnlyCredit => 'Price-only credit: no goods came back.';
+
+  @override
+  String get cancelInvoiceBody =>
+      'Its stock movements are reversed and its payments leave the session\'s expected amounts. The invoice keeps its name, marked Cancelled.';
+
+  @override
+  String get included => 'included';
+
+  @override
+  String get salesInvoice => 'Sales Invoice';
+
+  @override
+  String get creditNote => 'Credit Note';
+
+  @override
+  String get draftMark => 'DRAFT';
+
+  @override
+  String get cancelledMark => 'CANCELLED';
+
+  @override
+  String get invoiceNo => 'Invoice No.';
+
+  @override
+  String get serialNumberColumn => 'Sr';
+
+  @override
+  String get discountLabel => 'Discount';
+
+  @override
+  String get formatStandard => 'Standard';
+
+  @override
+  String get formatPosReceipt => 'POS Receipt';
+
+  @override
+  String get receiptPrinter => 'Receipt printer';
+
+  @override
+  String get printerUnreachable =>
+      'The receipt printer could not be reached. The sale is saved; print the PDF instead.';
+
+  @override
+  String get receiptSent => 'Sent to the receipt printer.';
+
+  @override
+  String get printDraftNotAllowed =>
+      'Drafts cannot be printed. Turn on Allow Print for Draft in Print Settings.';
+
+  @override
+  String get printCancelledNotAllowed =>
+      'Cancelled invoices cannot be printed. Turn on Allow Print for Cancelled in Print Settings.';
+
+  @override
+  String get pdfPageSize => 'PDF Page Size';
+
+  @override
+  String get repeatHeaderFooter => 'Repeat Header and Footer in PDF';
+
+  @override
+  String get withLetterhead => 'Print With Letterhead';
+
+  @override
+  String get compactItemPrint => 'Compact Item Print';
+
+  @override
+  String get allowPrintForDraft => 'Allow Print for Draft';
+
+  @override
+  String get addDraftHeading =>
+      'Always add \"Draft\" Heading for printing draft documents';
+
+  @override
+  String get allowPrintForCancelled => 'Allow Print for Cancelled';
+
+  @override
+  String get printTaxesWithZeroAmount => 'Print Taxes with Zero Amount';
+
+  @override
+  String get enableRawPrinting => 'Enable Raw Printing';
+
+  @override
+  String get paperWidth => 'Paper width';
+
+  @override
+  String get charsPerLine => 'Characters per line';
+
+  @override
+  String get cutPaper => 'Cut paper after printing';
+
+  @override
+  String get openCashDrawer => 'Open cash drawer after printing';
+
+  @override
+  String get bluetoothNoPermission =>
+      'Rx Merchant may not use Bluetooth. Allow Nearby devices for the app to list the receipt printer.';
+
+  @override
+  String get bluetoothOff =>
+      'Bluetooth is off. Turn it on to use the receipt printer.';
+
+  @override
+  String get noPairedPrinters =>
+      'No Bluetooth printer is paired. Pair the printer in Android\'s Bluetooth settings first.';
+
+  @override
+  String get bluetoothSettings => 'Bluetooth settings';
+
+  @override
+  String get appPermissions => 'App permissions';
+
+  @override
+  String get refresh => 'Refresh';
+
+  @override
+  String get testPrint => 'Test print';
+
+  @override
+  String get sampleItem => 'Sample item';
+
+  @override
+  String get logo => 'Logo';
+
+  @override
+  String get headerText => 'Header';
+
+  @override
+  String get headerTextHelp =>
+      'Lines under the logo: store name, address, phone, tax ID';
+
+  @override
+  String get footerText => 'Footer';
+
+  @override
+  String get termsHelp =>
+      'Copied into each sale when it starts; printed after the totals.';
+
+  @override
+  String get updateStock => 'Update Stock';
+
+  @override
+  String get updateStockOn => 'The goods come back into stock.';
+
+  @override
+  String get updateStockOff => 'Nothing moves in stock: a price-only credit.';
+
+  @override
+  String get receivingWarehouse => 'Receiving warehouse';
+
+  @override
+  String get refundAmount => 'Refund';
+
+  @override
+  String get refundPaidIn => 'Refund paid in';
+
+  @override
+  String returnable(String qty) {
+    return 'Still returnable: $qty';
+  }
+
+  @override
+  String rateAtMost(String rate) {
+    return 'At most $rate';
+  }
+
+  @override
+  String get submitReturnTitle => 'Submit this return?';
+
+  @override
+  String submitReturnBody(String amount) {
+    return 'Refund $amount now. The return is numbered and cannot be edited; it can be cancelled while this session is open.';
+  }
+
+  @override
+  String get allReturned => 'Everything on this sale has been returned.';
 }

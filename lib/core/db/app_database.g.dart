@@ -22678,7 +22678,8 @@ class Single extends DataClass implements Insertable<Single> {
   final String doctype;
 
   /// 'Store Profile', 'System Settings', 'Global Defaults',
-  /// 'Selling Settings', 'Stock Settings', 'Print Settings'
+  /// 'Selling Settings', 'POS Settings', 'Stock Settings',
+  /// 'Print Settings'
   final String field;
   final String? value;
   const Single({required this.doctype, required this.field, this.value});
@@ -24987,10 +24988,22 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'sii_item_idx',
     'CREATE INDEX sii_item_idx ON sales_invoice_item (item_id)',
   );
+  late final Index siiInvoiceIdx = Index(
+    'sii_invoice_idx',
+    'CREATE INDEX sii_invoice_idx ON sales_invoice_item (sales_invoice_id)',
+  );
   late final Tax tax = Tax(this);
   late final SalesInvoiceTax salesInvoiceTax = SalesInvoiceTax(this);
+  late final Index sitInvoiceIdx = Index(
+    'sit_invoice_idx',
+    'CREATE INDEX sit_invoice_idx ON sales_invoice_tax (sales_invoice_id)',
+  );
   late final SalesInvoicePayment salesInvoicePayment = SalesInvoicePayment(
     this,
+  );
+  late final Index sipInvoiceIdx = Index(
+    'sip_invoice_idx',
+    'CREATE INDEX sip_invoice_idx ON sales_invoice_payment (sales_invoice_id)',
   );
   late final Index itemGroupIdx = Index(
     'item_group_idx',
@@ -25089,9 +25102,12 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     item,
     salesInvoiceItem,
     siiItemIdx,
+    siiInvoiceIdx,
     tax,
     salesInvoiceTax,
+    sitInvoiceIdx,
     salesInvoicePayment,
+    sipInvoiceIdx,
     itemGroupIdx,
     itemVariantOfIdx,
     itemBarcode,

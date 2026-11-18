@@ -132,6 +132,38 @@ enum Refusal {
   /// POS-R20: only the latest closing entry, with no newer session, can be
   /// cancelled.
   notLatestClosing,
+
+  // ---- Invoices (05-invoices-and-receipts.md) ----
+
+  /// INV-R5: a return needs a submitted sale that is not itself a return.
+  returnOriginal,
+
+  /// INV-R6: no line is coming back.
+  nothingToReturn,
+
+  /// INV-R6: args are the row and the quantity still returnable.
+  returnTooMuch,
+
+  /// INV-R6: arg is the row. The rate stays the original's; it may only be
+  /// lowered, with Update Stock off.
+  returnRate,
+
+  /// INV-R6: arg is the row. Its serial numbers or batches are not ones sold
+  /// on the original line and not yet returned, or do not match its
+  /// quantity.
+  returnEntries,
+
+  /// INV-R7: args are the amount to refund and the amount entered.
+  refundNotEqual,
+
+  /// Detail is a Mode of Payment that is disabled.
+  modeDisabled,
+
+  /// INV-R10, R11: the invoice's POS session is closed.
+  cancelSessionClosed,
+
+  /// INV-R10: a submitted return exists against the sale.
+  cancelHasReturns,
 }
 
 /// Every problem a document has, reported together (POS-R16).

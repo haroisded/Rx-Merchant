@@ -5,6 +5,11 @@ import 'package:material_ui/material_ui.dart';
 import 'core/db/providers.dart';
 import 'core/widgets/adaptive_shell.dart';
 import 'core/widgets/window_size.dart';
+import 'features/dashboard/ui/dashboard_providers.dart' show dashboardPath;
+import 'features/dashboard/ui/dashboard_screen.dart';
+import 'features/dashboard/ui/sales_report_pages.dart';
+import 'features/invoices/ui/invoice_providers.dart' show invoicesPath;
+import 'features/invoices/ui/invoices_screen.dart';
 import 'features/pos/ui/pos_providers.dart' show posPath;
 import 'features/pos/ui/pos_screen.dart';
 import 'features/setup/ui/setup_screen.dart';
@@ -16,17 +21,6 @@ import 'l10n/app_localizations.dart';
 const _loading = '/loading';
 const _wizard = '/wizard';
 const _home = posPath;
-
-/// The five destinations, in the order of 00-overview section 7.3, each with
-/// its screen title. Each is a placeholder until its feature milestone
-/// replaces the builder.
-final _destinations = <(String, String Function(AppLocalizations))>[
-  (_home, (l) => l.titleCashRegister),
-  ('/invoices', (l) => l.navInvoices),
-  (stockPath, (l) => l.navStock),
-  ('/dashboard', (l) => l.navDashboard),
-  (setupPath, (l) => l.navSetup),
-];
 
 final routerProvider = Provider<GoRouter>((ref) {
   // null while System Settings is still being read.
@@ -66,32 +60,33 @@ final routerProvider = Provider<GoRouter>((ref) {
                 : 0,
           ),
         ),
+        // The five destinations, in the order of 00-overview section 7.3.
         branches: [
-          for (final (path, title) in _destinations)
-            StatefulShellBranch(
-              routes: [
-                if (path == posPath)
-                  _workspaceRoute(posPath, (page, _, _) => posPage(page))
-                else if (path == setupPath)
-                  _workspaceRoute(
-                    setupPath,
-                    (page, id, _) => SetupScreen(page: page, id: id),
-                  )
-                else if (path == stockPath)
-                  _workspaceRoute(
-                    stockPath,
-                    (page, id, query) =>
-                        StockScreen(page: page, id: id, query: query),
-                  )
-                else
-                  GoRoute(
-                    path: path,
-                    builder: (context, _) => _PlaceholderScreen(
-                      title: title(AppLocalizations.of(context)),
-                    ),
-                  ),
-              ],
+          for (final route in [
+            _workspaceRoute(posPath, (page, _, query) => posPage(page, query)),
+            _workspaceRoute(
+              invoicesPath,
+              (page, id, query) =>
+                  InvoicesScreen(page: page, id: id, query: query),
             ),
+            _workspaceRoute(
+              stockPath,
+              (page, id, query) =>
+                  StockScreen(page: page, id: id, query: query),
+            ),
+            // Full width: the reports open over the dashboard.
+            _workspaceRoute(
+              dashboardPath,
+              (page, _, query) =>
+                  (page == null ? null : salesReportPage(page, query)) ??
+                  const DashboardScreen(),
+            ),
+            _workspaceRoute(
+              setupPath,
+              (page, id, _) => SetupScreen(page: page, id: id),
+            ),
+          ])
+            StatefulShellBranch(routes: [route]),
         ],
       ),
     ],
@@ -152,20 +147,6 @@ class _LoadingScreen extends ConsumerWidget {
                 textAlign: TextAlign.center,
               ),
             ),
-    );
-  }
-}
-
-class _PlaceholderScreen extends StatelessWidget {
-  const _PlaceholderScreen({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(child: Text(AppLocalizations.of(context).comingSoon)),
     );
   }
 }

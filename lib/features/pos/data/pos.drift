@@ -118,6 +118,8 @@ CREATE TABLE sales_invoice_item (
   sales_invoice_item_id INTEGER REFERENCES sales_invoice_item(id)  -- on a return: the original row
 );
 CREATE INDEX sii_item_idx ON sales_invoice_item (item_id);
+-- An invoice's lines, taxes and payments (the dashboard joins them by invoice).
+CREATE INDEX sii_invoice_idx ON sales_invoice_item (sales_invoice_id);
 
 CREATE TABLE sales_invoice_tax (
   id INTEGER PRIMARY KEY,
@@ -134,6 +136,7 @@ CREATE TABLE sales_invoice_tax (
   total REAL NOT NULL DEFAULT 0,            -- running total after this row
   item_wise_tax_detail TEXT NOT NULL DEFAULT '{}'   -- JSON: item row id -> [rate, amount]
 );
+CREATE INDEX sit_invoice_idx ON sales_invoice_tax (sales_invoice_id);
 
 CREATE TABLE sales_invoice_payment (
   id INTEGER PRIMARY KEY,
@@ -141,3 +144,4 @@ CREATE TABLE sales_invoice_payment (
   mode_of_payment_id INTEGER NOT NULL REFERENCES mode_of_payment(id),
   amount REAL NOT NULL                      -- amount tendered; negative on a return
 );
+CREATE INDEX sip_invoice_idx ON sales_invoice_payment (sales_invoice_id);

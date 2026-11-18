@@ -28,8 +28,8 @@ class StockFilters {
   String? voucherNo;
 }
 
-/// The ids of [table] row [id] and everything under it in the tree.
-String _subtree(String table, int id) =>
+/// SQL for the ids of [table] row [id] and everything under it in the tree.
+String subtreeIds(String table, int id) =>
     '(WITH RECURSIVE t(id) AS (SELECT $id UNION '
     'SELECT x.id FROM $table x JOIN t ON x.parent_id = t.id) SELECT id FROM t)';
 
@@ -66,10 +66,10 @@ extension StockReports on AppDatabase {
       args.add(f.itemId);
     }
     if (f.warehouseId case final w?) {
-      parts.add('l.warehouse_id IN ${_subtree('warehouse', w)}');
+      parts.add('l.warehouse_id IN ${subtreeIds('warehouse', w)}');
     }
     if (f.itemGroupId case final g?) {
-      parts.add('i.item_group_id IN ${_subtree('item_group', g)}');
+      parts.add('i.item_group_id IN ${subtreeIds('item_group', g)}');
     }
     if (f.batchId != null) {
       parts.add('l.batch_id = ?');
@@ -214,8 +214,8 @@ extension StockReports on AppDatabase {
     'COALESCE(b.actual_qty, 0) c3, r.warehouse_reorder_level c4, '
     'r.warehouse_reorder_qty c5, '
     'r.warehouse_reorder_level - COALESCE(b.actual_qty, 0) c6 $_lowStock'
-    '${f.warehouseId == null ? '' : ' AND r.warehouse_id IN ${_subtree('warehouse', f.warehouseId!)}'}'
-    '${f.itemGroupId == null ? '' : ' AND i.item_group_id IN ${_subtree('item_group', f.itemGroupId!)}'}'
+    '${f.warehouseId == null ? '' : ' AND r.warehouse_id IN ${subtreeIds('warehouse', f.warehouseId!)}'}'
+    '${f.itemGroupId == null ? '' : ' AND i.item_group_id IN ${subtreeIds('item_group', f.itemGroupId!)}'}'
     ' ORDER BY i.item_code',
     const [],
     7,

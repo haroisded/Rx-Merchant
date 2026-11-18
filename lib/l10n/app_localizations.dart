@@ -136,12 +136,6 @@ abstract class AppLocalizations {
   /// **'Setup'**
   String get navSetup;
 
-  /// Body of a destination that has not been built yet
-  ///
-  /// In en, this message translates to:
-  /// **'This screen arrives in a later milestone.'**
-  String get comingSoon;
-
   /// Title of the first-run wizard
   ///
   /// In en, this message translates to:
@@ -399,12 +393,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Locked: documents have been submitted in this currency.'**
   String get lockedAfterSubmit;
-
-  /// No description provided for @laterMilestone.
-  ///
-  /// In en, this message translates to:
-  /// **'Arrives with a later milestone.'**
-  String get laterMilestone;
 
   /// No description provided for @refusedDuplicateName.
   ///
@@ -3267,6 +3255,708 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Selling rate is below the item\'s valuation rate.'**
   String get lineBelowValuationRate;
+
+  /// No description provided for @periodToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get periodToday;
+
+  /// No description provided for @periodYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get periodYesterday;
+
+  /// No description provided for @periodThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This Week'**
+  String get periodThisWeek;
+
+  /// No description provided for @periodThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This Month'**
+  String get periodThisMonth;
+
+  /// No description provided for @periodThisYear.
+  ///
+  /// In en, this message translates to:
+  /// **'This Year'**
+  String get periodThisYear;
+
+  /// No description provided for @periodCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get periodCustom;
+
+  /// No description provided for @netSales.
+  ///
+  /// In en, this message translates to:
+  /// **'Net Sales'**
+  String get netSales;
+
+  /// No description provided for @averageSale.
+  ///
+  /// In en, this message translates to:
+  /// **'Average Sale'**
+  String get averageSale;
+
+  /// No description provided for @itemsSold.
+  ///
+  /// In en, this message translates to:
+  /// **'Items Sold'**
+  String get itemsSold;
+
+  /// No description provided for @grossProfit.
+  ///
+  /// In en, this message translates to:
+  /// **'Gross Profit'**
+  String get grossProfit;
+
+  /// No description provided for @grossProfitPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'Gross Profit %'**
+  String get grossProfitPercent;
+
+  /// No description provided for @taxes.
+  ///
+  /// In en, this message translates to:
+  /// **'Taxes'**
+  String get taxes;
+
+  /// No description provided for @returns.
+  ///
+  /// In en, this message translates to:
+  /// **'Returns'**
+  String get returns;
+
+  /// No description provided for @stockValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock Value'**
+  String get stockValue;
+
+  /// No description provided for @totalMonthlySales.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Monthly Sales'**
+  String get totalMonthlySales;
+
+  /// No description provided for @achievement.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievement'**
+  String get achievement;
+
+  /// No description provided for @setSalesTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a monthly sales target'**
+  String get setSalesTarget;
+
+  /// No description provided for @salesTrend.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales Trend'**
+  String get salesTrend;
+
+  /// No description provided for @salesByItemGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales by Item Group'**
+  String get salesByItemGroup;
+
+  /// No description provided for @topItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Items'**
+  String get topItems;
+
+  /// No description provided for @paymentModes.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Modes'**
+  String get paymentModes;
+
+  /// No description provided for @other.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get other;
+
+  /// No description provided for @noSalesInPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'No sales in this period'**
+  String get noSalesInPeriod;
+
+  /// No description provided for @firstSaleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your first sale to see your dashboard'**
+  String get firstSaleHint;
+
+  /// No description provided for @reportSalesAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales Analytics'**
+  String get reportSalesAnalytics;
+
+  /// No description provided for @reportItemWiseSales.
+  ///
+  /// In en, this message translates to:
+  /// **'Item-wise Sales'**
+  String get reportItemWiseSales;
+
+  /// No description provided for @treeType.
+  ///
+  /// In en, this message translates to:
+  /// **'Tree Type'**
+  String get treeType;
+
+  /// No description provided for @rangeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Range'**
+  String get rangeLabel;
+
+  /// No description provided for @rangeDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get rangeDaily;
+
+  /// No description provided for @rangeWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get rangeWeekly;
+
+  /// No description provided for @rangeMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get rangeMonthly;
+
+  /// No description provided for @rangeQuarterly.
+  ///
+  /// In en, this message translates to:
+  /// **'Quarterly'**
+  String get rangeQuarterly;
+
+  /// No description provided for @rangeYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get rangeYearly;
+
+  /// No description provided for @quarterOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Q{quarter} {year}'**
+  String quarterOf(int quarter, int year);
+
+  /// No description provided for @groupBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Group By'**
+  String get groupBy;
+
+  /// No description provided for @invoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice'**
+  String get invoice;
+
+  /// No description provided for @sellingAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Selling Amount'**
+  String get sellingAmount;
+
+  /// No description provided for @buyingAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Buying Amount'**
+  String get buyingAmount;
+
+  /// No description provided for @averageSellingRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Average Selling Rate'**
+  String get averageSellingRate;
+
+  /// No description provided for @check.
+  ///
+  /// In en, this message translates to:
+  /// **'Check'**
+  String get check;
+
+  /// No description provided for @costMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'No buying or valuation rate'**
+  String get costMissing;
+
+  /// No description provided for @netAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Net Amount'**
+  String get netAmount;
+
+  /// No description provided for @notSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Set'**
+  String get notSet;
+
+  /// No description provided for @valueOrQty.
+  ///
+  /// In en, this message translates to:
+  /// **'Value or Qty'**
+  String get valueOrQty;
+
+  /// No description provided for @dashboardLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'The sales figures could not be read.'**
+  String get dashboardLoadError;
+
+  /// No description provided for @refusedReturnOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'Only a submitted sale can be returned, and a return cannot be returned again.'**
+  String get refusedReturnOriginal;
+
+  /// No description provided for @refusedNothingToReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is coming back. Set the quantity of at least one line.'**
+  String get refusedNothingToReturn;
+
+  /// No description provided for @refusedReturnTooMuch.
+  ///
+  /// In en, this message translates to:
+  /// **'Row {row}: at most {left} can still be returned.'**
+  String refusedReturnTooMuch(int row, String left);
+
+  /// No description provided for @refusedReturnRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Row {row}: a return keeps the original rate. To credit part of the price, turn Update Stock off and lower the rate.'**
+  String refusedReturnRate(int row);
+
+  /// No description provided for @refusedReturnEntries.
+  ///
+  /// In en, this message translates to:
+  /// **'Row {row}: choose one serial number or batch quantity per unit, from those sold on this line and not yet returned.'**
+  String refusedReturnEntries(int row);
+
+  /// No description provided for @refusedRefundNotEqual.
+  ///
+  /// In en, this message translates to:
+  /// **'The refund must be {amount} in full; {entered} is entered.'**
+  String refusedRefundNotEqual(String amount, String entered);
+
+  /// No description provided for @refusedModeDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'{mode} is disabled.'**
+  String refusedModeDisabled(String mode);
+
+  /// No description provided for @refusedCancelSessionClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Its POS session is closed, so the drawer has been counted. Make a return instead.'**
+  String get refusedCancelSessionClosed;
+
+  /// No description provided for @refusedCancelHasReturns.
+  ///
+  /// In en, this message translates to:
+  /// **'A return has been made against this sale. Cancel the return first, or make another return.'**
+  String get refusedCancelHasReturns;
+
+  /// No description provided for @invoicesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales you complete at the Cash Register appear here.'**
+  String get invoicesEmpty;
+
+  /// No description provided for @dateRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Date range'**
+  String get dateRange;
+
+  /// No description provided for @noInvoiceNamed.
+  ///
+  /// In en, this message translates to:
+  /// **'No invoice is named {name}.'**
+  String noInvoiceNamed(String name);
+
+  /// No description provided for @returnAgainst.
+  ///
+  /// In en, this message translates to:
+  /// **'Return Against'**
+  String get returnAgainst;
+
+  /// No description provided for @returnCreditNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Return / Credit Note'**
+  String get returnCreditNote;
+
+  /// No description provided for @print.
+  ///
+  /// In en, this message translates to:
+  /// **'Print'**
+  String get print;
+
+  /// No description provided for @printReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Print Receipt'**
+  String get printReceipt;
+
+  /// No description provided for @share.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get share;
+
+  /// No description provided for @payments.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments'**
+  String get payments;
+
+  /// No description provided for @priceOnlyCredit.
+  ///
+  /// In en, this message translates to:
+  /// **'Price-only credit: no goods came back.'**
+  String get priceOnlyCredit;
+
+  /// No description provided for @cancelInvoiceBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Its stock movements are reversed and its payments leave the session\'s expected amounts. The invoice keeps its name, marked Cancelled.'**
+  String get cancelInvoiceBody;
+
+  /// No description provided for @included.
+  ///
+  /// In en, this message translates to:
+  /// **'included'**
+  String get included;
+
+  /// No description provided for @salesInvoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales Invoice'**
+  String get salesInvoice;
+
+  /// No description provided for @creditNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit Note'**
+  String get creditNote;
+
+  /// No description provided for @draftMark.
+  ///
+  /// In en, this message translates to:
+  /// **'DRAFT'**
+  String get draftMark;
+
+  /// No description provided for @cancelledMark.
+  ///
+  /// In en, this message translates to:
+  /// **'CANCELLED'**
+  String get cancelledMark;
+
+  /// No description provided for @invoiceNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice No.'**
+  String get invoiceNo;
+
+  /// No description provided for @serialNumberColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sr'**
+  String get serialNumberColumn;
+
+  /// No description provided for @discountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount'**
+  String get discountLabel;
+
+  /// No description provided for @formatStandard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get formatStandard;
+
+  /// No description provided for @formatPosReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'POS Receipt'**
+  String get formatPosReceipt;
+
+  /// No description provided for @receiptPrinter.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt printer'**
+  String get receiptPrinter;
+
+  /// No description provided for @printerUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'The receipt printer could not be reached. The sale is saved; print the PDF instead.'**
+  String get printerUnreachable;
+
+  /// No description provided for @receiptSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent to the receipt printer.'**
+  String get receiptSent;
+
+  /// No description provided for @printDraftNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Drafts cannot be printed. Turn on Allow Print for Draft in Print Settings.'**
+  String get printDraftNotAllowed;
+
+  /// No description provided for @printCancelledNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled invoices cannot be printed. Turn on Allow Print for Cancelled in Print Settings.'**
+  String get printCancelledNotAllowed;
+
+  /// No description provided for @pdfPageSize.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF Page Size'**
+  String get pdfPageSize;
+
+  /// No description provided for @repeatHeaderFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat Header and Footer in PDF'**
+  String get repeatHeaderFooter;
+
+  /// No description provided for @withLetterhead.
+  ///
+  /// In en, this message translates to:
+  /// **'Print With Letterhead'**
+  String get withLetterhead;
+
+  /// No description provided for @compactItemPrint.
+  ///
+  /// In en, this message translates to:
+  /// **'Compact Item Print'**
+  String get compactItemPrint;
+
+  /// No description provided for @allowPrintForDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow Print for Draft'**
+  String get allowPrintForDraft;
+
+  /// No description provided for @addDraftHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Always add \"Draft\" Heading for printing draft documents'**
+  String get addDraftHeading;
+
+  /// No description provided for @allowPrintForCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow Print for Cancelled'**
+  String get allowPrintForCancelled;
+
+  /// No description provided for @printTaxesWithZeroAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Print Taxes with Zero Amount'**
+  String get printTaxesWithZeroAmount;
+
+  /// No description provided for @enableRawPrinting.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Raw Printing'**
+  String get enableRawPrinting;
+
+  /// No description provided for @paperWidth.
+  ///
+  /// In en, this message translates to:
+  /// **'Paper width'**
+  String get paperWidth;
+
+  /// No description provided for @charsPerLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Characters per line'**
+  String get charsPerLine;
+
+  /// No description provided for @cutPaper.
+  ///
+  /// In en, this message translates to:
+  /// **'Cut paper after printing'**
+  String get cutPaper;
+
+  /// No description provided for @openCashDrawer.
+  ///
+  /// In en, this message translates to:
+  /// **'Open cash drawer after printing'**
+  String get openCashDrawer;
+
+  /// No description provided for @bluetoothNoPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Rx Merchant may not use Bluetooth. Allow Nearby devices for the app to list the receipt printer.'**
+  String get bluetoothNoPermission;
+
+  /// No description provided for @bluetoothOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth is off. Turn it on to use the receipt printer.'**
+  String get bluetoothOff;
+
+  /// No description provided for @noPairedPrinters.
+  ///
+  /// In en, this message translates to:
+  /// **'No Bluetooth printer is paired. Pair the printer in Android\'s Bluetooth settings first.'**
+  String get noPairedPrinters;
+
+  /// No description provided for @bluetoothSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth settings'**
+  String get bluetoothSettings;
+
+  /// No description provided for @appPermissions.
+  ///
+  /// In en, this message translates to:
+  /// **'App permissions'**
+  String get appPermissions;
+
+  /// No description provided for @refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refresh;
+
+  /// No description provided for @testPrint.
+  ///
+  /// In en, this message translates to:
+  /// **'Test print'**
+  String get testPrint;
+
+  /// No description provided for @sampleItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample item'**
+  String get sampleItem;
+
+  /// No description provided for @logo.
+  ///
+  /// In en, this message translates to:
+  /// **'Logo'**
+  String get logo;
+
+  /// No description provided for @headerText.
+  ///
+  /// In en, this message translates to:
+  /// **'Header'**
+  String get headerText;
+
+  /// No description provided for @headerTextHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Lines under the logo: store name, address, phone, tax ID'**
+  String get headerTextHelp;
+
+  /// No description provided for @footerText.
+  ///
+  /// In en, this message translates to:
+  /// **'Footer'**
+  String get footerText;
+
+  /// No description provided for @termsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied into each sale when it starts; printed after the totals.'**
+  String get termsHelp;
+
+  /// No description provided for @updateStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Stock'**
+  String get updateStock;
+
+  /// No description provided for @updateStockOn.
+  ///
+  /// In en, this message translates to:
+  /// **'The goods come back into stock.'**
+  String get updateStockOn;
+
+  /// No description provided for @updateStockOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing moves in stock: a price-only credit.'**
+  String get updateStockOff;
+
+  /// No description provided for @receivingWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Receiving warehouse'**
+  String get receivingWarehouse;
+
+  /// No description provided for @refundAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund'**
+  String get refundAmount;
+
+  /// No description provided for @refundPaidIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund paid in'**
+  String get refundPaidIn;
+
+  /// No description provided for @returnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Still returnable: {qty}'**
+  String returnable(String qty);
+
+  /// No description provided for @rateAtMost.
+  ///
+  /// In en, this message translates to:
+  /// **'At most {rate}'**
+  String rateAtMost(String rate);
+
+  /// No description provided for @submitReturnTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit this return?'**
+  String get submitReturnTitle;
+
+  /// No description provided for @submitReturnBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund {amount} now. The return is numbered and cannot be edited; it can be cancelled while this session is open.'**
+  String submitReturnBody(String amount);
+
+  /// No description provided for @allReturned.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything on this sale has been returned.'**
+  String get allReturned;
 }
 
 class _AppLocalizationsDelegate

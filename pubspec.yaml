@@ -41,6 +41,9 @@ dependencies:
   mobile_scanner: ^7.5.0
   pdf: ^3.13.1
   printing: ^5.15.1
+  # Raw receipts to a paired Bluetooth thermal printer: only the transport;
+  # the ESC/POS commands are built in invoices/logic/escpos.dart (INV-R22).
+  print_bluetooth_thermal: ^1.2.5
   fl_chart: ^1.3.1
   file_picker: ^13.3.3
   share_plus: ^13.3.1
@@ -86,6 +89,11 @@ flutter:
   # frappe/geo/country_info.json (MIT). Read by the first-run wizard.
   assets:
     - assets/country_info.json
+    # Roboto (Apache 2.0, from the Flutter SDK), embedded in printed PDFs:
+    # the PDF standard fonts lack symbols such as the peso sign, and Google
+    # Fonts would need the internet (05-invoices-and-receipts, D-67).
+    - assets/fonts/Roboto-Regular.ttf
+    - assets/fonts/Roboto-Bold.ttf
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -1,0 +1,455 @@
+RX MERCHANT - SESSION REPORT
+============================
+
+Written:      2026-11-18 17:32 (+08:00)
+Branch:       main
+Based on:     861d78d "RX MERCHANT - SESSION REPORT" (the Cash Register plan,
+              issue 5). The Sales Dashboard plan (issue 6) is still in the
+              working tree, uncommitted, under this work.
+Committed:    nothing. Every change below is in the working tree, for you to
+              commit.
+Covers:       the whole session: the request in
+              .claude/erpnext-planner/current-user-prompt.txt to build
+              Plans/05-invoices-and-receipts.md (all 9 build steps, INV-B1 to
+              B9: milestone M6), then the wrap-up CLAUDE.txt asks for (Flutter
+              and Ponytail reviews, fixes, this report, the system
+              documentation).
+
+
+1. SUGGESTED COMMIT MESSAGE
+---------------------------
+
+Build 05-invoices-and-receipts: invoice list, returns, cancel, printing
+
+- Invoices destination: list with status chips, date range, search and
+  receipt scan; read-only invoice with Print, Create > Return / Credit
+  Note, Stock Ledger and Cancel; drafts open in the register
+  (INV-R1 to R4, section 5)
+- Return / Credit Note from a submitted sale: what is still returnable,
+  Update Stock and receiving warehouse, price-only credit, serial and
+  batch choice, refund in any enabled mode, stock back at the cost it went
+  out at, Return / Credit Note Issued statuses (INV-R5 to R9)
+- Cancel for sales and returns while their session is open (INV-R10, R11)
+- Printing: one layout step for Standard (A4 / A5 / Letter) and POS Receipt
+  (58 / 80 mm) PDFs with preview, Print and Share; letter head, print
+  heading, terms, compact or full item table, totals, In Words with lakh /
+  crore, Code 128 receipt barcode (INV-R12 to R21, R23)
+- Raw printing to a paired Bluetooth thermal printer (print_bluetooth_
+  thermal as transport, in-house ESC/POS builder), Test print, auto print
+  after a sale (INV-R22, R24)
+- Setup > Printing: Print Settings, Letter Head, Print Heading, Terms and
+  Conditions
+- Leftover links wired: Dashboard Invoices / Returns / Average Sale cards,
+  Item-wise Sales' Invoice cell, the closing entry's invoice count
+- Tests: 250 -> 282
+
+If you prefer two commits, split off "docs and tooling":
+.claude/erpnext-planner/system-documentation.md, .claude/commits/ and
+graphify-out/. Plan 04's own files (lib/features/dashboard/ and the files
+its report lists) are also uncommitted; commit them first if you want the
+history to follow the plans.
+
+
+2. RESULT IN SHORT
+------------------
+
+All 9 build steps of 05-invoices-and-receipts.md are in. Schema version 1
+is unchanged (every table already existed).
+
+  flutter analyze               No issues found
+  dart fix --dry-run            Nothing to fix
+  dart format (check)           0 files changed (131 files)
+  flutter test                  282 of 282 pass
+  flutter build apk --release   builds, 90.5 MB
+  release manifest              INTERNET absent; BLUETOOTH, BLUETOOTH_ADMIN,
+                                BLUETOOTH_CONNECT, BLUETOOTH_SCAN added by
+                                the printer plugin
+
+Not done, stated plainly:
+  - No thermal printer was available. Raw printing (ESC/POS bytes, cut,
+    drawer kick, barcode) is checked by unit tests only; on the emulator
+    only the "no paired printer" state, the Bluetooth settings link and
+    Save were seen.
+  - The printed barcode was not scanned with a camera (no camera image on
+    the emulator); scan-to-open was tested with a typed name only in tests.
+  - No real device was used. Phone and tablet emulators only.
+
+
+3. WHAT WAS BUILT
+-----------------
+
+3.1 Decisions you made (asked at the start)
+  - Scope: all 9 build steps, raw printing included, with
+    print_bluetooth_thermal 1.2.5 as the Bluetooth transport only.
+  - The leftover links from plans 03 and 04 wired now.
+
+3.2 By build step
+  INV-B1  data/invoice_db.dart: InvoiceFilters (statuses, date range,
+          name, session; carried in the route's query), watchInvoices,
+          invoiceView (lines with serials and batches, taxes, payments,
+          the original and its returns, letter head: its own, else the
+          default), invoiceIdByName. ui/invoices_screen.dart (list; on
+          Expanded beside the record), ui/invoice_detail.dart (header,
+          items as ListTiles or a DataTable on Expanded, totals, payments,
+          terms, links), router /invoices, /invoices/invoice/:id,
+          /invoices/return/:id; a draft opens in the register through
+          /pos?heldOrder=<id>.
+  INV-B2  data/print_masters.dart: saveLetterHead (one Default),
+          savePrintHeading and saveTerms (a rename follows into POS
+          Settings); ui/printing_pages.dart: Letter Head (logo, header,
+          footer, live preview), Print Heading, Terms and Conditions.
+          Terms were already copied into each new sale (POS-R2a).
+  INV-B3  Print Settings page: the eight PDF switches and page size, then
+          the receipt printer section.
+  INV-B4  logic/print_layout.dart (PrintDoc: heading with DRAFT /
+          CANCELLED / Credit Note / Print Heading, meta, 4 or 9 item
+          columns, receipt items, totals in INV-R18's order, zero taxes
+          left out unless asked, payments and change, In Words, terms,
+          barcode; mayPrint for INV-R13), logic/receipt_text.dart (wrap to
+          Characters per line, amounts right-aligned), core/numbers/
+          in_words.dart (lakh and crore for #,##,###.##).
+  INV-B5  ui/invoice_pdf.dart (Standard MultiPage, header and footer on
+          every page or first / last; POS Receipt on a 57 / 80 mm roll;
+          bundled Roboto), ui/print_page.dart (PdfPreview, Format, Letter
+          Head switch, Print through Android's print dialog, Share), Print
+          Receipt on the order summary and in Recent Orders, the preview
+          after a sale with Print Receipt on Order Complete.
+  INV-B6  Code 128 at the end of the receipt; a scan button in the list
+          and in Recent Orders opens the invoice by name.
+  INV-B7  logic/escpos.dart (initialise, alignment, bold, lines, GS k Code
+          128, feed, drawer kick, cut; text to printable ASCII, the
+          currency symbol to its code, × to x), ui/raw_printer.dart (the
+          only file that calls the plugin; one connection per job),
+          printer picker, paper width, characters per line, Test print
+          (ruler and a sample receipt), auto print after a sale with the
+          PDF as the fallback; MainActivity.kt opens Android's Bluetooth or
+          app settings through a small MethodChannel.
+  INV-B8  logic/returns.dart (scaleReturn, takeBatches), data/returns_db.
+          dart: returnDraft, returnProblems (all reported together),
+          submitReturn (return series, +stock at the original line's
+          incoming_rate, serials Available again at their cost, statuses),
+          ui/return_form.dart (stepper per line, serial chips, Update
+          Stock and receiving warehouse, rate only lowered for a price-only
+          credit, refund per enabled mode, confirm with the amount, the
+          return's summary with Print and New Order).
+  INV-B9  cancelInvoice: a sale only while its session is open and with no
+          submitted return; a return while its session is open, refused
+          when its stock was sold since; serials back where they were; the
+          original's status recalculated.
+
+3.3 Shared pieces changed
+  pos/logic/sale.dart         Sale.returnAgainstId, updateStock;
+                              SaleLine.againstLineId, incomingRate
+  pos/logic/totals.dart       roundToFraction mirrors a negative total
+                              (D-69)
+  pos/data/pos_db.dart        writeSale, keepOnFailure, taxRowsOf and
+                              deliverSerials public (as D-46 did for the
+                              stock entry code); return columns written;
+                              In Words told the Indian scale
+  pos/ui/                     order summary (Print Receipt, a return's
+                              summary), pos screen (?heldOrder=, auto
+                              print), recent orders (print, return, scan),
+                              closing page (count links to the list)
+  core/widgets/status_chip    statusLabel shared with the filter chips
+  core/db/singles             PrintSettings.rawPaperMm
+  setup/                      9 refusals and their texts; Printing links
+                              enabled; the "later milestone" branch removed
+  router.dart                 all five destinations are real routes; the
+                              placeholder screen removed
+  dashboard/                  invoicesIn (cards), Item-wise Sales' row tap
+  l10n/app_en.arb             641 messages (was 572)
+  pubspec.yaml                print_bluetooth_thermal; Roboto font assets
+  assets/fonts/               Roboto Regular and Bold, Apache 2.0 licence
+
+3.4 Size
+  New hand-written Dart under lib/features/invoices: 3,542 lines. New
+  tests: 820 lines. Changes to existing files: about +350 / -150.
+
+
+4. CODE REVIEW RESULTS
+----------------------
+
+CLAUDE.txt asks for "Flutter Review" and "Ponytail Review", then Ponytail
+fixes.
+
+4.1 Ponytail review (ponytail-review skill)
+  Six findings, about -40 lines, all applied:
+   1. Invoice.total, totalQty, toPay and InvoiceLine.priceListRate were
+      never read: removed.
+   2. invoicePdf wrapped invoiceDocument for one caller: removed.
+   3. statusLabel repeated StatusChip's switch: one shared function.
+   4. The search box built InvoiceFilters by hand beside copy(): copy().
+   5. A MissingPluginException branch for desktops: removed.
+   6. tendersOf / inWordsOf made public with no outside caller: private.
+
+4.2 Flutter review
+  flutter analyze, dart fix, and the code-review skill: two independent
+  reviewers of the working tree against 861d78d (plan 05 files only), one
+  for standards (plan 00 sections 5 to 7, CLAUDE.txt, D-1 to D-60, a
+  code-smell list), one against plan 05.
+
+  Fixed (smallest change at the cause):
+   Spec
+   1. Raw receipts printed "2 ? USD 1.50": × is not ASCII. printable maps
+      it to x; a test runs the clean step now.
+   2. Saving Print Settings with Bluetooth off wiped the saved printer
+      (empty paired list): the saved printer stays a choice.
+   3. The Receipt printer button ignored the Letter Head switch.
+   4. A sale made without a letter head printed none (INV-R14 "else the
+      default"): the default is used. Test.
+   5. Arriving at an open invoice list with new filters (Dashboard
+      Returns after Invoices) kept the old ones: the list is keyed by its
+      query.
+   6. The session filter from the closing entry was invisible and could
+      not be cleared: a chip, counted as a filter.
+   7. The closing entry's count (submitted invoices) linked to a list
+      that also showed drafts and cancelled: the link names the statuses.
+   8. The Standard PDF printed In Words after the payments: before them
+      (INV-R18).
+   Standards
+   9. A serial return line's quantity was stored without flt (C-8).
+  10. The test receipt printed the literals TEST-0001 / SAMPLE (C-6):
+      messages.
+  11. Duplicated code: the raw print pipeline and its snackbar (one
+      receiptJob and reportRaw), scan-to-open (one openScanned), the
+      "return exists" SQL, the warehouse filter (usable()), the totals
+      block (the detail now shows the print layout's totals), the day
+      text (toStorage), the chars-per-line default.
+  12. Shotgun surgery: invoice paths built by hand 8 times
+      (invoicePath, returnPath, invoicesLink).
+  13. Hidden coupling: the PDF guessed numeric columns from the column
+      count: PrintDoc carries them.
+  14. Names: refund / refundAmount messages (refundPaidIn), PosScreen.edit
+      (heldOrderId), a misplaced doc comment; unused messages
+      comingSoon, laterMilestone, taxIncluded removed.
+   Found on the emulator and fixed:
+  15. The cancel confirmation had two "Cancel" buttons: the action reads
+      "Cancel ACC-SINV-…" (as the closing entry's does since issue 5).
+
+  Left as they are, with the reason:
+   - Status names as strings (C-11 keeps ERPNext's names as stored).
+   - The '#,##,###.##' literal and the three _now helpers.
+   - _followRename beside savePriceList's own rename carry (different
+     keys and tables; small).
+   - Symbol-to-code replacement in two places: one is the PDF font's
+     coverage, the other the printer's character set.
+   - from / to passed together in the list's copy() (one call site each).
+   - escpos and receipt_text are tested inside print_layout_test.
+   - The detail pane shows a Back arrow on Expanded, as the stock and
+     setup pages nested under their workspace do.
+
+
+5. VERIFICATION EVIDENCE
+------------------------
+
+All run after the last code change.
+
+  $ dart format --output=none --set-exit-if-changed lib test
+  Formatted 131 files (0 changed)
+
+  $ flutter analyze
+  No issues found!
+
+  $ dart fix --dry-run
+  Nothing to fix!
+
+  $ flutter test
+  282 tests passed (250 before; 32 added: 16 invoices database, 8 print
+  layout / receipt / ESC/POS, 2 PDF, 4 invoices widget, 2 In Words)
+
+  $ flutter build apk --release
+  Built build\app\outputs\flutter-apk\app-release.apk (90.5MB)
+  merged release manifest: android.permission.INTERNET 0 times
+
+  Acceptance checks INV-A1 to A24 each have a test (INV-A2 with Frappe's
+  wording, D-66; INV-A18 as a refused disabled mode; INV-A23 through
+  mayPrint).
+
+  Emulators, started and run as CLAUDE.txt says (emulator
+  -no-snapshot-load, adb uninstall, flutter run --no-enable-impeller):
+
+  Phone (Medium_Phone_API_36.1, 1080x2400):
+    - Wizard (United States, USD, "Test Store"); item PARA500, 100 at
+      2.00, sells at 5.00; session with 500 cash; 3 sold ->
+      ACC-SINV-2026-00001; the summary offers Print Receipt.
+    - Print: POS Receipt preview (letter head, heading, totals, In Words,
+      payments, barcode), Standard A4 (4 columns); Print opened Android's
+      print dialog (ISO A4, page 1 of 1); Share offered the PDF.
+    - Invoices list and the invoice; Create > Return / Credit Note: 2 of
+      3 back, refund 10.00 in Cash -> ACC-SINV-RET-2026-00001, Return;
+      its receipt headed Credit Note with Return Against.
+    - Cancel the sale: refused ("A return has been made against this
+      sale…"); cancel the return: Cancelled, the sale Paid again, stock
+      97.
+    - Dashboard: Returns card -> list with Return; then Invoices card ->
+      Paid and Credit Note Issued (the filter fix).
+    - Print Settings: Nearby devices permission asked, "No Bluetooth
+      printer is paired", Bluetooth settings opened Android's Connected
+      devices, Save -> "Saved". Letter Head: header line added, preview
+      follows, saved.
+    - Recent Orders: Print Receipt and Return on the sale; Return opened
+      the return form. Closing entry: "Invoices: 1" opened the list with
+      the session chip.
+    - The two "Cancel" buttons found here were fixed afterwards.
+  Tablet (Medium_Tablet, 2560x1600):
+    - Landscape (expanded): rail with labels; the invoice beside the list,
+      items as a DataTable; the print screen with its controls in a side
+      panel.
+    - Portrait (medium): rail without labels; the return form in one pane.
+    - Logcat: no Flutter errors.
+
+  A first full test run hung on the new widget tests: a sale written
+  while the register's live queries held the database in the test's fake
+  clock. The tests now write it from the Invoices screen.
+
+  The phone emulator and its flutter run were stopped once by Claude Code
+  because the PC ran low on memory while idle; the Gradle daemon was
+  stopped before the tablet run.
+
+
+6. DECISIONS MADE ON YOUR BEHALF
+--------------------------------
+
+  1. A return is never held as a draft; Submit saves and submits it in one
+     transaction (D-61).
+  2. A partial return refunds the original's additional discount and
+     Actual (fixed) charges in proportion to the line amounts returned; a
+     full return refunds exactly what was paid (D-62).
+  3. The refund must equal the amount in full; no change on a refund;
+     stored as negative payments (D-63).
+  4. A return's cost is the original line's incoming_rate at the moment of
+     the return; a later backdated recost does not follow (marked
+     ponytail:, D-64).
+  5. A batch line's return takes its quantity from the original's batches
+     in the order they were sold (D-65).
+  6. In Words keeps Frappe's wording ("Fifty-Four", the Fraction name as
+     stored, "Cent"): INV-A2 is tested as "USD Seven Hundred And
+     Fifty-Four and Ninety Cent only." (D-66).
+  7. PDFs embed Roboto from the Flutter SDK (Apache 2.0); a symbol it
+     lacks prints as the currency code (D-67).
+  8. Raw text is printable ASCII; the barcode is the printer's own
+     command (D-68).
+  9. roundToFraction mirrors a negative amount (D-69).
+ 10. The print screen is a full-screen route over everything (openPrint),
+     not a URL, so the register and the invoices open it alike (D-70).
+ 11. A draft in the invoice list opens in the register (/pos?heldOrder=)
+     (D-71).
+ 12. The list's filters ride in the route's query; a session filter
+     serves the closing entry's link (D-72).
+ 13. Renaming a Print Heading or Terms follows into POS Settings (D-73).
+ 14. Android settings are opened through a MethodChannel in
+     MainActivity.kt, not a package (D-74).
+ 15. One Bluetooth connection per print job (ponytail:, D-75).
+ 16. Print Settings asks for the Nearby devices permission when it opens,
+     since it lists the paired printers (D-76).
+
+
+7. SYSTEM DOCUMENTATION
+-----------------------
+
+.claude/erpnext-planner/system-documentation.md is now issue 7, same
+ISO/IEC/IEEE 15289 structure: document control and change history; scope
+and milestone state (every milestone done); glossary (return, credit
+note, price-only credit, print format, letter head, raw printing);
+concept of operations; C-6, C-10; requirements INV-R1 to R24, acceptance
+INV-A1 to A24, INV-B1 to B9; architecture (structure, folder map, routes,
+packages, D-61 to D-76, D-52 closed); software design (new section 6.14);
+database (no change); interfaces (Invoices layouts, print screen,
+permissions, Bluetooth); configuration status; verification (tests,
+build, emulators, issue 7 review); user guide (Invoices, printing,
+returns); problems (P-16 closed, new P-18 thermal printer unverified).
+
+
+8. KNOWN PROBLEMS AND OPEN ITEMS
+--------------------------------
+
+  1. No thermal printer was used: cut, drawer kick, Code 128 and the
+     character width are unverified on hardware (P-18).
+  2. No real device; camera scanning of receipts and items not tried (P-8,
+     P-14).
+  3. Databases from before issue 3 still fail on sales (P-13); before
+     issue 6 lack three indexes (P-17). The CLAUDE.txt emulator flow
+     uninstalls first, so it is safe.
+  4. Unchanged: release APK signed with the debug key; leaving a form
+     with unsaved changes discards it (P-10); chains replayed from their
+     first entry (P-15).
+  5. On the emulator a right-edge swipe closed the app once (Android's
+     back gesture); not an app fault.
+
+
+9. FILES
+--------
+
+Added - app
+  lib/features/invoices/data/invoice_db.dart
+  lib/features/invoices/data/returns_db.dart
+  lib/features/invoices/data/print_masters.dart
+  lib/features/invoices/logic/invoice.dart
+  lib/features/invoices/logic/returns.dart
+  lib/features/invoices/logic/print_layout.dart
+  lib/features/invoices/logic/receipt_text.dart
+  lib/features/invoices/logic/escpos.dart
+  lib/features/invoices/ui/invoice_providers.dart
+  lib/features/invoices/ui/invoices_screen.dart
+  lib/features/invoices/ui/invoice_detail.dart
+  lib/features/invoices/ui/return_form.dart
+  lib/features/invoices/ui/print_page.dart
+  lib/features/invoices/ui/invoice_pdf.dart
+  lib/features/invoices/ui/raw_printer.dart
+  lib/features/invoices/ui/printing_pages.dart
+  assets/fonts/Roboto-Regular.ttf, Roboto-Bold.ttf, LICENSE-Roboto.txt
+
+Added - tests
+  test/features/invoices/data/invoices_db_test.dart
+  test/features/invoices/logic/print_layout_test.dart
+  test/features/invoices/ui/invoice_pdf_test.dart
+  test/features/invoices/ui/invoices_ui_test.dart
+
+Modified - app (plan 05 changes)
+  android/app/src/main/kotlin/com/rx_merchant/rx_merchant/MainActivity.kt
+  pubspec.yaml, pubspec.lock
+  lib/router.dart
+  lib/core/db/singles.dart
+  lib/core/numbers/in_words.dart
+  lib/core/widgets/status_chip.dart
+  lib/features/pos/logic/sale.dart, logic/totals.dart, data/pos_db.dart
+  lib/features/pos/ui/order_summary.dart, pos_screen.dart,
+    recent_orders.dart, closing_page.dart
+  lib/features/setup/data/refusal.dart
+  lib/features/setup/ui/form_kit.dart, setup_screen.dart
+  lib/features/dashboard/ui/dashboard_screen.dart, sales_report_pages.dart
+  lib/l10n/app_en.arb
+  lib/l10n/app_localizations.dart, app_localizations_en.dart   generated
+
+Modified - tests
+  test/app_test.dart                         Printing links reachable
+  test/core/numbers/in_words_test.dart       INV-A1, A2, lakh / crore
+
+Modified - documents and tooling
+  .claude/erpnext-planner/system-documentation.md
+  graphify-out/                              "graphify update .": 2,620 nodes,
+                                             4,280 edges, 125 communities (was
+                                             2,230 / 3,624 / 104); previous copy
+                                             in graphify-out/2026-11-18/;
+                                             community names stale ("graphify
+                                             label" refreshes them; not run)
+
+Added - documents
+  .claude/commits/2026-11-18_17-32-05.txt    this report
+
+Not changed
+  Every .drift file and app_database.g.dart (no schema change); the plans
+  (05 was built as written, with the deviations recorded as D-61 to D-76)
+
+Changed by you, not by me
+  .claude/erpnext-planner/current-user-prompt.txt   modified
+
+
+10. BEFORE YOU COMMIT
+---------------------
+
+  - Plan 04 (issue 6) is in the same working tree, uncommitted.
+  - No data clearing is needed for this build beyond P-13 / P-17.
+  - The first Print Settings visit asks for Android's Nearby devices
+    permission (Bluetooth); without it the receipt printer is unavailable
+    and the PDF still works.

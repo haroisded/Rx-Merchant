@@ -6,12 +6,10 @@ import '../../../core/db/app_database.dart';
 import '../../../core/db/providers.dart';
 import '../../../core/numbers/format.dart';
 import '../../../core/numbers/formats.dart';
-import '../../../core/widgets/child_table.dart';
 import '../../../core/widgets/date_field.dart';
 import '../../../core/widgets/link_field.dart';
 import '../../../core/widgets/report_table.dart';
 import '../../../core/widgets/spacing.dart';
-import '../../../core/widgets/window_size.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../setup/ui/simple_masters.dart' show priceListsProvider;
 import '../data/stock_ledger.dart';
@@ -191,12 +189,6 @@ class _ReportPageState extends ConsumerState<ReportPage> {
     }
     final formats = ref.watch(formatsProvider);
     final columns = report._columns(l);
-    final compact = WindowSize.of(context) == WindowSize.compact;
-    final filters = _FilterBar(
-      filters: report._filters,
-      value: _f,
-      onChanged: (f) => _set(f),
-    );
     return Scaffold(
       appBar: AppBar(title: Text(report.title(l))),
       body: FutureBuilder(
@@ -208,32 +200,16 @@ class _ReportPageState extends ConsumerState<ReportPage> {
             rows: rows,
             exportName: report.slug,
             emptyText: snap.hasData ? l.noEntries : null,
-            // The filter bar collapses to a sheet on a phone.
-            filters: compact
-                ? Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: ActionChip(
-                      avatar: const Icon(Icons.filter_list),
-                      label: Text(l.filters),
-                      onPressed: () => showRowEditor<void>(
-                        context,
-                        (_) => Padding(
-                          padding: const EdgeInsets.all(AppSpacing.md),
-                          child: StatefulBuilder(
-                            builder: (context, setSheet) => _FilterBar(
-                              filters: report._filters,
-                              value: _f,
-                              onChanged: (f) {
-                                _set(f);
-                                setSheet(() {});
-                              },
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  )
-                : filters,
+            filters: ReportFilters(
+              fields: (changed) => _FilterBar(
+                filters: report._filters,
+                value: _f,
+                onChanged: (f) {
+                  _set(f);
+                  changed();
+                },
+              ),
+            ),
             cell: (c, v) => _format(l, formats, columns[c].$2, v),
             totals: _totals(columns, rows),
             onRowTap:

@@ -168,8 +168,9 @@ Totals totalsOf(Sale sale, SaleSettings s) => computeTotals(
 );
 
 /// POS-R14: [value] to the nearest [fraction] (the currency's Smallest
-/// Currency Fraction Value), up only when the remainder is more than half
-/// of it; to a whole unit when no fraction is set.
+/// Currency Fraction Value), away from zero only when the remainder is more
+/// than half of it; to a whole unit when no fraction is set. A return's
+/// negative total mirrors the sale's (INV-R7).
 double roundToFraction(
   double value,
   double fraction,
@@ -178,11 +179,11 @@ double roundToFraction(
 ) {
   if (fraction <= 0) return flt(value, 0, method);
   final scale = math.pow(10, precision);
-  final units = (value * scale).round();
+  final units = (value.abs() * scale).round();
   final step = (fraction * scale).round();
   final rest = units % step;
   final out = rest * 2 > step ? units + step - rest : units - rest;
-  return flt(out / scale, precision, method);
+  return flt(value.sign * out / scale, precision, method);
 }
 
 /// POS-R7, R8: a line's Rate and discount from its Price List Rate and one

@@ -21,9 +21,11 @@
 * "B:\Development-Projects\erpnext-planner\Plans\00-overview-and-foundation.md"
 * "B:\Development-Projects\rx_merchant\.claude\erpnext-planner\Plans\01-setup.md"
 * "B:\Development-Projects\rx_merchant\.claude\erpnext-planner\Plans\02-stock.md"
+* "B:\Development-Projects\rx_merchant\.claude\erpnext-planner\Plans\03-cash-register.md"
+* "B:\Development-Projects\rx_merchant\.claude\erpnext-planner\Plans\04-sales-dashboard.md"
   ( note: you can skim read all these plans, to gain more context ) 
 
 
 # user-prompt
 - once done, I request read word for word and do only...
-"B:\Development-Projects\rx_merchant\.claude\erpnext-planner\Plans\03-cash-register.md"
+"B:\Development-Projects\rx_merchant\.claude\erpnext-planner\Plans\05-invoices-and-receipts.md"

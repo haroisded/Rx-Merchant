@@ -20,24 +20,15 @@ class StatusChip extends StatelessWidget {
     final neutral = (scheme.surfaceContainerHighest, scheme.onSurface);
     final positive = (scheme.primaryContainer, scheme.onPrimaryContainer);
 
-    final (label, (background, foreground)) = switch (status) {
-      'Draft' => (
-        l10n.statusDraft,
-        (scheme.secondaryContainer, scheme.onSecondaryContainer),
-      ),
-      'Submitted' => (l10n.statusSubmitted, positive),
-      'Paid' => (l10n.statusPaid, positive),
-      'Return' => (l10n.statusReturn, neutral),
-      'Credit Note Issued' => (l10n.statusCreditNoteIssued, neutral),
-      'Cancelled' => (
-        l10n.statusCancelled,
-        (scheme.errorContainer, scheme.onErrorContainer),
-      ),
-      _ => (status, neutral),
+    final (background, foreground) = switch (status) {
+      'Draft' => (scheme.secondaryContainer, scheme.onSecondaryContainer),
+      'Submitted' || 'Paid' => positive,
+      'Cancelled' => (scheme.errorContainer, scheme.onErrorContainer),
+      _ => neutral,
     };
 
     return Chip(
-      label: Text(label),
+      label: Text(statusLabel(l10n, status)),
       labelStyle: theme.textTheme.labelLarge?.copyWith(color: foreground),
       backgroundColor: background,
       side: BorderSide.none,
@@ -45,3 +36,15 @@ class StatusChip extends StatelessWidget {
     );
   }
 }
+
+/// The translated name of a document status; one outside the table shows
+/// as stored.
+String statusLabel(AppLocalizations l, String status) => switch (status) {
+  'Draft' => l.statusDraft,
+  'Submitted' => l.statusSubmitted,
+  'Paid' => l.statusPaid,
+  'Return' => l.statusReturn,
+  'Credit Note Issued' => l.statusCreditNoteIssued,
+  'Cancelled' => l.statusCancelled,
+  _ => status,
+};

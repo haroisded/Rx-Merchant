@@ -47,6 +47,11 @@ class SaleLine {
   /// Serial / Batch Entries (POS-R21).
   List<SbEntry> entries;
 
+  /// On a return: the original line (INV-R5) and the cost per stock unit it
+  /// went out at, which the goods come back in at (STK-R33).
+  int? againstLineId;
+  double incomingRate = 0;
+
   /// The batch of a line that holds one batch, for merging (POS-R4).
   String? get batchNo => entries.length == 1 && entries.first.serialNo == null
       ? entries.first.batchNo
@@ -89,8 +94,14 @@ class Sale {
   String? terms;
   final lines = <SaleLine>[];
 
-  /// Mode of payment id -> amount tendered (POS-R15).
+  /// Mode of payment id -> amount tendered (POS-R15); negative on a return.
   final payments = <int, double>{};
+
+  /// A return (Credit Note) against this sale (INV-R5).
+  int? returnAgainstId;
+
+  /// INV-R6: off for a price-only credit, where no goods move.
+  bool updateStock = true;
 
   /// Changed since it was last saved (Action on New Invoice, POS-R18).
   bool dirty = false;

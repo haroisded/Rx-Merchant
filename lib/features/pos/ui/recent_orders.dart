@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../core/db/app_database.dart';
@@ -6,13 +7,18 @@ import '../../../core/db/providers.dart';
 import '../../../core/widgets/spacing.dart';
 import '../../../core/widgets/status_chip.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../invoices/ui/invoice_providers.dart';
+import '../../invoices/ui/invoices_screen.dart' show openScanned;
+import '../../invoices/ui/print_page.dart';
 import '../../setup/ui/form_kit.dart';
+import '../../stock/ui/scan.dart';
 import '../data/pos_db.dart';
 import 'pos_providers.dart';
 
 /// Recent Orders (POS-R19): the register's invoices by status, searchable
-/// by name. A held order offers Edit and Delete; a paid sale's Print
-/// Receipt and Return arrive with 05-invoices-and-receipts.
+/// by name or by scanning a receipt (INV-R23). A held order offers Edit and
+/// Delete; a submitted invoice opens, prints, and a sale offers Return
+/// (INV-R5).
 class RecentOrders extends ConsumerStatefulWidget {
   const RecentOrders({super.key, required this.onEdit});
 
@@ -55,6 +61,9 @@ class _RecentOrdersState extends ConsumerState<RecentOrders> {
           child: SearchBar(
             hintText: l.search,
             leading: const Icon(Icons.search),
+            trailing: [
+              ScanButton(onScanned: (code) => openScanned(context, ref, code)),
+            ],
             onChanged: (q) => setState(() => _query = q),
           ),
         ),
@@ -105,10 +114,29 @@ class _RecentOrdersState extends ConsumerState<RecentOrders> {
                                   ),
                                 ],
                               )
-                            : StatusChip(s.status),
+                            : Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  StatusChip(s.status),
+                                  IconButton(
+                                    tooltip: l.printReceipt,
+                                    onPressed: () => openPrint(context, s.id),
+                                    icon: const Icon(Icons.print_outlined),
+                                  ),
+                                  if (s.docstatus == 1 && s.isReturn == 0)
+                                    IconButton(
+                                      tooltip: l.returnCreditNote,
+                                      onPressed: () =>
+                                          context.go(returnPath(s.id)),
+                                      icon: const Icon(
+                                        Icons.assignment_return_outlined,
+                                      ),
+                                    ),
+                                ],
+                              ),
                         onTap: s.docstatus == 0
                             ? () => widget.onEdit(s.id)
-                            : null,
+                            : () => context.go(invoicePath(s.id)),
                       ),
                   ],
                 ),

@@ -42,6 +42,22 @@ void main() {
         contains('A,,1'),
       );
     });
+
+    test('DSH-R11 the filters are written above the header', () {
+      expect(
+        toCsv(
+          ['Item', 'Qty'],
+          [
+            ['A', 1],
+          ],
+          [
+            ['From Date', '2026-03-01'],
+            ['To Date', '2026-03-31'],
+          ],
+        ).split(RegExp(r'\r?\n')).where((line) => line.isNotEmpty),
+        ['From Date,2026-03-01', 'To Date,2026-03-31', 'Item,Qty', 'A,1'],
+      );
+    });
   });
 
   group('ReportTable', () {

@@ -46,8 +46,9 @@ void main() {
     expect((await namesOf('table')).toSet(), specTables);
   });
 
-  test('schema v1 creates the 14 indexes of the feature plans', () async {
-    expect(await namesOf('index'), hasLength(14));
+  test('schema v1 creates the 14 indexes of the feature plans and the '
+      "3 on the invoice's lines, taxes and payments", () async {
+    expect(await namesOf('index'), hasLength(17));
   });
 
   test('foreign keys are switched on', () async {

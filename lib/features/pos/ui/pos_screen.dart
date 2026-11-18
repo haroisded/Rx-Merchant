@@ -7,6 +7,7 @@ import '../../../core/widgets/child_table.dart';
 import '../../../core/widgets/spacing.dart';
 import '../../../core/widgets/window_size.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../invoices/ui/print_page.dart';
 import '../../setup/ui/form_kit.dart';
 import '../logic/sale.dart';
 import 'cart_panel.dart';
@@ -19,9 +20,12 @@ import 'payment_panel.dart';
 import 'pos_providers.dart';
 import 'recent_orders.dart';
 
-/// `/pos` and `/pos/closing`.
-Widget posPage(String? page) =>
-    page == 'closing' ? const ClosingPage() : const PosScreen();
+/// `/pos` and `/pos/closing`; `/pos?heldOrder=<id>` opens held order `id`
+/// (a draft chosen in the invoice list, INV-R2).
+Widget posPage(String? page, [Map<String, String> query = const {}]) =>
+    page == 'closing'
+    ? const ClosingPage()
+    : PosScreen(heldOrderId: int.tryParse(query['heldOrder'] ?? ''));
 
 /// What the selector pane shows.
 enum _Pane { items, orders, detail, payment }
@@ -33,7 +37,10 @@ enum _Pane { items, orders, detail, payment }
 /// sheets. Expanded: detail and payment replace the selector, the cart
 /// stays, with a number pad under it.
 class PosScreen extends ConsumerStatefulWidget {
-  const PosScreen({super.key});
+  const PosScreen({super.key, this.heldOrderId});
+
+  /// A held order to load, as Recent Orders' Edit does.
+  final int? heldOrderId;
 
   @override
   ConsumerState<PosScreen> createState() => _PosScreenState();
@@ -49,12 +56,43 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   /// The order summary of the sale just submitted.
   Submitted? _done;
 
-  void _paid(Submitted done) => setState(() {
-    _done = done;
-    _pane = _Pane.items;
-    _cartOpen = false;
-    _line = null;
-  });
+  void _paid(Submitted done) {
+    setState(() {
+      _done = done;
+      _pane = _Pane.items;
+      _cartOpen = false;
+      _line = null;
+    });
+    // INV-R24: Print Receipt on Order Complete.
+    if (ref.read(posSettingsProvider).printReceiptOnOrderComplete) {
+      printAfterSale(context, ref, done.sale.id!);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _openHeldOrder();
+  }
+
+  @override
+  void didUpdateWidget(PosScreen old) {
+    super.didUpdateWidget(old);
+    if (widget.heldOrderId != old.heldOrderId) _openHeldOrder();
+  }
+
+  /// `?heldOrder=<id>`: load it once, then drop the query.
+  void _openHeldOrder() {
+    final id = widget.heldOrderId;
+    if (id == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      await ref.read(cartProvider.future);
+      if (!mounted) return;
+      _edit(id);
+      if (mounted) context.go(posPath);
+    });
+  }
 
   Future<void> _openLine(SaleLine line) async {
     if (WindowSize.of(context) == WindowSize.expanded) {

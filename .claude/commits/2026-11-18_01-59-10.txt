@@ -1,0 +1,374 @@
+RX MERCHANT - SESSION REPORT
+============================
+
+Written:      2026-11-18 01:59 (+08:00)
+Branch:       main
+Based on:     861d78d "RX MERCHANT - SESSION REPORT" (the Cash Register plan,
+              issue 5)
+Committed:    nothing. Every change below is in the working tree, for you to
+              commit.
+Covers:       the whole session: the request in
+              .claude/erpnext-planner/current-user-prompt.txt to build
+              Plans/04-sales-dashboard.md (all 5 build steps, DSH-B1 to B5:
+              milestone M7), then the wrap-up CLAUDE.txt asks for (Flutter and
+              Ponytail reviews, fixes, this report, the system documentation).
+
+
+1. SUGGESTED COMMIT MESSAGE
+---------------------------
+
+Build 04-sales-dashboard: cards, goal, charts, sales reports
+
+- Dashboard destination: period bar (Today to This Year, Custom), eight
+  number cards against the previous period, monthly sales goal, states
+  for no sale yet and no sales in the period; Compact / Medium / Expanded
+  layouts (DSH-R1 to R5, R11, R12, section 5)
+- Four fl_chart charts with table alternatives: Sales Trend (Value or
+  Quantity), Sales by Item Group (top 8 and Other), Top Items, Payment
+  Modes (DSH-R6)
+- Sales Analytics (Item / Item Group tree, Value or Qty, Daily to Yearly,
+  chart of chosen rows), Item-wise Sales, Gross Profit by Invoice, Item,
+  Item Group or Brand with a no-cost flag (DSH-R7 to R9)
+- Drill-down for the same period; CSV export headed by the filters
+  (DSH-R10, R11)
+- Schema v1 edited in place: indexes on sales_invoice_item, _tax and
+  _payment (sales_invoice_id)
+- Tests: 223 -> 250
+
+If you prefer two commits, split off "docs and tooling":
+.claude/erpnext-planner/system-documentation.md, .claude/commits/ and
+graphify-out/.
+
+
+2. RESULT IN SHORT
+------------------
+
+All 5 build steps of 04-sales-dashboard.md are in.
+
+  flutter analyze               No issues found
+  dart fix --dry-run            Nothing to fix
+  dart format (check)           0 files changed (111 files)
+  flutter test                  250 of 250 pass
+  flutter build apk --release   builds, 83.2 MB
+  release manifest              INTERNET permission absent
+  20,000 invoices (in memory)   dashboard queries ~80 ms, reports ~160 ms
+
+Not done, stated plainly:
+  - Left to plan 05 by your decision at the start: the Invoices, Returns
+    and Average Sale cards opening the invoice list, and the Invoice cell
+    of Item-wise Sales opening the invoice. They show figures only.
+  - Returns cannot be made in the app until plan 05, so the dashboard's
+    return handling is checked by tests (returns inserted directly), not
+    on the emulator.
+  - No real device was used. Phone and tablet emulators only.
+
+
+3. WHAT WAS BUILT
+-----------------
+
+3.1 Decisions you made (asked during the session)
+  - Plan-05 links: left out until plan 05.
+  - Speed: the first 20,000-invoice test took 16 to 29 s per refresh,
+    because sales_invoice_item, sales_invoice_tax and sales_invoice_payment
+    had no index on sales_invoice_id (each invoice scanned whole child
+    tables). You chose to add three indexes to schema v1 in place. With
+    them: about 80 ms.
+
+3.2 By build step
+  DSH-B1  logic/periods.dart: periods up to today, week start from First
+          Day of the Week, previous period (same days one unit back),
+          trend bucket size (days to 31, weeks to 26 weeks, months),
+          ranges cut into days, weeks, months, quarters, years.
+          data/dashboard_db.dart: figures (DSH-R4 in two queries), month's
+          sales and Achievement %, stock value, trend, top 8 groups and
+          Other, top 10 items, payment modes (change taken off the cash
+          mode it came from, the same SQL as the closing entry).
+          The section 7 fixture as tests.
+  DSH-B2  Dashboard screen: FilterChip period bar (Custom through
+          showDateRangePicker), eight cards with up / down change in
+          primary / error, Low Stock as a Badge button on Stock Value; no
+          sale yet card with Open Cash Register; the three width classes;
+          kept live by one drift tableUpdates stream (DSH-R12).
+  DSH-B3  Goal card (LinearProgressIndicator, current month always) or
+          the "Set a monthly sales target" link; Sales Trend (line, Value /
+          Quantity), Sales by Item Group, Top Items (Value / Quantity),
+          Payment Modes (horizontal bars); each title opens a table.
+  DSH-B4  data/sales_reports.dart and ui/sales_report_pages.dart: Sales
+          Analytics (group tree sums, Total first on phones, rows toggled
+          into the chart), Item-wise Sales (tax per line from the item-wise
+          detail, the invoice's remainder on its last line so totals equal
+          the Taxes card), Gross Profit (Average Selling Rate and Valuation
+          Rate by Item; "Check" column for a stock item sold at no cost).
+  DSH-B5  Drill-down: Net Sales and Items Sold -> Sales Analytics, Gross
+          Profit -> Gross Profit, Taxes -> Item-wise Sales, Stock Value /
+          Low Stock -> stock reports, bars and table rows -> Item-wise
+          Sales filtered; CSV export with the filters as its first lines,
+          values rounded as shown.
+
+3.3 Shared pieces changed
+  lib/router.dart              /dashboard and /dashboard/:page (workspace
+                               route, full width)
+  core/widgets/report_table    exportPreamble (filter lines above the CSV
+                               header); ReportFilters (the phone filter
+                               sheet, now shared by stock and sales
+                               reports)
+  pos/data/pos.drift           3 indexes (sii_invoice_idx, sit_invoice_idx,
+                               sip_invoice_idx)
+  pos/data/pos_closing_db      changeModeOf: the "change out of the first
+                               Cash payment" SQL, shared with the dashboard
+  stock/data/stock_reports     subtreeIds made public (item group filter)
+  stock/ui/report_pages        uses ReportFilters
+  l10n/app_en.arb              572 messages (was 526)
+
+3.4 Size
+  New hand-written Dart under lib/features/dashboard: 1,984 lines. New
+  tests: 717 lines. Changes to existing files: +162 / -52 (generated files
+  not counted).
+
+
+4. CODE REVIEW RESULTS
+----------------------
+
+CLAUDE.txt asks for "Flutter Review" and "Ponytail Review", then Ponytail
+fixes.
+
+4.1 Ponytail review (ponytail-review skill)
+  Two findings, about -10 lines, both applied:
+   1. A switch in the Gross Profit columns repeated _groupByText; it now
+      calls it.
+   2. A one-caller helper (_name) inlined.
+
+4.2 Flutter review
+  flutter analyze, dart fix, and the code-review skill: two independent
+  reviewers of the working tree against 861d78d, one for standards (plan
+  00 sections 5 to 7, CLAUDE.txt, D-1 to D-49, a code-smell list), one
+  against plan 04.
+
+  Fixed (smallest change at the cause):
+   1. Chart bars were 14dp, the only way to open Item-wise Sales from a
+      chart: touch area widened to 48dp, and the group / item table rows
+      now open it too.
+   2. Axis labels used NumberFormat.compact: now through Formats (Number
+      Format).
+   3. The dashboard showed raw error text: a message first.
+   4. Sales Analytics used the error colour for a line (it means "down"
+      on the cards): primary, tertiary, secondary and two containers, as
+      plan 04 section 5 says.
+   5. dashboard_screen and sales_report_pages imported each other:
+      bucketLabel and percent moved to dashboard_charts.
+   6. Nine item groups gave nine bars and no "Other": Other from the
+      ninth (top 8 and Other). Test.
+   7. The no-cost flag would mark a price-only credit note: returns are
+      not flagged. Test.
+   8. The CSV wrote values unrounded: rows rounded as shown before the
+      table and the export.
+   9. The export's Item / Item Group lines could be blank on a phone:
+      the page watches those lists.
+  10. Item-wise Sales' Date column showed the time: date only.
+  11. Untested: the totals row (now a widget test checks Gross Profit's
+      60.0% in the row and the totals), the per-line tax split (a two-line
+      invoice), A19 beyond the cards (group chart and trend too).
+
+  Found on the emulator and fixed:
+  12. The trend's axis did not start at zero.
+  13. fl_chart's extra end labels overlapped the last labels (both axes).
+  14. Sales Analytics drew nothing after Tree Type changed: the default
+      rows were taken from the previous result while the new one loaded.
+  15. The Value filter's label read "Value": now "Value or Qty".
+
+  Left as they are, with the reason:
+   - Export is in the report's filter row, not the app bar: the same as
+     every stock report (D-31).
+   - SalesReportPage reads the database directly, as the stock reports
+     do.
+   - Month labels are English (yMMM), as dates are (D-7).
+   - A parent item group's bar counts only its own items while its
+     drill-down includes subgroups, as ERPNext's Item Group filter does
+     (D-56); summing subtrees into the bars would count a sale twice.
+   - Judgement-call smells: switches on SalesReport in the page, a bool
+     for Value / Quantity, ReportRows and subtreeIds taken from the stock
+     reports, the group indent made in the data layer, achievement() in
+     data/.
+
+
+5. VERIFICATION EVIDENCE
+------------------------
+
+All run after the last code change.
+
+  $ dart format --output=none --set-exit-if-changed lib test
+  Formatted 111 files (0 changed)
+
+  $ flutter analyze
+  No issues found!
+
+  $ dart fix --dry-run
+  Nothing to fix!
+
+  $ flutter test
+  250 tests passed (223 before; 27 added: 5 periods, 16 dashboard
+  database, 5 dashboard widget, 1 CSV preamble)
+
+  $ flutter build apk --release
+  Built build\app\outputs\flutter-apk\app-release.apk (83.2MB)
+  merged release manifest: android.permission.INTERNET 0 times
+
+  Acceptance checks DSH-A1 to A19 each have a test (DSH-A13 in the widget
+  tests, DSH-A18 in periods_test).
+
+  Emulators, started and run exactly as CLAUDE.txt says (emulator
+  -no-snapshot-load, adb uninstall, flutter run --no-enable-impeller):
+
+  Phone (Medium_Phone_API_36.1, 1080x2400):
+    - Before any sale: "Complete your first sale to see your dashboard"
+      with Open Cash Register.
+    - Item PARA500 (100 at 2.00, sells at 5.00); 3 sold -> Today: Net Sales
+      $ 15.00, Invoices 1, Average Sale $ 15.00, Items Sold 3.000, Gross
+      Profit $ 9.00 / 60.0%, Taxes $ 0.00, Returns 0, Stock Value
+      $ 194.00.
+    - This Month: 17-day trend; its table view lists every day.
+    - "Set a monthly sales target" -> Store Profile; 60.00 saved -> goal
+      card $ 60.00 / $ 15.00 / 25.0%.
+    - Net Sales -> Sales Analytics: Total first, row marked, line drawn;
+      Item Group: All Item Groups and Products.
+    - Exports read back with adb: filter lines first; Gross Profit
+      PARA500, 3, 15, 6, 9, 60, 5, 2.
+  Tablet (Medium_Tablet, 2560x1600):
+    - Landscape (expanded): 4 cards per row, the target link beside Sales
+      Trend, 3 charts in one row; the Gauze bar opened Item-wise Sales
+      with the inline filter bar.
+    - Portrait (medium): 4 cards per row, 2 charts per row.
+  Phone again, after the review fixes:
+    - Axis labels in the Number Format; Top Items' table row opened
+      Item-wise Sales for the item, date-only column; the export named
+      the item. Logcat and Dart Tooling Daemon: no runtime errors.
+
+
+6. DECISIONS MADE ON YOUR BEHALF
+--------------------------------
+
+  1. Previous period = the same days one unit back (This Month on the
+     18th against the 1st to 18th of last month); a custom range against
+     as many days just before. No change line when the previous figure is
+     0 (D-50).
+  2. The Taxes card opens Item-wise Sales; plan 04 names no target for
+     it (D-53).
+  3. One drift tableUpdates stream refreshes the whole dashboard (D-54).
+  4. Item-wise tax per line from item_wise_tax_detail, the invoice's
+     rounding remainder on its last line (D-55).
+  5. Sales by Item Group bars count each group's own items (D-56).
+  6. The Gross Profit flag is an extra "Check" column; returns are not
+     flagged (D-57).
+  7. Sales Analytics charts the first five rows until others are tapped
+     (D-58).
+  8. Chart table rows open the same report as the bars; bars' touch area
+     48dp (D-59).
+  9. The stock reports' phone filter sheet became the shared
+     ReportFilters (D-60).
+ 10. A dashboard/logic/ folder was added (plan 00 lists dashboard with
+     data/ and ui/ only), because the period maths is pure and
+     unit-tested.
+
+
+7. SYSTEM DOCUMENTATION
+-----------------------
+
+.claude/erpnext-planner/system-documentation.md is now issue 6, same
+ISO/IEC/IEEE 15289 structure: document control and change history; scope
+and milestone state (M7 done); glossary (period, previous period, Net
+Sales, Gross Profit, Achievement %, bucket, drill-down); concept of
+operations; C-10 (17 indexes); requirements DSH-R1 to R12 and R5 section
+5, acceptance DSH-A1 to A19 and DSH-B1 to B5, the 20,000-invoice ceiling;
+architecture (structure diagram, folder map, fl_chart now used, routes
+/dashboard and /dashboard/:page, D-50 to D-60); software design (shared
+widgets ReportTable / ReportFilters / toCsv, changeModeOf, new section
+6.13 for the Dashboard); database (indexes 17, migration note);
+interfaces (Dashboard layouts); configuration status (861d78d);
+verification (tests, build, emulator runs, issue 6 review); user guide
+(Dashboard); problems (new P-17); not built yet (the plan-05 links);
+summary.
+
+
+8. KNOWN PROBLEMS AND OPEN ITEMS
+--------------------------------
+
+  1. Plan-05 links not offered yet (your decision): Invoices, Returns and
+     Average Sale cards; the Invoice cell of Item-wise Sales.
+  2. Databases and backups made before this build lack the three new
+     indexes (P-17): correct figures, slower dashboard as invoices grow.
+     The CLAUDE.txt emulator flow uninstalls first, so it is safe.
+     Databases from before issue 3 still fail on sales (P-13).
+  3. Returns cannot be made in the app yet; the dashboard's return
+     handling is tested with returns written directly.
+  4. No real device; camera scanning not tried (P-8, P-14).
+  5. Unchanged from earlier issues: release APK signed with the debug key;
+     leaving a form with unsaved changes discards it (P-10); emulator GPU
+     text fault (P-1, not seen this session); chains replayed from their
+     first entry (P-15).
+  6. Gboard on the emulator again appended a suggestion ("to") to a
+     typed field once; it is the emulator keyboard, not the app.
+
+
+9. FILES
+--------
+
+Added - app
+  lib/features/dashboard/logic/periods.dart
+  lib/features/dashboard/data/dashboard_db.dart
+  lib/features/dashboard/data/sales_reports.dart
+  lib/features/dashboard/ui/dashboard_providers.dart
+  lib/features/dashboard/ui/dashboard_screen.dart
+  lib/features/dashboard/ui/dashboard_charts.dart
+  lib/features/dashboard/ui/sales_report_pages.dart
+
+Added - tests
+  test/features/dashboard/logic/periods_test.dart
+  test/features/dashboard/data/dashboard_db_test.dart
+  test/features/dashboard/ui/dashboard_ui_test.dart
+
+Modified - app
+  lib/router.dart
+  lib/core/widgets/report_table.dart
+  lib/features/pos/data/pos.drift
+  lib/features/pos/data/pos_closing_db.dart
+  lib/features/stock/data/stock_reports.dart
+  lib/features/stock/ui/report_pages.dart
+  lib/l10n/app_en.arb
+  lib/core/db/app_database.g.dart            generated
+  lib/l10n/app_localizations.dart            generated
+  lib/l10n/app_localizations_en.dart         generated
+
+Modified - tests
+  test/core/db/schema_test.dart              17 indexes
+  test/core/widgets/report_table_test.dart   CSV filter lines
+
+Modified - documents and tooling
+  .claude/erpnext-planner/system-documentation.md
+  graphify-out/                              "graphify update .": 2,230 nodes,
+                                             3,624 edges, 104 communities (was
+                                             2,021 / 3,281 / 97); previous copy
+                                             in graphify-out/2026-11-18/
+                                             (overwritten: it held the copy
+                                             made by the issue 5 session)
+
+Added - documents
+  .claude/commits/2026-11-18_01-59-10.txt    this report
+
+Not changed
+  The plans (04-sales-dashboard.md was built as written, with the
+  deviations recorded as D-50 to D-60 and the index addition as D-51)
+
+Changed by you, not by me
+  .claude/erpnext-planner/current-user-prompt.txt   modified
+
+
+10. BEFORE YOU COMMIT
+---------------------
+
+  - Schema version is still 1 although three indexes were added (your
+    decision). Clear the app's data on any device that ran an earlier
+    build if you want the speed; the data itself still works.
+  - graphify-out/ holds new cache files (cache/ast/...) and the backup
+    folders 2026-11-16/, 2026-11-17/, 2026-11-18/; delete the backups if
+    you do not want them in the repository. Community names are stale
+    ("graphify label" refreshes them with an LLM; not run).

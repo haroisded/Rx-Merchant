@@ -5,6 +5,7 @@ import '../../../core/db/providers.dart';
 import '../../../core/widgets/spacing.dart';
 import '../../../core/widgets/status_chip.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../invoices/ui/print_page.dart';
 import '../../setup/ui/simple_masters.dart' show modesOfPaymentProvider;
 import '../data/pos_db.dart';
 import '../logic/sale.dart';
@@ -13,8 +14,8 @@ import 'cart_panel.dart';
 import 'pos_widgets.dart';
 
 /// The order summary after Submit (POS-R17): name and status, lines,
-/// totals, payments and change, and New Order. Printing arrives with
-/// 05-invoices-and-receipts.
+/// totals, payments and change, Print Receipt (INV-R24) and New Order. A
+/// return's summary too (INV-R9), whose New Order starts the exchange.
 class OrderSummary extends ConsumerWidget {
   const OrderSummary({
     super.key,
@@ -26,6 +27,8 @@ class OrderSummary extends ConsumerWidget {
   final Sale sale;
   final String name;
   final VoidCallback onNewOrder;
+
+  bool get _return => sale.returnAgainstId != null;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -52,7 +55,7 @@ class OrderSummary extends ConsumerWidget {
             Expanded(
               child: Text(name, style: Theme.of(context).textTheme.titleLarge),
             ),
-            const StatusChip('Paid'),
+            StatusChip(_return ? 'Return' : 'Paid'),
           ],
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -72,9 +75,21 @@ class OrderSummary extends ConsumerWidget {
           if (value != 0)
             TotalRow(modes[key]?.name ?? '', formats.money(value)),
         TotalRow(l.paidAmount, formats.money(paid.paid)),
-        TotalRow(l.changeAmount, formats.money(paid.change), strong: true),
+        if (!_return)
+          TotalRow(l.changeAmount, formats.money(paid.change), strong: true),
         const SizedBox(height: AppSpacing.lg),
-        FilledButton(onPressed: onNewOrder, child: Text(l.newOrder)),
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          children: [
+            OutlinedButton.icon(
+              onPressed: () => openPrint(context, sale.id!),
+              icon: const Icon(Icons.print_outlined),
+              label: Text(l.printReceipt),
+            ),
+            FilledButton(onPressed: onNewOrder, child: Text(l.newOrder)),
+          ],
+        ),
       ],
     );
   }

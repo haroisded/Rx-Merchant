@@ -6,6 +6,8 @@ import '../../../core/db/providers.dart';
 import '../../../core/widgets/spacing.dart';
 import '../../../core/widgets/window_size.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../invoices/data/invoice_db.dart' show InvoiceFilters;
+import '../../invoices/ui/invoice_providers.dart' show invoicesLink;
 import '../../setup/data/refusal.dart';
 import '../../setup/ui/form_kit.dart';
 import '../data/pos_closing_db.dart';
@@ -103,7 +105,26 @@ class _ClosingPageState extends ConsumerState<ClosingPage> {
                       at(DateTime.parse(d.session.periodStartDatetime)),
                     ),
                     TotalRow(l.periodEndDate, at(DateTime.now())),
-                    TotalRow(l.invoiceCount(d.invoices), ''),
+                    // The session's invoices, in the invoice list.
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: TextButton(
+                        // The submitted ones, as the count counts them.
+                        onPressed: () => context.go(
+                          invoicesLink(
+                            InvoiceFilters(
+                              session: d.session.id,
+                              statuses: const {
+                                'Paid',
+                                'Credit Note Issued',
+                                'Return',
+                              },
+                            ),
+                          ),
+                        ),
+                        child: Text(l.invoiceCount(d.invoices)),
+                      ),
+                    ),
                     TotalRow(l.totalQuantity, formats.number(d.totalQuantity)),
                     TotalRow(l.netTotal, formats.money(d.netTotal)),
                     TotalRow(
