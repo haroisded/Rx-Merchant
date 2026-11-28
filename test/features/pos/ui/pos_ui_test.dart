@@ -101,6 +101,22 @@ void main() {
     expect((sold!.status, sold.grandTotal), ('Paid', 25));
   });
 
+  testWidgets('a small phone shows Complete Order without scrolling', (
+    tester,
+  ) async {
+    await pumpPos(tester, width: 360, height: 640);
+    await tester.tap(find.text('Open'));
+    await settle(tester);
+    await tester.enterText(find.byType(SearchBar), '4800');
+    await tester.testTextInput.receiveAction(TextInputAction.search);
+    await settle(tester);
+    await tester.tap(find.text('1 item'));
+    await settle(tester);
+    await tester.tap(find.text('Checkout'));
+    await settle(tester);
+    expect(find.text('Complete Order').hitTestable(), findsOneWidget);
+  });
+
   testWidgets('a tablet shows selector, cart and number pad side by side', (
     tester,
   ) async {

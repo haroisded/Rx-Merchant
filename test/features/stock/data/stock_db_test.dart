@@ -442,6 +442,29 @@ void main() {
     expect(entry.isOpening, 1);
   });
 
+  test(
+    'STK-R38 opening stock at a zero rate or below zero is refused',
+    () async {
+      final db = await seeded();
+      for (final opening in [(qty: 12.0, rate: 0.0), (qty: -5.0, rate: 2.0)]) {
+        await expectLater(
+          db.saveItem(
+            ItemCompanion.insert(
+              itemCode: 'SOAP',
+              itemName: 'Soap',
+              itemGroupId: await idOf(db, 'item_group', 'Products'),
+              stockUomId: await idOf(db, 'uom', 'Nos'),
+            ),
+            noTables,
+            opening: opening,
+          ),
+          refused(Refusal.lineProblem),
+        );
+      }
+      expect(await db.select(db.item).get(), isEmpty);
+    },
+  );
+
   test('STK-R7 frozen fields; STK-R9 a used unit stays', () async {
     final db = await seeded();
     final apple = await newItem(db, 'APPLE');

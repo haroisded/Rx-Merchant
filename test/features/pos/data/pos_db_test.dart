@@ -143,6 +143,16 @@ void main() {
     expect(db.openSessionWith({}), refused(Refusal.anotherSessionOpen));
   });
 
+  test('POS-R2 an Opening Amount below zero is refused', () async {
+    final db = await seeded();
+    final cash = await idOf(db, 'mode_of_payment', 'Cash');
+    await expectLater(
+      db.openSessionWith({cash: -50}),
+      refused(Refusal.negativeOpeningAmount),
+    );
+    expect(await db.openSession(), isNull);
+  });
+
   test('POS-A10 a discount above Max Discount is refused', () async {
     final db = await register();
     final pen = await newItem(db, 'PEN');

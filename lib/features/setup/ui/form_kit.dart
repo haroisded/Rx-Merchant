@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../core/db/providers.dart';
 import '../../../core/numbers/formats.dart';
+import '../../../core/widgets/child_table.dart';
 import '../../../core/widgets/spacing.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../stock/logic/stock_documents.dart';
@@ -97,6 +98,7 @@ String refusalText(AppLocalizations l, RefusedException e, Formats f) {
     Refusal.docstatus => l.refusedDocstatus,
     Refusal.noOpenSession => l.refusedNoOpenSession,
     Refusal.anotherSessionOpen => l.refusedAnotherSessionOpen,
+    Refusal.negativeOpeningAmount => l.refusedNegativeOpeningAmount,
     Refusal.emptyCart => l.refusedEmptyCart,
     Refusal.itemUnavailable => l.refusedItemUnavailable(
       '${a[0]}',
@@ -222,9 +224,61 @@ Future<bool> confirm(
     ) ??
     false;
 
+/// P-10: a form that checks its fields before saving and asks before Back
+/// throws away changes. A change is a typed field (`Form.onChanged`) or a row
+/// edited in a [ChildTable] ([FormChanged]).
+// ponytail: a switch or dropdown alone does not count as a change (they are
+// not FormFields); track them too if losing one tap ever matters.
+mixin DiscardGuard<T extends StatefulWidget> on State<T> {
+  GlobalKey<FormState> get formKey;
+  var _dirty = false;
+
+  void _changed() {
+    if (!_dirty) setState(() => _dirty = true);
+  }
+
+  /// Saves through [save] once every field is valid; a field that is not
+  /// (such as "Not a number.") stops it. True from [save] clears the changes.
+  Future<void> validateAndSave(Future<bool> Function() save) async {
+    if (!formKey.currentState!.validate()) {
+      return showProblems(context, [
+        AppLocalizations.of(context).formHasErrors,
+      ]);
+    }
+    if (await save() && mounted) setState(() => _dirty = false);
+  }
+
+  /// [child] wrapped in the form. With [editable] false (a submitted
+  /// document) Back never asks.
+  Widget guard(Widget child, {bool editable = true}) => PopScope(
+    canPop: !_dirty || !editable,
+    onPopInvokedWithResult: (didPop, _) async {
+      if (didPop) return;
+      final l = AppLocalizations.of(context);
+      if (await confirm(
+            context,
+            title: l.unsavedChangesTitle,
+            body: l.unsavedFormBody,
+            action: l.discardChanges,
+          ) &&
+          mounted) {
+        Navigator.of(context).pop();
+      }
+    },
+    child: NotificationListener<FormChanged>(
+      onNotification: (_) {
+        _changed();
+        return true;
+      },
+      child: Form(key: formKey, onChanged: _changed, child: child),
+    ),
+  );
+}
+
 /// A form view: the title, Delete and a Save FilledButton in the app bar, and
-/// the sections in a scrolling list.
-class FormPage extends StatelessWidget {
+/// the sections in a scrolling list. [onSave] runs only when every field is
+/// valid and answers whether it saved.
+class FormPage extends StatefulWidget {
   const FormPage({
     super.key,
     required this.title,
@@ -237,37 +291,118 @@ class FormPage extends StatelessWidget {
 
   final String title;
   final List<Widget> children;
-  final VoidCallback? onSave;
+  final Future<bool> Function()? onSave;
   final VoidCallback? onDelete;
   final GlobalKey<FormState>? formKey;
   final List<Widget> actions;
 
   @override
+  State<FormPage> createState() => _FormPageState();
+}
+
+class _FormPageState extends State<FormPage> with DiscardGuard {
+  @override
+  late final GlobalKey<FormState> formKey =
+      widget.formKey ?? GlobalKey<FormState>();
+
+  @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    final onSave = widget.onSave;
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: Text(widget.title),
         actions: [
-          ...actions,
-          if (onDelete != null)
+          ...widget.actions,
+          if (widget.onDelete != null)
             IconButton(
-              onPressed: onDelete,
+              onPressed: widget.onDelete,
               icon: const Icon(Icons.delete_outline),
               tooltip: l.delete,
             ),
           if (onSave != null)
             Padding(
               padding: const EdgeInsetsDirectional.only(end: AppSpacing.sm),
-              child: FilledButton(onPressed: onSave, child: Text(l.save)),
+              child: FilledButton(
+                onPressed: () => validateAndSave(onSave),
+                child: Text(l.save),
+              ),
             ),
         ],
       ),
-      body: Form(
-        key: formKey,
-        child: ListView(
+      body: guard(
+        editable: onSave != null,
+        ListView(
           padding: const EdgeInsets.all(AppSpacing.md),
-          children: children,
+          children: widget.children,
+        ),
+      ),
+    );
+  }
+}
+
+/// The body of a row editor: fields, then Delete and Done. Done checks the
+/// fields, then pops the sheet with true after [onDone]; a null [onDone]
+/// disables it.
+class RowEditorBody extends StatelessWidget {
+  const RowEditorBody({
+    super.key,
+    required this.children,
+    required this.onDone,
+    this.onDelete,
+    this.title,
+  });
+
+  final List<Widget> children;
+  final VoidCallback? onDone;
+  final VoidCallback? onDelete;
+  final String? title;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final onDone = this.onDone;
+    return Form(
+      child: Builder(
+        builder: (context) => ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.all(AppSpacing.md),
+          children: [
+            if (title case final t?)
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                child: Text(t, style: Theme.of(context).textTheme.titleLarge),
+              ),
+            for (final c in children)
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                child: c,
+              ),
+            Row(
+              children: [
+                if (onDelete case final delete?)
+                  TextButton.icon(
+                    onPressed: () {
+                      delete();
+                      Navigator.pop(context, true);
+                    },
+                    icon: const Icon(Icons.delete_outline),
+                    label: Text(l.delete),
+                  ),
+                const Spacer(),
+                FilledButton(
+                  onPressed: onDone == null
+                      ? null
+                      : () {
+                          if (!Form.of(context).validate()) return;
+                          onDone();
+                          Navigator.pop(context, true);
+                        },
+                  child: Text(l.done),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

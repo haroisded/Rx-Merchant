@@ -343,7 +343,7 @@ abstract class AppLocalizations {
   /// No description provided for @notANumber.
   ///
   /// In en, this message translates to:
-  /// **'Not a number.'**
+  /// **'Not a number, or too large.'**
   String get notANumber;
 
   /// No description provided for @notAWholeNumber.
@@ -2716,6 +2716,30 @@ abstract class AppLocalizations {
   /// **'Item does not maintain stock.'**
   String get lineItemNotStock;
 
+  /// No description provided for @maxDiscountRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Max Discount (%) must be between 0 and 100.'**
+  String get maxDiscountRange;
+
+  /// No description provided for @openingStockNegative.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening Stock cannot be negative.'**
+  String get openingStockNegative;
+
+  /// No description provided for @openingNeedsValuationRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening Stock needs a Valuation Rate above zero.'**
+  String get openingNeedsValuationRate;
+
+  /// No description provided for @refusedNegativeOpeningAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'An Opening Amount cannot be negative.'**
+  String get refusedNegativeOpeningAmount;
+
   /// No description provided for @lineZeroRate.
   ///
   /// In en, this message translates to:
@@ -3100,6 +3124,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Discard Changes'**
   String get discardChanges;
+
+  /// No description provided for @unsavedFormBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This form has changes that are not saved.'**
+  String get unsavedFormBody;
 
   /// No description provided for @cartLines.
   ///

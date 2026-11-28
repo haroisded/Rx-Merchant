@@ -41,11 +41,8 @@ class _CurrencyPageState extends ConsumerState<CurrencyPage> {
       title: l.currency,
       formKey: _formKey,
       onSave: () async {
-        if (!_formKey.currentState!.validate()) {
-          return showProblems(context, [l.formHasErrors]);
-        }
         _formKey.currentState!.save();
-        await attempt(
+        return attempt(
           context,
           () => ref.read(appDatabaseProvider).saveCurrency(_edit!),
           done: l.saved,
@@ -160,7 +157,6 @@ class NamedMasterForm extends StatefulWidget {
 }
 
 class _NamedMasterFormState extends State<NamedMasterForm> {
-  final _formKey = GlobalKey<FormState>();
   late final _name = TextEditingController(text: widget.name);
   late final _switches = [for (final s in widget.switches) s.$2];
   late var _choice = widget.choice?.$3;
@@ -179,11 +175,7 @@ class _NamedMasterFormState extends State<NamedMasterForm> {
     final onDelete = widget.onDelete;
     return FormPage(
       title: widget.title,
-      formKey: _formKey,
       onSave: () async {
-        if (!_formKey.currentState!.validate()) {
-          return showProblems(context, [l.formHasErrors]);
-        }
         final ok = await attempt(
           context,
           () => widget.onSave(
@@ -195,6 +187,7 @@ class _NamedMasterFormState extends State<NamedMasterForm> {
           done: l.saved,
         );
         if (ok && context.mounted) context.go(widget.listPath);
+        return ok;
       },
       onDelete: onDelete == null
           ? null

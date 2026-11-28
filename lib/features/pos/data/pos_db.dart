@@ -70,6 +70,9 @@ extension PosDb on AppDatabase {
       if (await openSession() != null) {
         throw const RefusedException(Refusal.anotherSessionOpen);
       }
+      if (amounts.values.any((a) => a < 0)) {
+        throw const RefusedException(Refusal.negativeOpeningAmount);
+      }
       final now = DateTime.now();
       final at = toStorage(now);
       final id = await into(posOpeningEntry).insert(

@@ -7,6 +7,9 @@ import '../../../core/numbers/flt.dart';
 double stockQty(double qty, double factor, int floatPrecision) =>
     flt(qty * factor, floatPrecision);
 
+/// Max Discount (%) is a percentage: 0 to 100 (Item, 3.13).
+bool maxDiscountOk(double d) => d >= 0 && d <= 100;
+
 /// STK-R3: true when [qty] has no fractional part.
 bool isWhole(double qty) => (qty - qty.roundToDouble()).abs() < 1e-9;
 

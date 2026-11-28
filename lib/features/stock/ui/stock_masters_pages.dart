@@ -188,7 +188,6 @@ class _ItemAttributeForm extends ConsumerStatefulWidget {
 }
 
 class _ItemAttributeFormState extends ConsumerState<_ItemAttributeForm> {
-  final _formKey = GlobalKey<FormState>();
   late final _name = TextEditingController(text: widget.attribute?.name);
   late var _numeric = widget.attribute?.numericValues == 1;
   late var _from = widget.attribute?.fromRange ?? 0;
@@ -226,16 +225,18 @@ class _ItemAttributeFormState extends ConsumerState<_ItemAttributeForm> {
     super.dispose();
   }
 
-  Future<void> _save() async {
+  Future<bool> _save() async {
     final l = AppLocalizations.of(context);
     final values = _values!;
     final problems = [
-      if (!_formKey.currentState!.validate()) l.formHasErrors,
       if (_numeric && numericValues(_from, _to, _increment).isEmpty)
         l.badNumericRange,
       if (!_numeric && values.isEmpty) l.attributeNeedsValues,
     ];
-    if (problems.isNotEmpty) return showProblems(context, problems);
+    if (problems.isNotEmpty) {
+      await showProblems(context, problems);
+      return false;
+    }
     final a = widget.attribute;
     final ok = await attempt(
       context,
@@ -261,6 +262,7 @@ class _ItemAttributeFormState extends ConsumerState<_ItemAttributeForm> {
       done: l.saved,
     );
     if (ok && mounted) context.go(widget.path);
+    return ok;
   }
 
   @override
@@ -273,7 +275,6 @@ class _ItemAttributeFormState extends ConsumerState<_ItemAttributeForm> {
     final db = ref.read(appDatabaseProvider);
     return FormPage(
       title: a?.name ?? l.newRecord(l.itemAttribute),
-      formKey: _formKey,
       onSave: _save,
       onDelete: a == null
           ? null
@@ -396,68 +397,6 @@ class _ValueEditorState extends State<_ValueEditor> {
           controller: _abbr,
           decoration: InputDecoration(labelText: '${l.abbreviation} *'),
           onChanged: (_) => setState(() {}),
-        ),
-      ],
-    );
-  }
-}
-
-/// The body of a row editor: fields, then Delete and Done. Done pops the
-/// sheet after [onDone]; a null [onDone] disables it.
-class RowEditorBody extends StatelessWidget {
-  const RowEditorBody({
-    super.key,
-    required this.children,
-    required this.onDone,
-    this.onDelete,
-    this.title,
-  });
-
-  final List<Widget> children;
-  final VoidCallback? onDone;
-  final VoidCallback? onDelete;
-  final String? title;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context);
-    final onDone = this.onDone;
-    return ListView(
-      shrinkWrap: true,
-      padding: const EdgeInsets.all(AppSpacing.md),
-      children: [
-        if (title case final t?)
-          Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.md),
-            child: Text(t, style: Theme.of(context).textTheme.titleLarge),
-          ),
-        for (final c in children)
-          Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.md),
-            child: c,
-          ),
-        Row(
-          children: [
-            if (onDelete case final delete?)
-              TextButton.icon(
-                onPressed: () {
-                  delete();
-                  Navigator.pop(context);
-                },
-                icon: const Icon(Icons.delete_outline),
-                label: Text(l.delete),
-              ),
-            const Spacer(),
-            FilledButton(
-              onPressed: onDone == null
-                  ? null
-                  : () {
-                      onDone();
-                      Navigator.pop(context);
-                    },
-              child: Text(l.done),
-            ),
-          ],
         ),
       ],
     );
@@ -596,7 +535,10 @@ class _ItemPriceFormState extends ConsumerState<_ItemPriceForm> {
           if (_from != null && _upto != null && _upto!.compareTo(_from!) < 0)
             l.validUptoBeforeFrom,
         ];
-        if (problems.isNotEmpty) return showProblems(context, problems);
+        if (problems.isNotEmpty) {
+          await showProblems(context, problems);
+          return false;
+        }
         final ok = await attempt(
           context,
           () => db.saveItemPrice(
@@ -615,6 +557,7 @@ class _ItemPriceFormState extends ConsumerState<_ItemPriceForm> {
           done: l.saved,
         );
         if (ok && context.mounted) context.go(widget.path);
+        return ok;
       },
       onDelete: p == null
           ? null
@@ -901,7 +844,6 @@ class _BatchForm extends ConsumerStatefulWidget {
 }
 
 class _BatchFormState extends ConsumerState<_BatchForm> {
-  final _formKey = GlobalKey<FormState>();
   late final _batchId = TextEditingController(text: widget.batch?.batchId);
   late int? _itemId = widget.batch?.itemId;
   late String? _made = widget.batch?.manufacturingDate;
@@ -924,14 +866,13 @@ class _BatchFormState extends ConsumerState<_BatchForm> {
     final it = items.where((i) => i.id == _itemId).firstOrNull;
     return FormPage(
       title: b?.batchId ?? l.newRecord(l.batch),
-      formKey: _formKey,
       actions: [if (b != null) StatusChip(batchStatusText(l, _expiry))],
       onSave: () async {
-        final problems = [
-          if (!_formKey.currentState!.validate()) l.formHasErrors,
-          if (_itemId == null) l.fieldMissing(l.item),
-        ];
-        if (problems.isNotEmpty) return showProblems(context, problems);
+        final problems = [if (_itemId == null) l.fieldMissing(l.item)];
+        if (problems.isNotEmpty) {
+          await showProblems(context, problems);
+          return false;
+        }
         final ok = await attempt(
           context,
           () => db.saveBatch(
@@ -947,6 +888,7 @@ class _BatchFormState extends ConsumerState<_BatchForm> {
           done: l.saved,
         );
         if (ok && context.mounted) context.go(widget.path);
+        return ok;
       },
       onDelete: b == null
           ? null
@@ -1086,7 +1028,6 @@ class _SerialForm extends ConsumerStatefulWidget {
 }
 
 class _SerialFormState extends ConsumerState<_SerialForm> {
-  final _formKey = GlobalKey<FormState>();
   late final _serial = TextEditingController(text: widget.row?.serial.serialNo);
   late int? _itemId = widget.row?.serial.itemId;
   late int? _batchId = widget.row?.serial.batchId;
@@ -1111,14 +1052,13 @@ class _SerialFormState extends ConsumerState<_SerialForm> {
         : ref.watch(itemBatchesProvider(_itemId!)).value ?? const [];
     return FormPage(
       title: s?.serialNo ?? l.newRecord(l.serialNo),
-      formKey: _formKey,
       actions: [if (s != null) StatusChip(l.serialStatus(s.status))],
       onSave: () async {
-        final problems = [
-          if (!_formKey.currentState!.validate()) l.formHasErrors,
-          if (_itemId == null) l.fieldMissing(l.item),
-        ];
-        if (problems.isNotEmpty) return showProblems(context, problems);
+        final problems = [if (_itemId == null) l.fieldMissing(l.item)];
+        if (problems.isNotEmpty) {
+          await showProblems(context, problems);
+          return false;
+        }
         final ok = await attempt(
           context,
           () => db.saveSerialNo(
@@ -1133,6 +1073,7 @@ class _SerialFormState extends ConsumerState<_SerialForm> {
           done: l.saved,
         );
         if (ok && context.mounted) context.go(widget.path);
+        return ok;
       },
       onDelete: s == null
           ? null

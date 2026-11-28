@@ -22,7 +22,6 @@ import '../logic/stock_documents.dart';
 import '../logic/stock_rules.dart';
 import 'scan.dart';
 import 'serial_batch_editor.dart';
-import 'stock_masters_pages.dart' show RowEditorBody;
 import 'stock_providers.dart';
 
 // Stock Entry list and form (STK-R38 to R41; 02-stock section 5).
@@ -335,6 +334,7 @@ class _StockEntryFormState extends ConsumerState<_StockEntryForm> {
                     .showSnackBar(SnackBar(content: Text(l.saved)));
                 context.go('${widget.path}/$id');
               }
+              return id != null;
             }
           : null,
       onDelete: e != null && _draft

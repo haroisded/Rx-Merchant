@@ -89,6 +89,79 @@ void main() {
     expect(item.itemName, 'SOAP');
   });
 
+  testWidgets('a new item: bad numbers stop Save; Back asks before '
+      'discarding (P-10)', (tester) async {
+    final db = await pumpStock(tester);
+    await tester.tap(find.text('Item'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Add Item'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Item Code *'),
+      'SOAP',
+    );
+    final opening = find.widgetWithText(TextFormField, 'Opening Stock');
+    Future<void> saveAndExpect(String message) async {
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining(message), findsOneWidget);
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+    }
+
+    await tester.enterText(opening, 'abc-5');
+    await saveAndExpect('Some fields need attention.');
+    // Still refused from another tab: the Details tab stays built.
+    await tester.ensureVisible(find.text('Sales'));
+    await tester.tap(find.text('Sales'));
+    await tester.pumpAndSettle();
+    await saveAndExpect('Some fields need attention.');
+    await tester.ensureVisible(find.text('Details'));
+    await tester.tap(find.text('Details'));
+    await tester.pumpAndSettle();
+    await tester.enterText(opening, '5');
+    await saveAndExpect('Opening Stock needs a Valuation Rate above zero.');
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Valuation Rate'),
+      '2',
+    );
+    await tester.ensureVisible(find.text('Sales'));
+    await tester.tap(find.text('Sales'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Max Discount (%)'),
+      '500',
+    );
+    await saveAndExpect('Max Discount (%) must be between 0 and 100.');
+    expect(await tester.runAsync(() => db.select(db.item).get()), isEmpty);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.text('Unsaved changes'), findsOneWidget);
+    await tester.tap(find.text('Discard Changes'));
+    await tester.pumpAndSettle();
+    expect(find.text('Add Item'), findsOneWidget);
+    expect(await tester.runAsync(() => db.select(db.item).get()), isEmpty);
+  });
+
+  testWidgets('a settings page that stays after Save leaves without asking', (
+    tester,
+  ) async {
+    await pumpStock(tester);
+    await tester.tap(find.text('Setup').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Store Profile'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextFormField).first, 'Rx Corner Shop');
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(find.text('Saved'), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.text('Unsaved changes'), findsNothing);
+    expect(find.text('Store Profile'), findsOneWidget);
+  });
+
   testWidgets('STK-R12 the Stock destination shows the low-stock count', (
     tester,
   ) async {

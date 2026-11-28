@@ -1,3 +1,4 @@
+import '../../../core/numbers/format.dart' show maxNumber;
 import '../../stock/logic/barcode.dart';
 import '../../stock/logic/stock_rules.dart';
 
@@ -217,7 +218,10 @@ List<ImportProblem> validateImport(
         continue;
       }
       final ok = switch (c.kind) {
-        ColumnKind.number => double.tryParse(v)?.isFinite ?? false,
+        ColumnKind.number => switch (double.tryParse(v)) {
+          final n? => n.abs() < maxNumber,
+          null => false,
+        },
         ColumnKind.check => v == '0' || v == '1',
         ColumnKind.date => _date.hasMatch(v) && DateTime.tryParse(v) != null,
         ColumnKind.text => true,
@@ -251,6 +255,10 @@ List<ImportProblem> validateImport(
             add(Col.barcode, ImportProblemKind.duplicate);
           }
           seenBarcodes[barcode] = code;
+        }
+        final maxDiscount = double.tryParse(cell(Col.maxDiscount));
+        if (maxDiscount != null && !maxDiscountOk(maxDiscount)) {
+          add(Col.maxDiscount, ImportProblemKind.badValue);
         }
 
       case ImportRecordType.itemBarcode:

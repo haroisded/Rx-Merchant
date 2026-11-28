@@ -230,7 +230,6 @@ class _WarehouseForm extends ConsumerStatefulWidget {
 }
 
 class _WarehouseFormState extends ConsumerState<_WarehouseForm> {
-  final _formKey = GlobalKey<FormState>();
   late final _name = TextEditingController(text: widget.warehouse?.name);
   late final _type = TextEditingController(
     text: widget.warehouse?.warehouseType,
@@ -253,7 +252,6 @@ class _WarehouseFormState extends ConsumerState<_WarehouseForm> {
     final db = ref.read(appDatabaseProvider);
     return FormPage(
       title: w?.name ?? l.newRecord(l.warehouse),
-      formKey: _formKey,
       actions: [
         if (w != null)
           IconButton(
@@ -264,9 +262,6 @@ class _WarehouseFormState extends ConsumerState<_WarehouseForm> {
           ),
       ],
       onSave: () async {
-        if (!_formKey.currentState!.validate()) {
-          return showProblems(context, [l.formHasErrors]);
-        }
         final ok = await attempt(
           context,
           () => db.saveWarehouse(
@@ -284,6 +279,7 @@ class _WarehouseFormState extends ConsumerState<_WarehouseForm> {
           done: l.saved,
         );
         if (ok && context.mounted) context.go(widget.path);
+        return ok;
       },
       onDelete: w == null
           ? null
@@ -398,7 +394,6 @@ class _ItemGroupForm extends ConsumerStatefulWidget {
 }
 
 class _ItemGroupFormState extends ConsumerState<_ItemGroupForm> {
-  final _formKey = GlobalKey<FormState>();
   late final _name = TextEditingController(text: widget.group?.name);
   late int? _parent = widget.group?.parentId ?? widget.parentId;
   late var _isGroup = widget.group?.isGroup == 1;
@@ -418,11 +413,7 @@ class _ItemGroupFormState extends ConsumerState<_ItemGroupForm> {
     final templates = ref.watch(itemTaxTemplatesProvider).value ?? [];
     return FormPage(
       title: g?.name ?? l.newRecord(l.itemGroup),
-      formKey: _formKey,
       onSave: () async {
-        if (!_formKey.currentState!.validate()) {
-          return showProblems(context, [l.formHasErrors]);
-        }
         final ok = await attempt(
           context,
           () => db.saveItemGroup(
@@ -437,6 +428,7 @@ class _ItemGroupFormState extends ConsumerState<_ItemGroupForm> {
           done: l.saved,
         );
         if (ok && context.mounted) context.go(widget.path);
+        return ok;
       },
       onDelete: g == null
           ? null

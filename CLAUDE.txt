@@ -1,5 +1,6 @@
 # Codebase Navigation
 For Codebase Navigation, use [Graphify]
+( recommended that you just "refresh" )
 
 
 # Tool Calling

@@ -121,7 +121,6 @@ class _SalesTaxesTemplateForm extends ConsumerStatefulWidget {
 
 class _SalesTaxesTemplateFormState
     extends ConsumerState<_SalesTaxesTemplateForm> {
-  final _formKey = GlobalKey<FormState>();
   late final _title = TextEditingController(text: widget.template?.title);
   late var _isDefault = widget.template?.isDefault == 1;
   late var _disabled = widget.template?.disabled == 1;
@@ -148,13 +147,15 @@ class _SalesTaxesTemplateFormState
     super.dispose();
   }
 
-  Future<void> _save() async {
+  Future<bool> _save() async {
     final l = AppLocalizations.of(context);
     final problems = [
-      if (!_formKey.currentState!.validate()) l.formHasErrors,
       for (final p in validateTaxRows(_rows!)) taxRowProblemText(l, p),
     ];
-    if (problems.isNotEmpty) return showProblems(context, problems);
+    if (problems.isNotEmpty) {
+      await showProblems(context, problems);
+      return false;
+    }
     final t = widget.template;
     final ok = await attempt(
       context,
@@ -172,6 +173,7 @@ class _SalesTaxesTemplateFormState
       done: l.saved,
     );
     if (ok && mounted) context.go(widget.path);
+    return ok;
   }
 
   @override
@@ -189,7 +191,6 @@ class _SalesTaxesTemplateFormState
 
     return FormPage(
       title: t?.title ?? l.newRecord(l.salesTaxesTemplate),
-      formKey: _formKey,
       onSave: _save,
       onDelete: t == null
           ? null
@@ -392,15 +393,23 @@ class _TaxRowEditorState extends State<_TaxRowEditor> {
       for (final t in widget.taxes)
         if (t.disabled == 0 || t.id == _taxId) t,
     ];
-    return ListView(
-      shrinkWrap: true,
-      padding: const EdgeInsets.all(AppSpacing.md),
-      children: [
-        Text(
-          l.rowNumber(widget.number),
-          style: Theme.of(context).textTheme.titleLarge,
+    return RowEditorBody(
+      title: l.rowNumber(widget.number),
+      onDelete: widget.onDelete,
+      onDone: () => widget.onDone(
+        TaxRow(
+          chargeType: _type,
+          taxId: _taxId,
+          description: _description.text.trim().isEmpty
+              ? null
+              : _description.text.trim(),
+          rate: _type == ChargeType.actual ? 0 : _rate,
+          taxAmount: _type == ChargeType.actual ? _amount : 0,
+          rowId: _type.isPreviousRow ? _rowId : null,
+          included: _included,
         ),
-        const SizedBox(height: AppSpacing.md),
+      ),
+      children: [
         DropdownMenu<ChargeType>(
           label: Text('${l.type} *'),
           initialSelection: _type,
@@ -414,7 +423,6 @@ class _TaxRowEditorState extends State<_TaxRowEditor> {
               DropdownMenuEntry(value: t, label: t.value),
           ],
         ),
-        const SizedBox(height: AppSpacing.md),
         DropdownMenu<int>(
           label: Text('${l.tax} *'),
           initialSelection: _taxId,
@@ -425,12 +433,10 @@ class _TaxRowEditorState extends State<_TaxRowEditor> {
               DropdownMenuEntry(value: t.id, label: t.name),
           ],
         ),
-        const SizedBox(height: AppSpacing.md),
         TextField(
           controller: _description,
           decoration: InputDecoration(labelText: l.description),
         ),
-        const SizedBox(height: AppSpacing.md),
         // SET-R9: Actual takes an amount; On Item Quantity an amount per unit;
         // the others a percentage.
         if (_type == ChargeType.actual)
@@ -452,8 +458,7 @@ class _TaxRowEditorState extends State<_TaxRowEditor> {
             formats: formats,
             onChanged: (v) => _rate = v,
           ),
-        if (_type.isPreviousRow) ...[
-          const SizedBox(height: AppSpacing.md),
+        if (_type.isPreviousRow)
           DropdownMenu<int>(
             label: Text('${l.referenceRow} *'),
             initialSelection: _rowId,
@@ -464,45 +469,10 @@ class _TaxRowEditorState extends State<_TaxRowEditor> {
                 DropdownMenuEntry(value: n, label: '$n'),
             ],
           ),
-        ],
         SwitchListTile(
           title: Text(l.includedInBasicRate),
           value: _included,
           onChanged: (on) => setState(() => _included = on),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        Row(
-          children: [
-            if (widget.onDelete case final onDelete?)
-              TextButton.icon(
-                onPressed: () {
-                  onDelete();
-                  Navigator.pop(context);
-                },
-                icon: const Icon(Icons.delete_outline),
-                label: Text(l.delete),
-              ),
-            const Spacer(),
-            FilledButton(
-              onPressed: () {
-                widget.onDone(
-                  TaxRow(
-                    chargeType: _type,
-                    taxId: _taxId,
-                    description: _description.text.trim().isEmpty
-                        ? null
-                        : _description.text.trim(),
-                    rate: _type == ChargeType.actual ? 0 : _rate,
-                    taxAmount: _type == ChargeType.actual ? _amount : 0,
-                    rowId: _type.isPreviousRow ? _rowId : null,
-                    included: _included,
-                  ),
-                );
-                Navigator.pop(context);
-              },
-              child: Text(l.done),
-            ),
-          ],
         ),
       ],
     );
@@ -557,7 +527,6 @@ class _ItemTaxTemplateForm extends ConsumerStatefulWidget {
 }
 
 class _ItemTaxTemplateFormState extends ConsumerState<_ItemTaxTemplateForm> {
-  final _formKey = GlobalKey<FormState>();
   late final _title = TextEditingController(text: widget.template?.title);
   late var _disabled = widget.template?.disabled == 1;
   List<ItemTaxRow>? _rows;
@@ -592,19 +561,21 @@ class _ItemTaxTemplateFormState extends ConsumerState<_ItemTaxTemplateForm> {
     super.dispose();
   }
 
-  Future<void> _save() async {
+  Future<bool> _save() async {
     final l = AppLocalizations.of(context);
     final rows = _rows!;
     final seen = <int>{};
     final problems = [
-      if (!_formKey.currentState!.validate()) l.formHasErrors,
       for (final (i, r) in rows.indexed)
         if (r.taxId == null)
           l.rowProblem(i + 1, l.taxRowMissingTax)
         else if (!seen.add(r.taxId!))
           l.rowProblem(i + 1, l.taxRowDuplicateTax),
     ];
-    if (problems.isNotEmpty) return showProblems(context, problems);
+    if (problems.isNotEmpty) {
+      await showProblems(context, problems);
+      return false;
+    }
     final t = widget.template;
     final ok = await attempt(
       context,
@@ -626,6 +597,7 @@ class _ItemTaxTemplateFormState extends ConsumerState<_ItemTaxTemplateForm> {
       done: l.saved,
     );
     if (ok && mounted) context.go(widget.path);
+    return ok;
   }
 
   @override
@@ -643,7 +615,6 @@ class _ItemTaxTemplateFormState extends ConsumerState<_ItemTaxTemplateForm> {
 
     return FormPage(
       title: t?.title ?? l.newRecord(l.itemTaxTemplate),
-      formKey: _formKey,
       onSave: _save,
       onDelete: t == null
           ? null
@@ -745,9 +716,13 @@ class _ItemTaxRowEditorState extends State<_ItemTaxRowEditor> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    return ListView(
-      shrinkWrap: true,
-      padding: const EdgeInsets.all(AppSpacing.md),
+    return RowEditorBody(
+      onDelete: widget.onDelete,
+      onDone: () => widget.onDone((
+        taxId: _taxId,
+        rate: _rate,
+        notApplicable: _notApplicable,
+      )),
       children: [
         DropdownMenu<int>(
           label: Text('${l.tax} *'),
@@ -760,7 +735,6 @@ class _ItemTaxRowEditorState extends State<_ItemTaxRowEditor> {
                 DropdownMenuEntry(value: t.id, label: t.name),
           ],
         ),
-        const SizedBox(height: AppSpacing.md),
         NumberField(
           label: l.taxRate,
           value: _rate,
@@ -773,32 +747,6 @@ class _ItemTaxRowEditorState extends State<_ItemTaxRowEditor> {
           title: Text(l.notApplicable),
           value: _notApplicable,
           onChanged: (on) => setState(() => _notApplicable = on),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        Row(
-          children: [
-            if (widget.onDelete case final onDelete?)
-              TextButton.icon(
-                onPressed: () {
-                  onDelete();
-                  Navigator.pop(context);
-                },
-                icon: const Icon(Icons.delete_outline),
-                label: Text(l.delete),
-              ),
-            const Spacer(),
-            FilledButton(
-              onPressed: () {
-                widget.onDone((
-                  taxId: _taxId,
-                  rate: _rate,
-                  notApplicable: _notApplicable,
-                ));
-                Navigator.pop(context);
-              },
-              child: Text(l.done),
-            ),
-          ],
         ),
       ],
     );

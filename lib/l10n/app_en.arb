@@ -98,7 +98,7 @@
   "problemsTitle": "Cannot save",
   "formHasErrors": "Some fields need attention. Check the messages under them.",
   "mandatoryField": "This field is mandatory.",
-  "notANumber": "Not a number.",
+  "notANumber": "Not a number, or too large.",
   "notAWholeNumber": "Enter a whole number.",
   "deleteTitle": "Delete?",
   "deleteBody": "Delete {name}? This cannot be undone.",
@@ -688,6 +688,10 @@
   "lineItemEndOfLife": "Item has reached its End of Life.",
   "lineItemTemplate": "Item is a template: choose one of its variants.",
   "lineItemNotStock": "Item does not maintain stock.",
+  "maxDiscountRange": "Max Discount (%) must be between 0 and 100.",
+  "openingStockNegative": "Opening Stock cannot be negative.",
+  "openingNeedsValuationRate": "Opening Stock needs a Valuation Rate above zero.",
+  "refusedNegativeOpeningAmount": "An Opening Amount cannot be negative.",
   "lineZeroRate": "Valuation Rate is mandatory. Tick Allow Zero Valuation Rate to receive at zero.",
   "lineSerialCount": "The quantity must be a whole number equal to the number of serial numbers.",
   "lineEntriesQty": "The Serial / Batch Entries must add up to the quantity.",
@@ -903,6 +907,7 @@
   "unsavedChangesBody": "The current sale has changes that are not saved.",
   "saveChanges": "Save Changes",
   "discardChanges": "Discard Changes",
+  "unsavedFormBody": "This form has changes that are not saved.",
   "cartLines": "{count, plural, =1{1 item} other{{count} items}}",
   "@cartLines": {
     "placeholders": {

@@ -74,10 +74,17 @@ Future<R?> showRowEditor<R>(
   );
 }
 
+/// Sent up from a [ChildTable] when a row editor changed a row, so the form
+/// around it knows it has unsaved changes.
+class FormChanged extends Notification {
+  const FormChanged();
+}
+
 /// The rows that belong to one parent record, shown inside its form.
 ///
 /// Tapping a row opens it in [showRowEditor]; "Add Row" opens the editor with
-/// no row. The editor saves through the form's own callbacks and pops itself.
+/// no row. The editor saves through the form's own callbacks and pops itself,
+/// with true when it changed the rows (then [FormChanged] is sent).
 /// [readOnly] is for a submitted or cancelled document: rows still open (the
 /// editor shows them read-only) but none can be added.
 class ChildTable<T> extends StatelessWidget {
@@ -96,8 +103,15 @@ class ChildTable<T> extends StatelessWidget {
   final Widget Function(BuildContext context, T? row) editorBuilder;
   final bool readOnly;
 
-  void _edit(BuildContext context, T? row) =>
-      showRowEditor<void>(context, (context) => editorBuilder(context, row));
+  Future<void> _edit(BuildContext context, T? row) async {
+    final changed = await showRowEditor<bool>(
+      context,
+      (context) => editorBuilder(context, row),
+    );
+    if (changed == true && context.mounted) {
+      const FormChanged().dispatch(context);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

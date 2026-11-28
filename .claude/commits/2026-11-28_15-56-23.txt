@@ -1,0 +1,340 @@
+RX MERCHANT - SESSION REPORT
+============================
+
+Written:      2026-11-28 15:56 (+08:00)
+Branch:       main
+Based on:     6749be6 "Graphify: name communities with the LLM"
+Committed:    nothing. Every change below is in the working tree, for you to commit.
+Covers:       the whole session: the request in
+              .claude/erpnext-planner/current-user-prompt.txt to read
+              .claude/erpnext-planner/bug-report.txt (10 AI tester personas,
+              run 46109145751), confirm each item against the plans, the
+              system documentation and the earlier session reports, then fix
+              the real ones; then the wrap-up CLAUDE.txt asks for (Flutter and
+              Ponytail reviews, fixes, emulators, this report, the system
+              documentation).
+
+
+1. SUGGESTED COMMIT MESSAGE
+---------------------------
+
+Fix the confirmed findings of the AI tester bug report
+
+- Checkout: Complete Order always on screen; payment panel capped at
+  560dp; cart number pad hidden while paying
+- Forms check their fields before Save (one place: DiscardGuard); a
+  "Not a number." field no longer saves the last valid value; row
+  editors check theirs on Done
+- Back on a form with unsaved changes asks first (P-10)
+- Typed and imported numbers below 10^12; Max Discount 0 to 100;
+  Opening Stock needs a Valuation Rate above zero and cannot be
+  negative; a negative Opening Amount is refused
+- "Add your first item" opens the New Item form
+- Item form: tabs kept built; tab row start-aligned on phones
+- Country data: 21 currency symbols, 3 fractions, 88 number formats
+- Tests: 282 -> 290
+
+If you prefer two commits, split off "docs and tooling":
+.claude/erpnext-planner/system-documentation.md, .claude/commits/,
+graphify-out/.
+
+
+2. RESULT IN SHORT
+------------------
+
+  flutter analyze               No issues found
+  dart fix --dry-run            Nothing to fix
+  dart format (check)           0 files changed
+  flutter test                  290 of 290 pass
+  flutter build apk --release   builds, 90.5 MB
+  Emulators                     phone and tablet, every fix seen working
+
+Not done, stated plainly:
+  - No real device was used (P-8).
+  - A change made only with a switch or dropdown is not counted as an
+    unsaved change (D-78). Typed fields and child-table rows are.
+  - The tester's other runs were not repeated; only this run's report
+    was checked.
+
+
+3. VERDICTS: WAS EACH ITEM A BUG?
+---------------------------------
+
+Checked against the plans (R1 to R6), system-documentation.md issue 7,
+the session reports (incl. the POS Profile removal, 2026-11-16_22-00-06),
+the code, and the testers' own screenshots and UI dumps in
+B:\Development-Projects\rx-merchant-testers\runs\46109145751\.
+
+  #  Report                               Verdict
+  -- ------------------------------------ --------------------------------
+  1  Complete Order / keypad under the    REAL. payment_panel.dart put the
+     tab bar                              button at the end of a ListView;
+                                          on tablets the keypad stretched
+                                          across the pane and two keypads
+                                          showed. Fixed (F1).
+  2  New Item has no price field          NOT A BUG. Standard Selling Rate
+                                          is on the Details tab for a new
+                                          item (STK-R5, as ERPNext). kenji
+                                          typed his price into Max
+                                          Discount on the Sales tab (that
+                                          500 is now refused, #3).
+  3  Bad input saved without a word       REAL. NumberField showed "Not a
+                                          number." but Save never checked
+                                          fields, so the last valid value
+                                          (0) was saved. Max Discount had
+                                          no range. 1e20 was accepted.
+                                          Fixed (F2).
+  4  Cart lost when Android kills the     BY DESIGN (R4 section 7: a killed
+     app                                  sale comes back only if it was
+                                          saved; D-40). Kept, your
+                                          decision.
+  5  Back on New Item discards without    REAL, already known (P-10, open
+     a prompt                             since issue 2). Fixed for every
+                                          form (F3), your decision.
+  6  Tapping an out-of-stock item does    NOT A BUG. A dialog "Item is
+     nothing                              unavailable: 1,000 of CAY-001
+                                          needed in Stores; available:
+                                          0,000." does show: it is in the
+                                          tester's own UI dump tree-51.xml;
+                                          the agent tapped "Dismiss" before
+                                          taking a screenshot. kenji saw
+                                          the same message.
+  7  Currency data errors                 REAL (data inherited from
+                                          Frappe's country_info.json).
+                                          Fixed (F4).
+
+  Smaller issues
+  "Add your first item" opens the      REAL (small). Fixed (F5).
+  Stock menu
+  Valuation Rate 0 -> Gross Profit     REAL, but the root is not the
+  100%, Stock Value 0                  dashboard: the item form's opening
+                                       stock silently allowed a zero rate,
+                                       against R3 ("A Material Receipt
+                                       needs a rate above zero"). Fixed.
+  Item tab row cut off                 Not a bug (M3 scrollable tabs);
+                                       start-aligned anyway (F6, your
+                                       choice).
+  Dashboard "This Month" chip cut off  Not a bug (a horizontal chip row).
+  Keyboard covers fields               Not a bug: the focused field stays
+                                       visible, the rest scrolls.
+  Text fields have no screen-reader    Not a bug: Flutter gives Android the
+  name                                 label as hint text; the tester's
+                                       uiautomator dump has no hint
+                                       attribute.
+  Back button 40dp in the item picker  Flutter's SearchAnchor default.
+  Wizard Next disabled with no hint    Not a bug: required fields are
+                                       marked *.
+  Jargon (Material Receipt, UOM)       By design: C-11 keeps ERPNext's
+                                       labels.
+  (not in the report) Session opened   REAL. Fixed (F7, your choice).
+  with -50 cash
+
+
+4. WHAT WAS DONE
+----------------
+
+4.1 Decisions you made (asked after the verdicts)
+  - #4: keep as designed.
+  - #5: the prompt on all forms.
+  - #7: all comma-decimal countries, not only Spain.
+  - Polish: item tabs start-aligned; negative opening cash refused.
+
+4.2 Fixes
+  F1 Checkout   pos/ui/payment_panel.dart: a Column with the scrolling part
+                and Complete Order below it; Center + 560dp cap.
+                pos/ui/pos_screen.dart: the cart's number pad is hidden
+                while the payment pane is open (Expanded).
+  F2 Input      setup/ui/form_kit.dart: DiscardGuard.validateAndSave checks
+                the Form before Save; FormPage became stateful and onSave
+                returns Future<bool>; eleven page-level validate blocks
+                deleted. RowEditorBody moved here from
+                stock_masters_pages.dart; Done checks its sheet's fields and
+                pops true; both tax row editors now use it (their own
+                button rows deleted).
+                core/numbers/format.dart: parseNumber refuses |v| >= 10^12
+                (maxNumber; ERPNext decimal(21,9)); "Not a number, or too
+                large.".
+                stock/logic/stock_rules.dart: maxDiscountOk (0 to 100), used
+                by the Item form and Data Import.
+                stock/ui/item_pages.dart: Max Discount range, Opening Stock
+                below zero, Opening Stock without a Valuation Rate; tabs
+                kept built (_KeptAlive) so Save checks every tab.
+                stock/data/stock_masters.dart: the silent Allow Zero
+                Valuation Rate on opening stock removed; a negative opening
+                quantity is no longer skipped, the line checks refuse it.
+                setup/logic/data_import.dart: Max Discount range; number
+                columns below 10^12.
+  F3 P-10       DiscardGuard.guard: PopScope + "Unsaved changes / Discard
+                Changes"; a change is a typed field (Form.onChanged) or a
+                ChildTable row (core/widgets/child_table.dart sends
+                FormChanged); a successful save clears it; a submitted
+                document never asks. Used by FormPage and the Item form.
+  F4 Data       assets/country_info.json: Egypt E£, Cape Verde Esc; 19 empty
+                symbols filled (¥ ₽ ₩ ₫ NT$ ...); Piastre, Rappen, Seniti
+                without footnote marks; 88 countries to #.###,## (84 whose
+                CLDR likely language writes 1.234,5, checked with Node's full
+                ICU, plus Paraguay, Chad, Comoros, Haiti; Mauritius,
+                Namibia, Seychelles and Rwanda kept because English is
+                official there and writes 1,234.5).
+  F5 Wizard     setup/ui/wizard_screen.dart: /stock/item/new.
+  F6 Tabs       TabAlignment.start on phones.
+  F7 Opening    pos/data/pos_db.dart: openSessionWith refuses a negative
+                amount (Refusal.negativeOpeningAmount). Data layer only, on
+                purpose: a UI check would hide the value and open with the
+                previous one, the very pattern of #3.
+
+4.3 Messages (l10n/app_en.arb, 646 now)
+  Added unsavedFormBody, maxDiscountRange, openingStockNegative,
+  openingNeedsValuationRate, refusedNegativeOpeningAmount; notANumber
+  reworded.
+
+4.4 Tests (282 -> 290)
+  format_test           10^12 refused, 999,999,999,999.99 accepted
+  data_import_test      Max Discount 500 / -1 refused, 100 accepted; 1e20
+  pos_db_test           -50 Opening Amount refused, no session opened
+  stock_db_test         opening at rate 0 or quantity -5 refused, nothing saved
+  pos_ui_test           Complete Order hit-testable on a 360x640 phone
+                        (checked to FAIL on the old layout)
+  stock_ui_test         Item form: "abc-5" stops Save, also from the Sales
+                        tab; zero-cost opening; Max Discount 500; Back asks,
+                        Discard leaves, nothing saved. A settings page that
+                        stays after Save leaves without asking.
+  country_info_test     every currency has one clean symbol; no footnote
+                        marks; Spain #.###,##
+
+
+5. CODE REVIEW RESULTS
+----------------------
+
+5.1 Ponytail review: "Lean already. Ship." (the diff removes the duplicated
+    validate blocks and button rows itself).
+
+5.2 Flutter review (code-review skill: a standards and a spec reviewer
+    against 6749be6). Fixed:
+   1. New Item rules only in the UI; data layer skipped a negative opening
+      (D-19): maxDiscountOk in logic/, negative opening refused by the data
+      layer.
+   2. 1e12 twice, once as its own fallback: maxNumber.
+   3. Message key not named refused*: refusedNegativeOpeningAmount.
+   4. A bad number on another Item tab escaped Save (TabBarView disposes
+      tabs out of view): _KeptAlive; the test saves from another tab.
+   5. Missed comma-decimal countries: Paraguay, Chad, Comoros, Haiti.
+  Left as they are, with the reason:
+   - "showProblems; return false" in eight handlers (two lines each).
+   - The Item form's own Opening Stock message beside the data layer's
+     refusal: that refusal's text names a switch the form does not have.
+   - A switch or dropdown alone is not a change (D-78, ponytail: comment).
+   - The Item form keeps its own Scaffold (tabs) instead of FormPage.
+
+
+6. VERIFICATION EVIDENCE
+------------------------
+
+  $ flutter analyze                       No issues found!
+  $ dart fix --dry-run                    Nothing to fix!
+  $ dart format --set-exit-if-changed     0 changed
+  $ flutter test                          290 tests passed
+  $ flutter build apk --release           app-release.apk (90.5MB)
+
+  Phone (Medium_Phone_API_36.1), CLAUDE.txt flow:
+    - Wizard: Spain preview "1.234.567,89"; then Egypt, EGP.
+    - Add your first item -> New Item form directly.
+    - Opening Stock "abc-5": "Not a number, or too large." under the
+      field; Save -> "Some fields need attention...".
+    - Opening Stock 100, Valuation Rate 0: "Opening Stock needs a
+      Valuation Rate above zero."
+    - Max Discount 500: "Max Discount (%) must be between 0 and 100."
+    - Back: "Unsaved changes" with Cancel / Discard Changes; Cancel kept
+      the form.
+    - Saved (Stores: 100, price E£ 5.00); Back left without asking.
+    - Opening Amount -50: "An Opening Amount cannot be negative."
+    - Checkout: Complete Order above the tab bar without scrolling; prices
+      "E£ 5.00"; sale ACC-SINV-2026-00001 Paid. Log: no exceptions.
+  Tablet (Medium_Tablet, 2560x1600, landscape):
+    - Add your first item -> New Item beside the item list.
+    - Checkout: payment panel centred at 560dp, cart number pad hidden,
+      Complete Order on screen; sale paid. Log: no exceptions.
+
+  On the way: a full test run hung after a failing widget test (the Sales
+  tab is off-screen at 400dp; the test now scrolls to it); four orphaned
+  flutter_tester processes were stopped. During the emulator run my adb
+  taps once typed into the wrong field because the keyboard was open (one
+  extra item "PARabc-5" on the phone emulator's data); not an app fault.
+
+
+7. SYSTEM DOCUMENTATION
+-----------------------
+
+.claude/erpnext-planner/system-documentation.md is now issue 8: document
+control and change history; R10; folder map (290 tests, 646 messages);
+5.5 (the wizard's next location); D-15 note and new D-77 to D-82;
+6.9 / 6.11 tables (DiscardGuard, RowEditorBody moved); 9.5 configuration
+status; 10.1, 10.2 (290 tests), 10.5 (phone and tablet), 10.6 (issue 8
+review); P-10 closed with its remaining limit; summary.
+
+
+8. KNOWN PROBLEMS AND OPEN ITEMS
+--------------------------------
+
+  1. Unsaved-changes prompt ignores a change made only with a switch or
+     dropdown (D-78).
+  2. Country data fixes reach only new setups. An existing store with a
+     wrong symbol or format edits Setup > Currency or System Settings.
+  3. The add-to-cart refusal dialog is titled "Cannot save" (the shared
+     problems title). Seen, not changed.
+  4. On the opening form, a refused -50 stays as the amount sent while the
+     field shows 0.00 after focus leaves; Open is refused again until it is
+     retyped. Safe (nothing written), slightly confusing.
+  5. Unchanged: no real device (P-8); thermal printer untested (P-18);
+     release APK signed with the debug key (P-6).
+
+
+9. FILES
+--------
+
+Modified - app
+  assets/country_info.json
+  lib/core/numbers/format.dart
+  lib/core/widgets/child_table.dart
+  lib/features/invoices/ui/printing_pages.dart
+  lib/features/pos/data/pos_db.dart
+  lib/features/pos/ui/payment_panel.dart
+  lib/features/pos/ui/pos_screen.dart
+  lib/features/setup/data/refusal.dart
+  lib/features/setup/logic/data_import.dart
+  lib/features/setup/ui/form_kit.dart
+  lib/features/setup/ui/naming_series_page.dart
+  lib/features/setup/ui/settings_pages.dart
+  lib/features/setup/ui/simple_masters.dart
+  lib/features/setup/ui/tax_template_pages.dart
+  lib/features/setup/ui/wizard_screen.dart
+  lib/features/stock/data/stock_masters.dart
+  lib/features/stock/logic/stock_rules.dart
+  lib/features/stock/ui/item_pages.dart
+  lib/features/stock/ui/stock_entry_page.dart
+  lib/features/stock/ui/stock_masters_pages.dart
+  lib/features/stock/ui/stock_reconciliation_page.dart
+  lib/features/stock/ui/tree_masters.dart
+  lib/l10n/app_en.arb
+  lib/l10n/app_localizations.dart, app_localizations_en.dart   generated
+
+Modified - tests
+  test/core/numbers/format_test.dart
+  test/features/pos/data/pos_db_test.dart
+  test/features/pos/ui/pos_ui_test.dart
+  test/features/setup/logic/data_import_test.dart
+  test/features/stock/data/stock_db_test.dart
+  test/features/stock/ui/stock_ui_test.dart
+
+Added
+  test/features/setup/data/country_info_test.dart
+  .claude/commits/2026-11-28_15-56-23.txt      this report
+
+Modified - documents and tooling
+  .claude/erpnext-planner/system-documentation.md
+  graphify-out/                                "graphify update ."
+
+Changed by you, not by me
+  .claude/erpnext-planner/current-user-prompt.txt
+  CLAUDE.txt
+  .claude/erpnext-planner/bug-report.txt, configuration.md   (untracked)

@@ -1,0 +1,39 @@
+The 10 agents filed 79 reports. They boil down to 7 real bugs plus some layout, accessibility and wording issues. I looked at the screenshots for the top items; the rest come from the agents' written reports.
+
+Bugs, most severe first
+
+┌─────┬────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬─────────────────────────┬─────────────────────────────┐
+│  #  │                                                                   Issue                                                                    │        Personas         │           Checked           │
+├─────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────┼─────────────────────────────┤
+│ 1   │ Checkout: the Complete Order button and the bottom of the keypad are hidden under the tab bar, so the user has to scroll to finish a sale. │ malik, grace, felipe,   │ screenshots malik 21, grace │
+│     │  This happens even on a normal Pixel 7 at normal text size.                                                                                │ lucia, layla, ravi      │  17                         │
+├─────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────┼─────────────────────────────┤
+│ 2   │ New Item has no price field. The price can only be set through a small "Add price" chip that appears after saving. Until then the Register │ malik, kenji, layla,    │ kenji 11: the Sales tab has │
+│     │  is empty, or the item sells at 0.                                                                                                         │ ravi, anna              │  only Max Discount          │
+├─────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────┼─────────────────────────────┤
+│ 3   │ Bad input is saved without a word: Opening Stock "abc-5" shows "Not a number." but Save still says "Saved" and stores 0. Max Discount 500% │ mehmet, kenji           │ mehmet 13                   │
+│     │  is accepted. A price of 99999999999999999999 is accepted and shows as 1e20.                                                               │                         │                             │
+├─────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────┼─────────────────────────────┤
+│ 4   │ The cart is lost if Android kills the app. It lives only in memory; no draft invoice is saved.                                             │ kenji                   │ report only                 │
+├─────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────┼─────────────────────────────┤
+│ 5   │ Back on New Item throws away everything typed, with no "discard changes?" prompt.                                                          │ layla                   │ report only                 │
+├─────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────┼─────────────────────────────┤
+│ 6   │ Tapping an out-of-stock item in the Register does nothing, with no message saying why.                                                     │ mehmet                  │ report only                 │
+├─────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────┼─────────────────────────────┤
+│ 7   │ Currency data errors in assets/country_info.json. Egypt's symbol is literally "£ or م.ج", and it shows on every price. Cabo Verde has the  │ layla, olga, lucia,     │ layla 24, plus the data     │
+│     │ same problem. Russia, China and others have no symbol at all. Spain uses the wrong number format (#,###.## instead of #.###,##).           │ felipe                  │ file                        │
+└─────┴────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴─────────────────────────┴─────────────────────────────┘
+
+Smaller issues
+- "Add your first item" on the last Welcome step opens the Stock menu instead of the New Item form (grace, felipe, mehmet).
+- Cut-off layout:
+  - The item editor tab row cuts off "Tax" and "Variants" with no hint that it scrolls (8 personas).
+  - The Dashboard "This Month" chip is cut off (4 personas).
+  - The keyboard covers fields in the Welcome wizard and on New Item (4 personas).
+- Accessibility: text fields have no name for screen readers (9 personas), and a few back buttons are 40dp, under the 48dp minimum.
+- Unclear setup and wording:
+  - The Welcome "Next" button is disabled with no hint why (malik).
+  - The Valuation Rate defaults to 0, so the Dashboard shows Gross Profit 100% and Stock Value $0 (layla, malik, felipe).
+  - Business jargon ("Material Receipt", "Valuation Rate", "UOM") loses new users (ravi, olga, anna).
+
+The average score was 5.8/10. The full reports and screenshots are in B:\Development-Projects\rx-merchant-testers\runs\46109145751\<persona>\results\<persona>\.

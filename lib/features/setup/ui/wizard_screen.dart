@@ -294,7 +294,7 @@ class _WizardScreenState extends ConsumerState<WizardScreen> {
       ),
       const SizedBox(height: AppSpacing.sm),
       OutlinedButton.icon(
-        onPressed: _busy ? null : () => _finish('/stock'),
+        onPressed: _busy ? null : () => _finish('/stock/item/new'),
         icon: const Icon(Icons.inventory_2_outlined),
         label: Text(l.addFirstItem),
       ),

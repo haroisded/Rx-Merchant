@@ -126,6 +126,14 @@ void main() {
       expect(parseNumber('1.234.567', '#.###'), 1234567);
     });
 
+    test('10^12 or more is refused, as ERPNext decimal(21,9) would', () {
+      expect(parseNumber('999999999999.99', '#,###.##'), 999999999999.99);
+      expect(parseNumber('-999999999999', '#,###.##'), -999999999999);
+      expect(parseNumber('1000000000000', '#,###.##'), isNull);
+      expect(parseNumber('99999999999999999999', '#,###.##'), isNull);
+      expect(parseNumber('abc-5', '#,###.##'), isNull);
+    });
+
     test('plain typing works without group separators', () {
       expect(parseNumber('12.5', '#,###.##'), 12.5);
       expect(parseNumber('12,5', '#.###,##'), 12.5);

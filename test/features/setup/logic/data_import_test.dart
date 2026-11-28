@@ -88,6 +88,22 @@ void main() {
     );
   });
 
+  test('Max Discount stays within 0 to 100; numbers stay below 10^12', () {
+    expect(
+      kinds(ImportRecordType.item, [
+        {...item('A'), Col.maxDiscount: '500'},
+        {...item('B'), Col.maxDiscount: '-1'},
+        {...item('C'), Col.maxDiscount: '100'},
+        {...item('D'), Col.standardRate: '1e20'},
+      ]),
+      [
+        ImportProblemKind.badValue,
+        ImportProblemKind.badValue,
+        ImportProblemKind.badNumber,
+      ],
+    );
+  });
+
   test('update: only the key is mandatory, and it must exist', () {
     expect(
       kinds(ImportRecordType.item, [

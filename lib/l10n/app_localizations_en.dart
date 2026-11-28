@@ -134,7 +134,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mandatoryField => 'This field is mandatory.';
 
   @override
-  String get notANumber => 'Not a number.';
+  String get notANumber => 'Not a number, or too large.';
 
   @override
   String get notAWholeNumber => 'Enter a whole number.';
@@ -1435,6 +1435,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lineItemNotStock => 'Item does not maintain stock.';
 
   @override
+  String get maxDiscountRange => 'Max Discount (%) must be between 0 and 100.';
+
+  @override
+  String get openingStockNegative => 'Opening Stock cannot be negative.';
+
+  @override
+  String get openingNeedsValuationRate =>
+      'Opening Stock needs a Valuation Rate above zero.';
+
+  @override
+  String get refusedNegativeOpeningAmount =>
+      'An Opening Amount cannot be negative.';
+
+  @override
   String get lineZeroRate =>
       'Valuation Rate is mandatory. Tick Allow Zero Valuation Rate to receive at zero.';
 
@@ -1680,6 +1694,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get discardChanges => 'Discard Changes';
+
+  @override
+  String get unsavedFormBody => 'This form has changes that are not saved.';
 
   @override
   String cartLines(int count) {

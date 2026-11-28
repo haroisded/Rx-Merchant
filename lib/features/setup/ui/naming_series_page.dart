@@ -52,10 +52,11 @@ class _NamingSeriesPageState extends ConsumerState<NamingSeriesPage> {
     super.dispose();
   }
 
-  Future<void> _save(List<String> patterns) async {
+  Future<bool> _save(List<String> patterns) async {
     final l = AppLocalizations.of(context);
     if (patterns.isEmpty) {
-      return showProblems(context, [l.namingSeriesNeedsOne]);
+      await showProblems(context, [l.namingSeriesNeedsOne]);
+      return false;
     }
     final ok = await attempt(
       context,
@@ -63,6 +64,7 @@ class _NamingSeriesPageState extends ConsumerState<NamingSeriesPage> {
       done: l.saved,
     );
     if (ok) setState(() => _patterns = null);
+    return ok;
   }
 
   Future<void> _updateSeries() async {

@@ -21,9 +21,10 @@ import '../../setup/ui/tax_template_pages.dart'
 import '../data/stock_lists.dart';
 import '../data/stock_masters.dart';
 import '../logic/barcode.dart';
+import '../logic/stock_rules.dart' show maxDiscountOk;
 import '../logic/variants.dart';
 import 'scan.dart';
-import 'stock_masters_pages.dart' show RowEditorBody, deleteAndLeave;
+import 'stock_masters_pages.dart' show deleteAndLeave;
 import 'stock_providers.dart';
 
 // Item list and Item form (02-stock section 5; STK-R4 to R9, R13 to R18).
@@ -276,7 +277,9 @@ class _ItemForm extends ConsumerStatefulWidget {
   ConsumerState<_ItemForm> createState() => _ItemFormState();
 }
 
-class _ItemFormState extends ConsumerState<_ItemForm> {
+class _ItemFormState extends ConsumerState<_ItemForm> with DiscardGuard {
+  @override
+  final formKey = GlobalKey<FormState>();
   ItemData? _old;
   var _loaded = false;
   var _stocked = false;
@@ -419,10 +422,15 @@ class _ItemFormState extends ConsumerState<_ItemForm> {
   String? _text(TextEditingController c) =>
       c.text.trim().isEmpty ? null : c.text.trim();
 
-  Future<void> _save() async {
+  Future<bool> _save() async {
     final l = AppLocalizations.of(context);
     final byCode = ref.read(stockSettingsProvider).itemNamingBy == 'Item Code';
     final isNew = _old == null;
+    // STK-R5: Opening Stock counts only where the form offers it.
+    final opening =
+        isNew && !_hasVariants && _stockItem && !_hasBatch && !_hasSerial
+        ? _opening
+        : 0.0;
     final problems = [
       if (isNew && byCode && _code.text.trim().isEmpty)
         l.fieldMissing(l.itemCode),
@@ -430,8 +438,15 @@ class _ItemFormState extends ConsumerState<_ItemForm> {
         l.fieldMissing(l.itemName),
       if (_groupId == null) l.fieldMissing(l.itemGroup),
       if (_uomId == null) l.fieldMissing(l.defaultUom),
+      if (!maxDiscountOk(_maxDiscount)) l.maxDiscountRange,
+      if (opening < 0) l.openingStockNegative,
+      // STK-R38: a Material Receipt needs a rate above zero.
+      if (opening > 0 && _valuationRate <= 0) l.openingNeedsValuationRate,
     ];
-    if (problems.isNotEmpty) return showProblems(context, problems);
+    if (problems.isNotEmpty) {
+      await showProblems(context, problems);
+      return false;
+    }
     final code = _code.text.trim();
     final db = ref.read(appDatabaseProvider);
     int? saved;
@@ -511,6 +526,7 @@ class _ItemFormState extends ConsumerState<_ItemForm> {
       );
     }, done: l.saved);
     if (ok && mounted) context.go('${widget.path}/$saved');
+    return ok;
   }
 
   Future<void> _pickImage(ImageSource source) async {
@@ -560,29 +576,38 @@ class _ItemFormState extends ConsumerState<_ItemForm> {
               ),
             Padding(
               padding: const EdgeInsetsDirectional.only(end: AppSpacing.sm),
-              child: FilledButton(onPressed: _save, child: Text(l.save)),
+              child: FilledButton(
+                onPressed: () => validateAndSave(_save),
+                child: Text(l.save),
+              ),
             ),
           ],
           bottom: TabBar(
             isScrollable: compact,
+            // No leading offset, so more of the five tabs fit on a phone.
+            tabAlignment: compact ? TabAlignment.start : null,
             tabs: [for (final (label, _) in tabs) Tab(text: label)],
           ),
         ),
-        body: Column(
-          children: [
-            if (old != null) _Strip(itemId: old.id, template: _hasVariants),
-            Expanded(
-              child: TabBarView(
-                children: [
-                  for (final (_, children) in tabs)
-                    ListView(
-                      padding: const EdgeInsets.all(AppSpacing.md),
-                      children: children,
-                    ),
-                ],
+        body: guard(
+          Column(
+            children: [
+              if (old != null) _Strip(itemId: old.id, template: _hasVariants),
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    for (final (_, children) in tabs)
+                      _KeptAlive(
+                        child: ListView(
+                          padding: const EdgeInsets.all(AppSpacing.md),
+                          children: children,
+                        ),
+                      ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -1600,5 +1625,28 @@ class _AttributeEditorState extends State<_AttributeEditor> {
         ),
       ],
     );
+  }
+}
+
+/// Keeps an Item form tab built while another one shows, so Save checks its
+/// fields too (a "Not a number." left on another tab still stops Save).
+class _KeptAlive extends StatefulWidget {
+  const _KeptAlive({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_KeptAlive> createState() => _KeptAliveState();
+}
+
+class _KeptAliveState extends State<_KeptAlive>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
   }
 }

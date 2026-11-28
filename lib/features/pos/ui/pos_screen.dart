@@ -296,7 +296,8 @@ class _PosScreenState extends ConsumerState<PosScreen> {
             onOpenLine: _openLine,
             onCheckout: _checkout,
             selected: _line,
-            numberPad: numberPad,
+            // The payment panel has its own pad.
+            numberPad: numberPad && _pane != _Pane.payment,
           ),
         ),
       ],

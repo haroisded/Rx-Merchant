@@ -327,7 +327,7 @@ extension StockMasters on AppDatabase {
       }
     }
     if (opening == null ||
-        opening.qty <= 0 ||
+        opening.qty == 0 ||
         it.isStockItem == 0 ||
         it.hasBatchNo == 1 ||
         it.hasSerialNo == 1 ||
@@ -355,7 +355,6 @@ extension StockMasters on AppDatabase {
           qty: opening.qty,
           uomId: it.stockUomId,
           basicRate: opening.rate,
-          allowZero: opening.rate == 0,
         ),
       ],
       const [],

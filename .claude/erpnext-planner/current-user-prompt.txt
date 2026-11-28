@@ -1,4 +1,4 @@
-# instructions
+# instruction( do this first, before doing user-prompt )
 - read these referenced files, word for word...
 * "B:\Development-Projects\rx_merchant\CLAUDE.txt"
 * "B:\Development-Projects\erpnext-planner\past-user-prompt.txt"
@@ -15,17 +15,17 @@
   ` "B:\Development-Projects\rx_merchant\.claude\commits\2026-11-16_22-00-06.txt" `
   ( this is for context about the Removal of the "POS Profile" )
 
+- if ever you would read the plans stored in...
+  ["B:\Development-Projects\rx_merchant\.claude\erpnext-planner\Plans"]
+   
+  ( note ):
+  the some features of the system might not have matched it, rely on... 
+  "B:\Development-Projects\rx_merchant\.claude\erpnext-planner\system-documentation.md"
 
-# context
-- Plans that has already been finished...
-* "B:\Development-Projects\erpnext-planner\Plans\00-overview-and-foundation.md"
-* "B:\Development-Projects\rx_merchant\.claude\erpnext-planner\Plans\01-setup.md"
-* "B:\Development-Projects\rx_merchant\.claude\erpnext-planner\Plans\02-stock.md"
-* "B:\Development-Projects\rx_merchant\.claude\erpnext-planner\Plans\03-cash-register.md"
-* "B:\Development-Projects\rx_merchant\.claude\erpnext-planner\Plans\04-sales-dashboard.md"
-  ( note: you can skim read all these plans, to gain more context ) 
+  but the "Plans" Directory is still helpful in understand how the application is created 
 
 
 # user-prompt
-- once done, I request read word for word and do only...
-"B:\Development-Projects\rx_merchant\.claude\erpnext-planner\Plans\05-invoices-and-receipts.md"
+- read this "B:\Development-Projects\rx_merchant\.claude\erpnext-planner\bug-report.txt", 
+  before you start fixing them, based on the context that you have read ( the instructions earlier ), 
+  confirm first if they really are bugs or not 

@@ -115,6 +115,9 @@ enum Refusal {
   /// POS-R2: only one POS Opening Entry can be Open at a time.
   anotherSessionOpen,
 
+  /// POS-R2: an Opening Amount below zero.
+  negativeOpeningAmount,
+
   /// POS-R16: the cart has no lines.
   emptyCart,
 

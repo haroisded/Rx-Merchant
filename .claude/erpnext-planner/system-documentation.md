@@ -7,8 +7,8 @@
 | Title | Rx Merchant: System Documentation |
 | System | Rx Merchant, an offline Android point-of-sale app |
 | System version | 1.0.0+1 (`pubspec.yaml`) |
-| Date of issue | 2026-11-18 |
-| Status | Issued. Describes the system at the end of the Invoices and Receipts plan (R6), build steps INV-B1 to INV-B9 (milestone M6), on top of M0 and the whole Setup (M1, M4, M9), Stock (M2, M3, M8), Cash Register (M5) and Sales Dashboard (M7) plans. Every milestone of R1 is built. |
+| Date of issue | 2026-11-28 |
+| Status | Issued. Describes the system at the end of the Invoices and Receipts plan (R6), build steps INV-B1 to INV-B9 (milestone M6), on top of M0 and the whole Setup (M1, M4, M9), Stock (M2, M3, M8), Cash Register (M5) and Sales Dashboard (M7) plans, with the fixes of issue 8 from the AI tester bug report (`.claude/erpnext-planner/bug-report.txt`). Every milestone of R1 is built. |
 | Issuing organization | The Rx Merchant project (one owner, who is also the developer) |
 | Prepared by | Claude (AI assistant), for the project owner |
 | Approval | Pending the project owner's review |
@@ -25,6 +25,7 @@
 | 5 | 2026-11-18 | The Cash Register plan (R4), POS-B1 to B9: the POS Opening Entry, the POS screen (item selector, cart, item detail, number pad, payment, order summary, recent orders) in three window size classes, the totals engine (item and additional discounts, taxes on net total, previous rows, quantity and fixed amounts, taxes included in the rate, item tax overrides, rounding to the smallest coin, In Words), Submit with the stock ledger, held orders, the POS Closing Entry with its backup, and serial numbers and batches at the counter. The sale-side stock rules left by issue 4 (D-34, P-16) are wired, except the cost of a sale return, which comes with returns (R6). Printing and returns stay with R6. Schema unchanged. Every section updated except 2.3, 5.5, 6.1 to 6.5, 7.1, 7.3 to 7.7 and 8.4; new section 6.12. |
 | 6 | 2026-11-18 | The Sales Dashboard plan (R5), DSH-B1 to B5: the Dashboard destination with its period bar (Today to This Year, Custom), eight number cards with the change against the previous period, the monthly sales goal, four charts (Sales Trend, Sales by Item Group, Top Items, Payment Modes) with table alternatives, and three reports (Sales Analytics, Item-wise Sales, Gross Profit) with drill-down links and CSV export headed by the filters. Three indexes added to schema version 1 in place (owner's decision): an invoice's lines, taxes and payments by `sales_invoice_id`, which the dashboard needs at 20,000 invoices. The links into R6's invoice list stay out until R6 (owner's decision). Every section updated except 2.3, 5.5, 6.1 to 6.7, 7.1, 7.2, 7.4, 7.6 and 8.3 to 8.5; new section 6.13. |
 | 7 | 2026-11-18 | The Invoices and Receipts plan (R6), INV-B1 to B9: the Invoices destination (list with status, date and name filters and receipt scan; read-only invoice), Return / Credit Note with stock back at the cost it went out at, Cancel for sales and returns, two print formats as PDF (Standard and POS Receipt) with preview, Print and Share, raw printing to a Bluetooth thermal printer with an in-house ESC/POS builder, Setup › Printing (Print Settings, Letter Head, Print Heading, Terms and Conditions), In Words in lakh and crore. The links left by R4 and R5 are wired (D-52 closed). Schema unchanged. One new package, `print_bluetooth_thermal`. Every section updated except 2.3, 5.5, 6.1, 6.2, 6.4, 6.5, 6.7, 6.9, 6.11, 6.13, 7.1, 7.2, 7.4 to 7.7; new section 6.14. |
+| 8 | 2026-11-28 | Fixes from the AI tester bug report (run 46109145751), each confirmed against the plans first. Checkout keeps Complete Order on screen and caps its width on tablets; every form checks its fields before Save (a "Not a number." field no longer saves the last valid value) and asks before Back discards changes (P-10 closed for typed fields and rows); typed and imported numbers stay below 10^12; Max Discount 0 to 100; Opening Stock needs a Valuation Rate above zero and cannot be negative; a negative Opening Amount is refused; "Add your first item" opens the New Item form; country data: 21 currency symbols, 3 fractions, 88 number formats. Rejected as not bugs: no price field (it exists, STK-R5), the out-of-stock tap (a dialog does show), the cart lost on a process kill (by design, R4 §7). Schema unchanged. Sections 0, 2.1, 5.3, 5.5, 5.7, 6.9, 6.11, 9.5, 10, 12 and 13 updated. |
 
 ### How this document follows ISO/IEC/IEEE 15289
 
@@ -89,7 +90,7 @@ At this issue the store can be set up completely, its stock kept, goods sold at 
 | R7 | ERPNext documentation, merged | `.claude/erpnext-planner/erpnext-docs-merged.md` |
 | R8 | ISO/IEC/IEEE 15289:2019, Content of life-cycle information items (documentation) | Published standard |
 | R9 | Material Design 3 guidelines (window size classes, navigation, sheets) | m3.material.io |
-| R10 | Session reports: issue 1 `2026-11-15_09-47-00.txt`, issue 2 `2026-11-16_17-26-13.txt`, issue 3 `2026-11-16_22-00-06.txt`, issue 4 `2026-11-17_14-38-00.txt`, issue 5 `2026-11-18_00-48-56.txt`, issue 6 `2026-11-18_01-59-10.txt`, issue 7 `2026-11-18_17-32-05.txt` | `.claude/commits/` |
+| R10 | Session reports: issue 1 `2026-11-15_09-47-00.txt`, issue 2 `2026-11-16_17-26-13.txt`, issue 3 `2026-11-16_22-00-06.txt`, issue 4 `2026-11-17_14-38-00.txt`, issue 5 `2026-11-18_00-48-56.txt`, issue 6 `2026-11-18_01-59-10.txt`, issue 7 `2026-11-18_17-32-05.txt`, issue 8 `2026-11-28_15-56-23.txt` | `.claude/commits/` |
 | R11 | Frappe `frappe/geo/country_info.json` (MIT licence), source of `assets/country_info.json` | github.com/frappe/frappe |
 
 ### 2.2 Glossary
@@ -565,12 +566,12 @@ lib/
     invoices/ui/raw_printer.dart the Bluetooth printer (the only caller of print_bluetooth_thermal); Android settings
     invoices/ui/printing_pages.dart Setup › Print Settings, Letter Head, Print Heading, Terms and Conditions
   l10n/
-    app_en.arb                  641 messages, English
+    app_en.arb                  646 messages, English
     app_localizations*.dart     generated by gen-l10n
 assets/
   country_info.json             250 countries (R11)
   fonts/                        Roboto Regular and Bold (Apache 2.0), embedded in printed PDFs
-test/                           282 tests (section 10.2)
+test/                           290 tests (section 10.2)
 android/                        Android host project
 ```
 
@@ -628,7 +629,7 @@ The router holds one value, `setupComplete`, with three states. Every navigation
 | `false` | `/wizard` |
 | `true` | The requested location; `/loading` leads to `/pos`; `/wizard` leads to the location in its `?next=` parameter, or `/pos` |
 
-The value is a `ValueNotifier` passed to the router as `refreshListenable`, so the redirect runs again the moment the setting changes. On the wizard's last step, **Open Cash Register** and **Add your first item** first move to `/wizard?next=/pos` or `/wizard?next=/stock`, then run `completeSetup`. When it commits, the settings stream emits and the router leaves the wizard for the `next` location. A failed seed writes nothing and the wizard stays. **Restore from backup** on the first step takes the other way out: the restored data has `setup_complete` set, so when the reopened database's settings stream emits, the router leaves the wizard for `/pos`.
+The value is a `ValueNotifier` passed to the router as `refreshListenable`, so the redirect runs again the moment the setting changes. On the wizard's last step, **Open Cash Register** and **Add your first item** first move to `/wizard?next=/pos` or `/wizard?next=/stock/item/new` (the New Item form), then run `completeSetup`. When it commits, the settings stream emits and the router leaves the wizard for the `next` location. A failed seed writes nothing and the wizard stays. **Restore from backup** on the first step takes the other way out: the restored data has `setup_complete` set, so when the reopened database's settings stream emits, the router leaves the wizard for `/pos`.
 
 If the settings cannot be read, `/loading` shows "The database could not be opened." and the error text.
 
@@ -674,7 +675,7 @@ The print screen is not a route: `openPrint` pushes it on the root navigator ove
 | D-12 | The release manifest removes `INTERNET` with `tools:node="remove"` | A plugin that declares the permission cannot bring it back | Debug and profile builds keep it for hot reload |
 | D-13 | Seed colour is `Colors.teal` | A placeholder; one constant in `lib/app.dart` | None |
 | D-14 | The whole Setup plan was built at once (M1, M4, M9) | The prompt for this issue named the Setup plan, not a milestone | Pages exist before the stock and register plans that use them |
-| D-15 | Country data comes from Frappe's `country_info.json` (R11), trimmed | ERPNext's own data; 250 countries | 11 countries use a number format the app lacks and were mapped to the nearest of the six |
+| D-15 | Country data comes from Frappe's `country_info.json` (R11), trimmed; corrected at issue 8 (D-80) | ERPNext's own data; 250 countries | 11 countries use a number format the app lacks and were mapped to the nearest of the six |
 | D-16 | Currency Precision is set from the currency at setup: 0 when the currency has no fraction, 3 for 1,000 fraction units, otherwise 2 | The yen and the dinars would otherwise round wrongly | None found |
 | D-17 | One generic settings form (`SinglesForm`) for the four settings pages, one generic form for the name-and-switches masters | Fewer near-identical screens | A new field type is added in one place for all |
 | D-18 | Deletes rely on SQLite's foreign keys; a FOREIGN KEY failure becomes "used elsewhere, disable it instead", a UNIQUE failure "a record with this name already exists" | No per-table "is it used" queries to keep in step with the schema | The message cannot say which record uses it |
@@ -736,6 +737,12 @@ The print screen is not a route: `openPrint` pushes it on the root navigator ove
 | D-74 | Android's Bluetooth or app settings are opened through a small MethodChannel in `MainActivity.kt` | R6's states ask for a link to the system setting; no package for two intents | Native code in the host project |
 | D-75 | One Bluetooth connection per print job, closed after | No stale connection to manage | A little slower per receipt (marked `ponytail:`) |
 | D-76 | Print Settings asks for Android's Nearby devices permission when it opens, since it lists the paired printers; the saved printer stays a choice while Bluetooth is off | The plugin asks on its first call; saving another setting must not forget the printer | The prompt appears on the first visit |
+| D-77 | Every form checks its fields when Save is tapped, in one place: `DiscardGuard.validateAndSave` (used by `FormPage` and the Item form); `RowEditorBody`'s Done checks its sheet's fields. `FormPage.onSave` answers whether it saved | A field showing "Not a number." was ignored and the last valid value saved (bug report #3) | Every `onSave` returns a bool |
+| D-78 | Back on a form with unsaved changes asks ("Unsaved changes", Discard Changes). A change is a typed field (`Form.onChanged`) or a row edited in a `ChildTable` (`FormChanged`); a successful save clears it; a submitted document (no Save) never asks | P-10 | A change made only with a switch or dropdown is not counted (marked `ponytail:`) |
+| D-79 | A typed or imported number must be below 10^12 (`maxNumber`); Max Discount is 0 to 100 (`maxDiscountOk`); opening stock from the item form needs a Valuation Rate above zero (the silent Allow Zero Valuation Rate is gone, STK-R38) and cannot be negative; an Opening Amount cannot be negative | ERPNext stores amounts as decimal(21,9) and a double loses digits above about 10^15 (bug report #3); Max Discount is a percentage | — |
+| D-80 | Country data corrected: one symbol per currency (Egypt E£, Cape Verde Esc; 19 empty symbols filled), Wikipedia footnote marks removed from three fractions, and every country whose CLDR language writes 1.234,5 set to `#.###,##` (84 by CLDR likely language, plus Paraguay, Chad, Comoros and Haiti, whose language of commerce is Spanish or French; Mauritius, Namibia, Seychelles and Rwanda kept, as English is official there) | Bug report #7; Frappe's file carries these errors | Only new setups; an existing store edits Setup › Currency or System Settings |
+| D-81 | Checkout keeps Complete Order below the scrolling part, caps the payment panel at 560dp and hides the cart's number pad while paying | Bug report #1: the button sat under the tab bar on phones; the keys stretched on tablets | — |
+| D-82 | The Item form keeps all five tabs built (`_KeptAlive`), and its tab row starts at the leading edge on phones | Save must check the fields of every tab; more tabs fit | All tabs stay in memory |
 
 ---
 
@@ -925,7 +932,7 @@ A post-condition guards the rule that spans records: after a Price List save or 
 |---|---|
 | `wizard_screen.dart` | Language (with **Restore from backup** below the list), Region (country and currency pickers, format preview; the device's country preselected), Store (abbreviation suggested), Done. Compact: one step per screen; wider: a 560dp card. |
 | `setup_screen.dart` | `setupPage(slug, id)` and `SetupScreen` (a `ListDetailPane` of `SetupHome` and the page). `SetupHome` lists six groups; pages owned by other plans are shown disabled. |
-| `form_kit.dart` | `FormPage`, `SectionHeading`, `FieldGrid`, `LockNote`, `MasterList` (optional `trailingOf`, used for document status chips), `showProblems`, `confirm`, `attempt` (runs a save and shows a refusal, every refusal of a `RefusedAll`, or any other error, numbers and dates in the store's formats), `refusalText`, `lineProblemText`, `lineProblemMessage`. |
+| `form_kit.dart` | `DiscardGuard` (D-77, D-78), `FormPage`, `RowEditorBody`, `SectionHeading`, `FieldGrid`, `LockNote`, `MasterList` (optional `trailingOf`, used for document status chips), `showProblems`, `confirm`, `attempt` (runs a save and shows a refusal, every refusal of a `RefusedAll`, or any other error, numbers and dates in the store's formats), `refusalText`, `lineProblemText`, `lineProblemMessage`. |
 | `settings_pages.dart` | `SinglesForm` and its field spec; Store Profile, System Settings (live preview), Global Defaults, Selling Settings, POS Settings (Payment Methods, Configurations, Print Settings; choices of enabled modes, print headings and enabled terms read first); `countryInfoProvider`, `submittedProvider`. |
 | `simple_masters.dart` | Currency (live amount preview), `NamedMasterForm`; Mode of Payment, Tax, Price List lists and forms. |
 | `tax_template_pages.dart` | Sales Taxes and Charges Template (rows, row editor, Try it), Item Tax Template; `NumberField`. |
@@ -966,7 +973,7 @@ A post-condition guards the rule that spans records: after a Price List save or 
 | `stock_screen.dart` | `stockPage(slug, id, query)`, `StockScreen` (workspace or the record's list on the left on an expanded window), `StockHome` (Items and Pricing, Stock Transactions, Serial No and Batch when enabled, Settings, Reports; low-stock badge). |
 | `item_pages.dart` | Item list (search by code, name, barcode; scan; filter chips; thumbnail, stock dot, price) and Item form (strip of stock levels and prices; tabs Details, Inventory, Variants, Sales, Tax; barcode, unit, re-order, tax and attribute row editors; Create Single / Multiple Variants). |
 | `tree_masters.dart` | `TreeList` (nested `ExpansionTile`s, Add Child, flat-list switch); Warehouse and Item Group forms. |
-| `stock_masters_pages.dart` | UOM, Brand, Item Attribute, Item Price, Stock Settings, Batch (status, quantity per warehouse), Serial No (status, warehouse, ledger); `RowEditorBody`, `deleteAndLeave`. |
+| `stock_masters_pages.dart` | UOM, Brand, Item Attribute, Item Price, Stock Settings, Batch (status, quantity per warehouse), Serial No (status, warehouse, ledger); `deleteAndLeave`. |
 | `stock_entry_page.dart` | Stock Entry list and form (purpose, posting time, default warehouses, scan field, items, additional costs, totals, Save / Submit / Cancel / Amend, Stock Ledger link). |
 | `stock_reconciliation_page.dart` | Stock Reconciliation list and form (purpose, warehouse, posting time, Scan Mode, Fetch Items, CSV, items with coloured differences). |
 | `serial_batch_editor.dart` | `SerialBatchEditor` (STK-R27). |
@@ -1520,8 +1527,10 @@ The release build is signed with the debug key, as the Flutter template sets it.
 | `6ed71b8` | 2026-11-17 | The Stock plan (issue 4) and its session report |
 | `861d78d` | 2026-11-18 00:59 +08:00 | The Cash Register plan (issue 5) and its session report |
 | `f09bcd3` | 2026-11-18 17:42 +08:00 | The Sales Dashboard plan (issue 6) and the Invoices and Receipts plan (issue 7), in one commit, with their session reports; pushed |
+| `6749be6` | after 2026-11-18 | Documentation and Graphify updates; the base of issue 8 |
+| (working tree) | 2026-11-28 | Issue 8, the bug report fixes; not committed yet |
 
-Every issue of this document is committed. The project owner commits. The session report for this issue (R10) lists every added, changed and deleted file.
+Issues 1 to 7 of this document are committed; issue 8 is in the working tree. The project owner commits. The session report for this issue (R10) lists every added, changed and deleted file.
 
 ---
 
@@ -1534,11 +1543,11 @@ Every issue of this document is committed. The project owner commits. The sessio
 | Static analysis, `flutter analyze` | No issues |
 | Formatting, `dart format` | All 131 files formatted |
 | Fixes, `dart fix --dry-run` | Nothing to fix |
-| Automated tests, `flutter test` | 282 of 282 pass |
+| Automated tests, `flutter test` | 290 of 290 pass |
 | Release build | Builds; 90.5 MB APK |
 | Release manifest | No `INTERNET` permission; four Bluetooth permissions from the printer plugin |
-| Phone emulator, 360dp wide | Issue 7: a sale; POS Receipt and Standard A4 previews; Android's print dialog; Share; the invoice list and the invoice; a partial return and its Credit Note receipt; cancel refused while a return exists; cancelling the return; dashboard cards opening the list with the right filters; Print Settings with no paired printer and the Bluetooth settings link; Letter Head preview; Recent Orders' Print and Return; the closing entry's link with the session chip. Issue 6: the empty state; a sale, then the cards, period chips, goal link and goal card, chart table views, drill-down into Sales Analytics (by Item and by Item Group) and Item-wise Sales, Gross Profit, CSV exports read back; after the review, axis labels, a table row opening Item-wise Sales, the date-only column. Issue 5: opening, a sale with VAT, item and Grand Total discounts and a split payment; a held order across an app restart; the Stock Ledger; the closing entry with its backup and its cancel; the compact opening dialog after the review. Issue 4: wizard; item with barcode, opening stock and price; Material Issue by typed barcode; Stock Ledger and Stock Balance; low-stock badge; Transfer defaults. Issue 3: POS Settings, Default Price List refusal. Issue 2: Setup pages, backup / wipe / restore |
-| Tablet emulator | Issue 7: landscape (expanded) with the invoice beside the list and the print screen's side panel; portrait (medium) with the return form. Issue 6: landscape (expanded) with 4 cards per row, the goal link beside the trend and 3 charts per row, a bar opening Item-wise Sales with the inline filter bar; portrait (medium) with charts 2 per row. Issue 5: landscape (expanded) with the number pad and the detail and payment panes; portrait (medium) after rotating mid-sale, with side sheets. Issue 4: Item list beside the two-column form (landscape); Stock Reconciliation with Fetch Items and the side-sheet row editor; portrait one pane. Issue 2: wizard card, Setup panes |
+| Phone emulator, 360dp wide | Issue 8: wizard with Spain (preview 1.234.567,89), then Egypt; Add your first item opened New Item; Opening Stock "abc-5" refused on Save; opening without a Valuation Rate refused; Max Discount 500 refused; Back asked "Unsaved changes"; the saved item (E£ 5.00) left without asking; Opening Amount -50 refused; Complete Order on screen without scrolling; a sale paid. Issue 7: a sale; POS Receipt and Standard A4 previews; Android's print dialog; Share; the invoice list and the invoice; a partial return and its Credit Note receipt; cancel refused while a return exists; cancelling the return; dashboard cards opening the list with the right filters; Print Settings with no paired printer and the Bluetooth settings link; Letter Head preview; Recent Orders' Print and Return; the closing entry's link with the session chip. Issue 6: the empty state; a sale, then the cards, period chips, goal link and goal card, chart table views, drill-down into Sales Analytics (by Item and by Item Group) and Item-wise Sales, Gross Profit, CSV exports read back; after the review, axis labels, a table row opening Item-wise Sales, the date-only column. Issue 5: opening, a sale with VAT, item and Grand Total discounts and a split payment; a held order across an app restart; the Stock Ledger; the closing entry with its backup and its cancel; the compact opening dialog after the review. Issue 4: wizard; item with barcode, opening stock and price; Material Issue by typed barcode; Stock Ledger and Stock Balance; low-stock badge; Transfer defaults. Issue 3: POS Settings, Default Price List refusal. Issue 2: Setup pages, backup / wipe / restore |
+| Tablet emulator | Issue 8: Add your first item opened New Item beside the list; checkout with the payment panel capped, no cart number pad and Complete Order on screen; a sale paid. Issue 7: landscape (expanded) with the invoice beside the list and the print screen's side panel; portrait (medium) with the return form. Issue 6: landscape (expanded) with 4 cards per row, the goal link beside the trend and 3 charts per row, a bar opening Item-wise Sales with the inline filter bar; portrait (medium) with charts 2 per row. Issue 5: landscape (expanded) with the number pad and the detail and payment panes; portrait (medium) after rotating mid-sale, with side sheets. Issue 4: Item list beside the two-column form (landscape); Stock Reconciliation with Fetch Items and the side-sheet row editor; portrait one pane. Issue 2: wizard card, Setup panes |
 | Real device | **Not tested** |
 
 Issue 6's checks were run on 2026-11-18, after the last code change (the phone check of the review fixes last). Issue 5's were run on 2026-11-17 and 2026-11-18. Issue 1's checks (launcher label, 411dp phone, `aapt2` badging) were not repeated.
@@ -1577,7 +1586,8 @@ Issue 6's checks were run on 2026-11-18, after the last code change (the phone c
 | `test/features/invoices/logic/print_layout_test.dart` | 8 | INV-A3 to A9; R13; R14 and R18 (letter head lines, totals order, In Words, change); × printed as x. |
 | `test/features/invoices/ui/invoice_pdf_test.dart` | 2 | Roboto covers ₱; 40 lines on A5 run over pages; the POS Receipt is one 58 mm roll page. |
 | `test/features/invoices/ui/invoices_ui_test.dart` | 4 | Phone: empty state, list, invoice; tablet: the invoice beside the list with a `DataTable`; a partial return from the invoice through the form and its confirmation; Setup › Letter Head lists the default. |
-| **Total** | **282** | |
+| Issue 8 additions | 8 | parseNumber's 10^12 limit; Data Import Max Discount and number limit; a negative Opening Amount; opening stock at a zero rate or below zero; Complete Order on a 360x640 phone; the Item form (a bad number stops Save, also from another tab; zero-cost opening; Max Discount; Back asks and discards); a settings page that stayed after Save leaves without asking; country data (`country_info_test.dart`) |
+| **Total** | **290** | |
 
 Database tests run against an in-memory SQLite database with the real schema. Widget tests run the real widgets inside the app's theme and localisation. No test uses a mock.
 
@@ -1804,6 +1814,18 @@ Issue 7. `flutter analyze`, `dart fix`, a Ponytail review (six findings, about �
 
 Left as they are (issue 7), with reasons: status names stay strings (C-11); the `#,##,###.##` literal and the three `_now` helpers; `_followRename` beside the price list's rename carry (other keys and tables); the symbol-to-code replacement exists for the PDF font and for the printer, two different limits; `from` / `to` passed together in one call site; the ESC/POS and receipt tests live in `print_layout_test.dart`; the detail pane's Back arrow on Expanded, as the stock and setup pages nested under their workspace have.
 
+Issue 8. `flutter analyze`, `dart fix`, a Ponytail review ("Lean already": the diff itself removed eleven duplicated validate blocks and two hand-made row-editor button rows), and the code-review skill: a standards reviewer and a spec reviewer of the working tree against `6749be6`. Fixed:
+
+| Finding | Fix |
+|---|---|
+| The Item form's new rules lived only in the UI, and the data layer skipped a negative opening silently (D-19) | `maxDiscountOk` in `stock/logic/stock_rules.dart`, used by the form and Data Import; `_openItem` passes a negative quantity on, so the entry's line checks refuse it |
+| `1e12` written twice, once as its own fallback | `maxNumber` in `core/numbers/format.dart` |
+| The refusal's message key did not follow the `refused*` names | `refusedNegativeOpeningAmount` |
+| A bad number on another Item tab escaped Save: `TabBarView` disposes tabs out of view | `_KeptAlive` keeps the tabs built (D-82); the widget test saves from another tab |
+| Comma-decimal countries missed | Paraguay, Chad, Comoros, Haiti (D-80) |
+
+Left as they are (issue 8), with reasons: the `showProblems` then `return false` lines in eight save handlers (two lines each); the Item form's own Opening Stock message beside the data layer's refusal (that text names a switch the form does not have); a switch or dropdown alone not counted as a change (D-78); the Item form keeps its own Scaffold (for its tabs) instead of `FormPage`.
+
 ---
 
 ## 11. User documentation
@@ -1935,7 +1957,7 @@ After **Complete Order**, **Print Receipt** opens the receipt (or prints it at o
 | P-7 | Generated localisation code is excluded from analysis. | A real problem in it would go unreported. | Accepted (D-11). |
 | P-8 | No real device has been used. | Behaviour on real hardware is unverified. | Open. |
 | P-9 | Restoring onto a fresh install needed the wizard first, because Setup is behind the wizard gate. | — | **Closed** in issue 2: the wizard's first step offers Restore from backup. |
-| P-10 | Leaving a form with unsaved changes discards them without asking. | Edits can be lost by a stray Back; at issue 4 a stray Back on the emulator lost a Stock Entry draft. | Open. |
+| P-10 | Leaving a form with unsaved changes discards them without asking. | Edits can be lost by a stray Back; at issue 4 a stray Back on the emulator lost a Stock Entry draft. | **Closed** at issue 8 for typed fields and child-table rows (D-78); a change made only with a switch or dropdown is still not asked about. |
 | P-11 | Two deviations from R1 §7.1 and §4: Setup link fields are dropdowns without "Create new" (D-20); stored option values show in English as stored. | Owner must create a master from its own page first; a second language would leave those values untranslated. | Accepted for now. |
 | P-12 | The automatic backup on POS Closing submit (SET-R17) was not wired. | — | **Closed** at issue 5: `submitClosing` takes it. |
 | P-13 | Schema version 1 was edited in place at issue 3 (D-29). A database or backup made before issue 3 still has the POS Profile tables and a NOT NULL `pos_profile_id` in `pos_opening_entry`, `pos_closing_entry` and `sales_invoice`. `checkRestorable` accepts such a backup, because its schema version is 1. | Setup works on it; opening a session or selling fails. | Open. Clear the app's data on every device that ran an earlier build, and do not restore backups taken before issue 3. |
@@ -1960,4 +1982,4 @@ Every milestone of R1 is built. Left out on purpose, as the plans' sections 8 li
 
 ## 13. Summary
 
-Rx Merchant is an offline Android point-of-sale app for one store owner, modelled on ERPNext. At this issue every milestone is complete (M0 to M9). Setup: a first-run wizard that seeds the store; every settings page and master; Data Import and Export; Backup and Restore. Stock: the item catalogue with barcodes, units, prices, taxes, photos and variants; warehouses; Stock Entry and Stock Reconciliation; batches and serial numbers; the stock ledger engine; seven reports and a low-stock badge. Cash Register: sessions, a POS screen for phones and tablets, the totals engine, split payments with change, Submit with stock and cost, held orders, and the POS Closing Entry with its cash count and backup. Sales Dashboard: a period bar, eight cards against the previous period, the monthly sales goal, four charts, and three sales reports with drill-down and CSV export. Invoices and Receipts: a filtered, scannable invoice list; the read-only invoice; Return / Credit Note with stock back at its cost; Cancel within the session; Standard and POS Receipt PDFs with preview, Print and Share; raw ESC/POS printing to a Bluetooth thermal printer; Setup › Printing. 282 automated tests pass, including every INV, DSH, POS and STK acceptance check; analysis is clean; the release build carries no internet permission; the main flows were checked on phone and tablet emulators; a Ponytail review, a standards review and a spec review were acted on. All of it is committed (`f09bcd3`); no real device and no real thermal printer have been tested (P-8, P-18).
+Rx Merchant is an offline Android point-of-sale app for one store owner, modelled on ERPNext. At this issue every milestone is complete (M0 to M9). Setup: a first-run wizard that seeds the store; every settings page and master; Data Import and Export; Backup and Restore. Stock: the item catalogue with barcodes, units, prices, taxes, photos and variants; warehouses; Stock Entry and Stock Reconciliation; batches and serial numbers; the stock ledger engine; seven reports and a low-stock badge. Cash Register: sessions, a POS screen for phones and tablets, the totals engine, split payments with change, Submit with stock and cost, held orders, and the POS Closing Entry with its cash count and backup. Sales Dashboard: a period bar, eight cards against the previous period, the monthly sales goal, four charts, and three sales reports with drill-down and CSV export. Invoices and Receipts: a filtered, scannable invoice list; the read-only invoice; Return / Credit Note with stock back at its cost; Cancel within the session; Standard and POS Receipt PDFs with preview, Print and Share; raw ESC/POS printing to a Bluetooth thermal printer; Setup › Printing. 290 automated tests pass, including every INV, DSH, POS and STK acceptance check; analysis is clean; the release build carries no internet permission; the main flows were checked on phone and tablet emulators; a Ponytail review, a standards review and a spec review were acted on. Issue 8 fixed the confirmed findings of an AI tester bug report (checkout layout, form validation, unsaved changes, number limits, country data) and is in the working tree for the owner to commit; no real device and no real thermal printer have been tested (P-8, P-18).

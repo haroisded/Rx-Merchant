@@ -91,11 +91,8 @@ class _SinglesFormState extends ConsumerState<SinglesForm> {
         : value;
   }
 
-  Future<void> _save() async {
+  Future<bool> _save() async {
     final l = AppLocalizations.of(context);
-    if (!_formKey.currentState!.validate()) {
-      return showProblems(context, [l.formHasErrors]);
-    }
     _formKey.currentState!.save();
     final values = {
       for (final f in _fields)
@@ -103,7 +100,7 @@ class _SinglesFormState extends ConsumerState<SinglesForm> {
           f.key: _values![f.key]!,
     };
     final db = ref.read(appDatabaseProvider);
-    await attempt(context, () async {
+    return attempt(context, () async {
       await widget.beforeSave?.call(values);
       await db.writeSingle(widget.doctype, values);
     }, done: l.saved);

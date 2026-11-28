@@ -23,7 +23,6 @@ import '../data/stock_reconciliation_db.dart';
 import '../logic/stock_documents.dart';
 import 'scan.dart';
 import 'stock_entry_page.dart' show docStatus;
-import 'stock_masters_pages.dart' show RowEditorBody;
 import 'stock_providers.dart';
 
 // Stock Reconciliation list and form (STK-R42; 02-stock section 5).
@@ -335,6 +334,7 @@ class _ReconciliationFormState extends ConsumerState<_ReconciliationForm> {
                     .showSnackBar(SnackBar(content: Text(l.saved)));
                 context.go('${widget.path}/$id');
               }
+              return id != null;
             }
           : null,
       onDelete: d != null && _draft

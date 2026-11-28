@@ -104,74 +104,108 @@ class _PaymentPanelState extends ConsumerState<PaymentPanel> {
     );
     final due = totals.toPay - paid.paid;
     final scheme = Theme.of(context).colorScheme;
-    return ListView(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      children: [
-        Row(
+    // Complete Order sits below the scrolling part, so it is always on
+    // screen; the width cap keeps the number pad's keys from stretching on a
+    // tablet's wide pane.
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 560),
+        child: Column(
           children: [
-            if (widget.onBack != null)
-              IconButton(
-                tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-                onPressed: widget.onBack,
-                icon: const Icon(Icons.arrow_back),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                children: [
+                  Row(
+                    children: [
+                      if (widget.onBack != null)
+                        IconButton(
+                          tooltip: MaterialLocalizations.of(context)
+                              .backButtonTooltip,
+                          onPressed: widget.onBack,
+                          icon: const Icon(Icons.arrow_back),
+                        ),
+                      Text(
+                        l.checkout,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  for (final m in modes)
+                    Card(
+                      color: m.id == _mode ? scheme.secondaryContainer : null,
+                      child: ListTile(
+                        title: Text(m.name),
+                        trailing: Text(
+                          formats.money(sale.payments[m.id] ?? 0),
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        onTap: () => _select(m.id, sale, due),
+                      ),
+                    ),
+                  const SizedBox(height: AppSpacing.md),
+                  TotalRow(
+                    l.grandTotal,
+                    formats.money(totals.grandTotal),
+                    strong: !totals.rounded,
+                  ),
+                  if (totals.rounded)
+                    TotalRow(
+                      l.roundedTotal,
+                      formats.money(totals.roundedTotal),
+                      strong: true,
+                    ),
+                  TotalRow(l.paidAmount, formats.money(paid.paid)),
+                  if (paid.change > 0)
+                    TotalRow(
+                      l.changeAmount,
+                      formats.money(paid.change),
+                      strong: true,
+                    )
+                  else
+                    TotalRow(l.toBePaid, formats.money(due > 0 ? due : 0)),
+                  if (paid.nonCashOver)
+                    Padding(
+                      padding: const EdgeInsets.only(top: AppSpacing.sm),
+                      child: Text(
+                        l.refusedNonCashOverpaid,
+                        style: TextStyle(color: scheme.error),
+                      ),
+                    ),
+                  const SizedBox(height: AppSpacing.md),
+                  NumberPad(onKey: _key, enabled: _mode != null),
+                ],
               ),
-            Text(l.checkout, style: Theme.of(context).textTheme.titleLarge),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.md,
+                0,
+                AppSpacing.md,
+                AppSpacing.md,
+              ),
+              child: SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: paid.short || paid.nonCashOver
+                      ? null
+                      : () async {
+                          Submitted? done;
+                          final ok = await attempt(context, () async {
+                            done = await ref
+                                .read(cartProvider.notifier)
+                                .submit();
+                          });
+                          if (ok && done != null) widget.onDone(done!);
+                        },
+                  child: Text(l.completeOrder),
+                ),
+              ),
+            ),
           ],
         ),
-        const SizedBox(height: AppSpacing.sm),
-        for (final m in modes)
-          Card(
-            color: m.id == _mode ? scheme.secondaryContainer : null,
-            child: ListTile(
-              title: Text(m.name),
-              trailing: Text(
-                formats.money(sale.payments[m.id] ?? 0),
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              onTap: () => _select(m.id, sale, due),
-            ),
-          ),
-        const SizedBox(height: AppSpacing.md),
-        TotalRow(
-          l.grandTotal,
-          formats.money(totals.grandTotal),
-          strong: !totals.rounded,
-        ),
-        if (totals.rounded)
-          TotalRow(
-            l.roundedTotal,
-            formats.money(totals.roundedTotal),
-            strong: true,
-          ),
-        TotalRow(l.paidAmount, formats.money(paid.paid)),
-        if (paid.change > 0)
-          TotalRow(l.changeAmount, formats.money(paid.change), strong: true)
-        else
-          TotalRow(l.toBePaid, formats.money(due > 0 ? due : 0)),
-        if (paid.nonCashOver)
-          Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.sm),
-            child: Text(
-              l.refusedNonCashOverpaid,
-              style: TextStyle(color: scheme.error),
-            ),
-          ),
-        const SizedBox(height: AppSpacing.md),
-        NumberPad(onKey: _key, enabled: _mode != null),
-        const SizedBox(height: AppSpacing.md),
-        FilledButton(
-          onPressed: paid.short || paid.nonCashOver
-              ? null
-              : () async {
-                  Submitted? done;
-                  final ok = await attempt(context, () async {
-                    done = await ref.read(cartProvider.notifier).submit();
-                  });
-                  if (ok && done != null) widget.onDone(done!);
-                },
-          child: Text(l.completeOrder),
-        ),
-      ],
+      ),
     );
   }
 }

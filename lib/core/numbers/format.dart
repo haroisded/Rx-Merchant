@@ -39,7 +39,12 @@ String formatNumber(num value, String numberFormat, int precision) {
 ///
 /// Groups after the first must have the format's size, so a mistyped
 /// decimal mark is refused instead of read as a group separator: `7.5` in
-/// `#.###` is null, not 75. Null too when the text is not a finite number.
+/// `#.###` is null, not 75. Null too when the text is not a finite number,
+/// or is 10^12 or more: ERPNext stores amounts and quantities as
+/// decimal(21,9), and a double keeps every digit only well below 10^15.
+/// Typed and imported numbers stay below this (see [parseNumber]).
+const maxNumber = 1e12;
+
 double? parseNumber(String text, String numberFormat) {
   final groupSeparator = numberFormat.length > 1 ? numberFormat[1] : ',';
   final decimalSeparator =
@@ -55,7 +60,7 @@ double? parseNumber(String text, String numberFormat) {
   }
   final fraction = cut < 0 ? '' : '.${t.substring(cut + 1)}';
   final value = double.tryParse('${groups.join()}$fraction');
-  return value != null && value.isFinite ? value : null;
+  return value != null && value.abs() < maxNumber ? value : null;
 }
 
 /// [formatNumber] with the currency symbol placed as the Currency record says.

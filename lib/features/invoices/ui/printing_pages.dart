@@ -320,7 +320,6 @@ class _LetterHeadForm extends ConsumerStatefulWidget {
 }
 
 class _LetterHeadFormState extends ConsumerState<_LetterHeadForm> {
-  final _formKey = GlobalKey<FormState>();
   late final _name = TextEditingController(text: widget.head?.name);
   late final _header = TextEditingController(text: widget.head?.header);
   late final _footer = TextEditingController(text: widget.head?.footer);
@@ -359,11 +358,7 @@ class _LetterHeadFormState extends ConsumerState<_LetterHeadForm> {
     final scheme = Theme.of(context).colorScheme;
     return FormPage(
       title: h?.name ?? l.newRecord(l.letterHead),
-      formKey: _formKey,
       onSave: () async {
-        if (!_formKey.currentState!.validate()) {
-          return showProblems(context, [l.formHasErrors]);
-        }
         final ok = await attempt(
           context,
           () => db.saveLetterHead(
@@ -380,6 +375,7 @@ class _LetterHeadFormState extends ConsumerState<_LetterHeadForm> {
           done: l.saved,
         );
         if (ok && context.mounted) context.go(widget.path);
+        return ok;
       },
       onDelete: h == null
           ? null
@@ -581,7 +577,6 @@ class _TermsForm extends ConsumerStatefulWidget {
 }
 
 class _TermsFormState extends ConsumerState<_TermsForm> {
-  final _formKey = GlobalKey<FormState>();
   late final _title = TextEditingController(text: widget.terms?.title);
   late final _text = TextEditingController(text: widget.terms?.terms);
   late var _disabled = widget.terms?.disabled == 1;
@@ -601,11 +596,7 @@ class _TermsFormState extends ConsumerState<_TermsForm> {
     String? mandatory(String? v) => v!.trim().isEmpty ? l.mandatoryField : null;
     return FormPage(
       title: t?.title ?? l.newRecord(l.termsAndConditions),
-      formKey: _formKey,
       onSave: () async {
-        if (!_formKey.currentState!.validate()) {
-          return showProblems(context, [l.formHasErrors]);
-        }
         final ok = await attempt(
           context,
           () => db.saveTerms(
@@ -619,6 +610,7 @@ class _TermsFormState extends ConsumerState<_TermsForm> {
           done: l.saved,
         );
         if (ok && context.mounted) context.go(widget.path);
+        return ok;
       },
       onDelete: t == null
           ? null
